@@ -1,0 +1,22 @@
+[databases]
+test_dev = postgresql+pypostgresql://app_user:passw@127.0.0.1:6432/test_dev
+
+[main]
+port = 8889
+allow_host = "192.168.0.5, 127.0.0.1, 192.168.0.10"
+enable_exception_catching = 1
+application_name = pg_stat_monitor
+time_zone = Europe/Moscow
+application_max_mem = 1200    						#in MB
+max_workers = 4
+db_pool_size = 3
+db_pool_recycle = 14400
+
+timezone_correct_time_backward = " - interval '1 hour'"   					#sql expr for "+ interval 'timezone_correct_time'"
+timezone_correct_time_forward = " + interval '1 hour'"
+pg_log_dir = /var/log/pg_log
+pg_log_line_max_len = 1100
+pg_log_file_extension = csv
+hide_password_in_queries = t
+hide_host_in_queries = t
+

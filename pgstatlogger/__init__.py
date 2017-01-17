@@ -1,0 +1,1 @@
+from pgstatlogger.pg_stat_logger import PSCLogger

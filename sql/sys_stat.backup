@@ -1,0 +1,1681 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6.0
+-- Dumped by pg_dump version 9.6.0
+
+-- Started on 2017-01-15 23:11:47 MSK
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 8 (class 2615 OID 29771)
+-- Name: node_template; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA node_template;
+
+
+ALTER SCHEMA node_template OWNER TO postgres;
+
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 264 (class 1255 OID 29772)
+-- Name: psc_get_app_name(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_app_name(app_name_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	app_name_p = COALESCE(app_name_p, '');
+
+	IF length( app_name_p ) > 90 THEN
+		app_name_p = SUBSTRING(app_name_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_app_names WHERE app_name = app_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_app_names( app_name ) VALUES ( app_name_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_app_name(app_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 265 (class 1255 OID 29773)
+-- Name: psc_get_conn_state(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_conn_state(state_name_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	state_name_p = COALESCE(state_name_p, '');
+
+	IF length( state_name_p ) > 90 THEN
+		state_name_p = SUBSTRING(state_name_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_conn_states WHERE state_name = state_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_conn_states( state_name ) VALUES ( state_name_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_conn_state(state_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 266 (class 1255 OID 29774)
+-- Name: psc_get_db(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_db(db_name_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	db_name_p = COALESCE(db_name_p, '');
+
+	IF length( db_name_p ) > 90 THEN
+		db_name_p = SUBSTRING(db_name_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_dbs WHERE db_name = db_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_dbs( db_name ) VALUES ( db_name_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_db(db_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 267 (class 1255 OID 29775)
+-- Name: psc_get_db_user(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_db_user(db_user_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	db_user_p = COALESCE(db_user_p, '');
+
+	IF length( db_user_p ) > 90 THEN
+		db_user_p = SUBSTRING(db_user_p FOR 90);
+	END IF;
+
+        SELECT id INTO result FROM psc_users WHERE user_name = db_user_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_users( user_name ) VALUES ( db_user_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_db_user(db_user_p text) OWNER TO postgres;
+
+--
+-- TOC entry 280 (class 1255 OID 29776)
+-- Name: psc_get_device(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_device(device_name_p text, device_type_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	device_name_p = COALESCE(device_name_p, '');
+	device_type_p = COALESCE(device_type_p, '');
+
+	IF length( device_name_p ) > 90 THEN
+		device_name_p = SUBSTRING(device_name_p FOR 90);
+	END IF;
+	IF length( device_type_p ) > 90 THEN
+		device_type_p = SUBSTRING(device_type_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_devices WHERE device_name = device_name_p AND device_type = device_type_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_devices( device_name, device_type ) VALUES ( device_name_p, device_type_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_device(device_name_p text, device_type_p text) OWNER TO postgres;
+
+--
+-- TOC entry 281 (class 1255 OID 29777)
+-- Name: psc_get_lock_mode(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_lock_mode(lock_mode_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	lock_mode_p = COALESCE(lock_mode_p, '');
+
+	IF length( lock_mode_p ) > 90 THEN
+		lock_mode_p = SUBSTRING(lock_mode_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_lock_modes WHERE lock_mode = lock_mode_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_lock_modes( lock_mode ) VALUES ( lock_mode_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_lock_mode(lock_mode_p text) OWNER TO postgres;
+
+--
+-- TOC entry 282 (class 1255 OID 29778)
+-- Name: psc_get_lock_type(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_lock_type(lock_type_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	lock_type_p = COALESCE(lock_type_p, '');
+
+	IF length( lock_type_p ) > 90 THEN
+		lock_type_p = SUBSTRING(lock_type_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_lock_types WHERE lock_type = lock_type_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_lock_types( lock_type ) VALUES ( lock_type_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_lock_type(lock_type_p text) OWNER TO postgres;
+
+--
+-- TOC entry 288 (class 1255 OID 30096)
+-- Name: psc_get_node(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_node(node_name_p text, node_desc_p text, node_host_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	node_name_p = COALESCE(node_name_p, '');
+	node_desc_p = COALESCE(node_desc_p, '');
+
+	IF length( node_name_p ) > 255 THEN
+		node_name_p = SUBSTRING(node_name_p FOR 255);
+	END IF;
+	IF length( node_desc_p ) > 255 THEN
+		node_desc_p = SUBSTRING(node_desc_p FOR 255);
+	END IF;	
+	IF length( node_host_p ) > 255 THEN
+		node_host_p = SUBSTRING(node_host_p FOR 255);
+	END IF;	
+	
+        SELECT id INTO result FROM psc_nodes WHERE node_name = node_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_nodes( node_name, node_desc, node_host ) VALUES ( node_name_p, node_desc_p, node_host_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_node(node_name_p text, node_desc_p text, node_host_p text) OWNER TO postgres;
+
+--
+-- TOC entry 290 (class 1255 OID 30417)
+-- Name: psc_get_node_info(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_node_info(node_name_p text, last_dt_p text) RETURNS SETOF text
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result text[] = '{}';
+exists_queries boolean = false;
+exists_tbls_stat boolean = false;
+exists_os_stat boolean = false;
+exists_snapshots boolean = false;
+BEGIN
+	EXECUTE 'set search_path = ''' || node_name_p || '''';
+
+	IF not exists( select 1 from pg_namespace where nspname = node_name_p ) THEN
+		return;
+	END IF;
+
+	EXECUTE 'SELECT EXISTS( SELECT 1 FROM psc_queries_and_plans WHERE dt > now() - interval ''' || last_dt_p || ''' limit 1)' into exists_queries;
+	EXECUTE 'SELECT EXISTS( SELECT 1 FROM psc_tbls_stat WHERE dt > now() - interval ''' || last_dt_p || ''' limit 1)' into exists_tbls_stat;
+	EXECUTE 'SELECT EXISTS( SELECT 1 FROM psc_os_stat WHERE dt > now() - interval ''' || last_dt_p || ''' limit 1)' into exists_os_stat;
+	EXECUTE 'SELECT EXISTS( SELECT 1 FROM psc_snapshots WHERE dt > now() - interval ''' || last_dt_p || ''' limit 1)' into exists_snapshots;
+	
+	IF exists_queries THEN
+		result = array_append(result, 'psc_queries_and_plans');
+	END IF;
+	
+	IF exists_tbls_stat THEN
+		result = array_append(result, 'psc_tbls_stat');
+	END IF;
+	
+	IF exists_os_stat THEN
+		result = array_append(result, 'psc_os_stat');
+	END IF;
+	
+	IF exists_snapshots THEN
+		result = array_append(result, 'psc_snapshots');
+	END IF;
+	
+	EXECUTE 'set search_path = ''public''';
+	RETURN query select unnest( result );
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_node_info(node_name_p text, last_dt_p text) OWNER TO postgres;
+
+--
+-- TOC entry 283 (class 1255 OID 29780)
+-- Name: psc_get_param(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_param(param_name_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	param_name_p = COALESCE(param_name_p, '');
+	
+	IF length( param_name_p ) > 90 THEN
+		param_name_p = SUBSTRING(param_name_p FOR 90);
+	END IF;
+		
+        SELECT id INTO result FROM psc_params WHERE param_name = param_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_params( param_name ) VALUES ( param_name_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_param(param_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 284 (class 1255 OID 29781)
+-- Name: psc_get_tbl(bigint, text, bigint); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_tbl(tbl_relid_p bigint, tbl_name_p text, db_id_p bigint) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	tbl_relid_p = COALESCE(tbl_relid_p, 0);
+	tbl_name_p = COALESCE(tbl_name_p, '');
+	db_id_p = COALESCE(db_id_p, 0);
+
+	IF length( tbl_name_p ) > 90 THEN
+		tbl_name_p = SUBSTRING(tbl_name_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_tbls WHERE tbl_name = tbl_name_p AND tbl_relid = tbl_relid_p AND db_id = db_id_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_tbls( tbl_relid, tbl_name, db_id ) 
+			VALUES ( tbl_relid_p, tbl_name_p, db_id_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_tbl(tbl_relid_p bigint, tbl_name_p text, db_id_p bigint) OWNER TO postgres;
+
+--
+-- TOC entry 291 (class 1255 OID 30443)
+-- Name: psc_get_user_hash(text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_user_hash(user_hash_p text, user_name_p text, user_ip_p text, user_agent_p text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result boolean;
+BEGIN
+	user_hash_p = COALESCE(user_hash_p, '');
+	user_name_p = COALESCE(user_name_p, '');
+	user_ip_p = COALESCE(user_ip_p, '');
+	user_agent_p = COALESCE(user_agent_p, '');
+	
+
+	IF length( user_hash_p ) > 64 THEN
+		user_hash_p = SUBSTRING(user_hash_p FOR 64);
+	END IF;
+	IF length( user_name_p ) > 64 THEN
+		user_name_p = SUBSTRING(user_name_p FOR 64);
+	END IF;	
+	IF length( user_ip_p ) > 64 THEN
+		user_ip_p = SUBSTRING(user_ip_p FOR 64);
+	END IF;
+	IF length( user_agent_p ) > 255 THEN
+		user_agent_p = SUBSTRING(user_agent_p FOR 255);
+	END IF;
+	
+	
+        SELECT exists( SELECT 1 FROM psc_user_hashes WHERE user_hash = user_hash_p ) into result;
+        IF result = false THEN
+		INSERT INTO psc_user_hashes( user_hash, user_name, user_ip, user_agent ) VALUES ( user_hash_p, user_name_p, user_ip_p, user_agent_p );
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_user_hash(user_hash_p text, user_name_p text, user_ip_p text, user_agent_p text) OWNER TO postgres;
+
+--
+-- TOC entry 285 (class 1255 OID 29782)
+-- Name: psc_get_wait_name(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_wait_name(wait_name_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	wait_name_p = COALESCE(wait_name_p, '');
+
+	IF length( wait_name_p ) > 90 THEN
+		wait_name_p = SUBSTRING(wait_name_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_wait_names WHERE wait_name = wait_name_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_wait_names( wait_name ) VALUES ( wait_name_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_wait_name(wait_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 286 (class 1255 OID 29783)
+-- Name: psc_get_wait_type(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_wait_type(wait_type_p text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+result BIGINT;
+BEGIN
+	wait_type_p = COALESCE(wait_type_p, '');
+
+	IF length( wait_type_p ) > 90 THEN
+		wait_type_p = SUBSTRING(wait_type_p FOR 90);
+	END IF;
+	
+        SELECT id INTO result FROM psc_wait_types WHERE wait_type = wait_type_p;
+        IF result IS NULL THEN
+		INSERT INTO psc_wait_types( wait_type ) VALUES ( wait_type_p ) RETURNING id INTO result;
+        END IF;
+        RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_wait_type(wait_type_p text) OWNER TO postgres;
+
+--
+-- TOC entry 289 (class 1255 OID 30097)
+-- Name: psc_init_node(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_init_node(node_name_p text, node_descr_p text DEFAULT ''::text, node_host_p text DEFAULT ''::text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE 
+  object_i text;
+  default_i text;
+  column_i text;
+  condef text; 
+  buffer text;
+  source_schema text = 'node_template';
+  node_schema text = 'n' || ( select psc_get_node(node_name_p, node_descr_p, node_host_p) );
+BEGIN
+	if not exists( select 1 from pg_namespace where nspname = node_schema ) then
+		EXECUTE 'CREATE SCHEMA ' || node_schema;
+		EXECUTE 'set search_path = ''' || node_schema || '''';
+		
+		FOR object_i IN SELECT sequence_name::text FROM information_schema.sequences WHERE sequence_schema = source_schema
+		LOOP
+			EXECUTE 'CREATE SEQUENCE ' || node_schema || '.' || object_i;
+		END LOOP;
+
+		FOR object_i IN SELECT table_name::text FROM information_schema.tables WHERE table_schema = source_schema
+		LOOP
+			buffer = node_schema || '."' || object_i || '"';
+			if ( 
+				select relpersistence 
+				from pg_class c 
+				inner join pg_namespace n on n.oid = c.relnamespace 
+				where n.nspname = source_schema and c.relname = object_i
+				limit 1 ) = 'u'
+			then
+				EXECUTE 'CREATE UNLOGGED TABLE ' || buffer || ' (LIKE ' || source_schema || '."' || object_i || '" INCLUDING CONSTRAINTS INCLUDING INDEXES INCLUDING DEFAULTS)';
+			else
+				EXECUTE 'CREATE TABLE ' || buffer || ' (LIKE ' || source_schema || '."' || object_i || '" INCLUDING CONSTRAINTS INCLUDING INDEXES INCLUDING DEFAULTS)';
+			end if;
+
+			FOR column_i, default_i IN
+				SELECT column_name::text, REPLACE(column_default::text, source_schema, node_schema) 
+				FROM information_schema.columns 
+				WHERE table_schema = node_schema AND table_name = object_i AND column_default LIKE 'nextval(%' || source_schema || '%::regclass)'
+			LOOP
+				EXECUTE 'ALTER TABLE ' || buffer || ' ALTER COLUMN ' || column_i || ' SET DEFAULT ' || default_i;
+			END LOOP;
+		END LOOP;
+
+		FOR condef IN
+			SELECT ( 'ALTER TABLE ' || pg_class.relname || ' ADD CONSTRAINT ' || pg_constraint.conname || ' ' ||  
+			pg_get_constraintdef( pg_constraint.oid ) ) as condef
+			FROM pg_constraint 
+			INNER JOIN pg_class ON pg_class.oid = pg_constraint.conrelid
+			WHERE connamespace = ( SELECT oid FROM pg_namespace WHERE nspname = source_schema ) AND contype <> 'p' AND contype <> 'u'
+		LOOP
+			if position( source_schema || '.' in condef) > 0 then
+				condef = overlay(condef placing ('') from (position(source_schema || '.' in condef) ) for ( length(source_schema || '.') ) );
+			end if;
+			EXECUTE condef;
+		END LOOP;
+		EXECUTE 'set search_path = ''public''';
+		return true;
+	else
+		EXECUTE 'set search_path = ''public''';
+		return false;
+	end if;
+	
+	EXECUTE 'set search_path = ''public''';
+        return false;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_init_node(node_name_p text, node_descr_p text, node_host_p text) OWNER TO postgres;
+
+--
+-- TOC entry 287 (class 1255 OID 29785)
+-- Name: psc_round_minutes(timestamp with time zone, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_round_minutes(timestamp with time zone, integer) RETURNS timestamp with time zone
+    LANGUAGE sql IMMUTABLE
+    AS $_$ 		
+   SELECT 		
+      date_trunc('hour', $1)  +  cast(($2::varchar||' min') as interval) 		
+      * round( (date_part('minute',$1)::float + date_part('second',$1)/ 60.)::float / $2::float )		
+ $_$;
+
+
+ALTER FUNCTION public.psc_round_minutes(timestamp with time zone, integer) OWNER TO postgres;
+
+SET search_path = node_template, pg_catalog;
+
+--
+-- TOC entry 187 (class 1259 OID 29786)
+-- Name: psc_app_names_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_app_names_id_seq
+    START WITH 62
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_app_names_id_seq OWNER TO postgres;
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 188 (class 1259 OID 29788)
+-- Name: psc_app_names; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_app_names (
+    id integer DEFAULT nextval('psc_app_names_id_seq'::regclass) NOT NULL,
+    app_name character varying(90)
+);
+
+
+ALTER TABLE psc_app_names OWNER TO postgres;
+
+--
+-- TOC entry 189 (class 1259 OID 29792)
+-- Name: psc_common_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_common_stat_id_seq
+    START WITH 351545
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_common_stat_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 190 (class 1259 OID 29794)
+-- Name: psc_common_stat; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_common_stat (
+    id bigint DEFAULT nextval('psc_common_stat_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT now(),
+    param_id bigint NOT NULL,
+    val numeric DEFAULT 0.0
+);
+
+
+ALTER TABLE psc_common_stat OWNER TO postgres;
+
+--
+-- TOC entry 191 (class 1259 OID 29803)
+-- Name: psc_conn_states_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_conn_states_id_seq
+    START WITH 961
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_conn_states_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 192 (class 1259 OID 29805)
+-- Name: psc_conn_states; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_conn_states (
+    id integer DEFAULT nextval('psc_conn_states_id_seq'::regclass) NOT NULL,
+    state_name character varying(90)
+);
+
+
+ALTER TABLE psc_conn_states OWNER TO postgres;
+
+--
+-- TOC entry 193 (class 1259 OID 29809)
+-- Name: psc_conns; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_conns (
+    sn_id bigint NOT NULL,
+    db_id bigint NOT NULL,
+    user_id integer NOT NULL,
+    app_name integer NOT NULL,
+    conn_state integer NOT NULL,
+    pid integer,
+    client_addr inet,
+    client_port integer,
+    backend_start timestamp with time zone,
+    xact_start timestamp with time zone,
+    query_start timestamp with time zone,
+    state_change timestamp with time zone,
+    waiting boolean,
+    query text,
+    wait_event_type integer,
+    wait_event integer
+);
+
+
+ALTER TABLE psc_conns OWNER TO postgres;
+
+--
+-- TOC entry 194 (class 1259 OID 29815)
+-- Name: psc_dbs_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_dbs_id_seq
+    START WITH 24
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_dbs_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 195 (class 1259 OID 29817)
+-- Name: psc_dbs; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_dbs (
+    id bigint DEFAULT nextval('psc_dbs_id_seq'::regclass) NOT NULL,
+    db_name character varying(90)
+);
+
+
+ALTER TABLE psc_dbs OWNER TO postgres;
+
+--
+-- TOC entry 196 (class 1259 OID 29821)
+-- Name: psc_dbs_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_dbs_stat_id_seq
+    START WITH 7320812
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_dbs_stat_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 197 (class 1259 OID 29823)
+-- Name: psc_dbs_stat; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_dbs_stat (
+    id bigint DEFAULT nextval('psc_dbs_stat_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT now(),
+    db_id bigint NOT NULL,
+    param_id bigint NOT NULL,
+    val numeric DEFAULT 0.0
+);
+
+
+ALTER TABLE psc_dbs_stat OWNER TO postgres;
+
+--
+-- TOC entry 198 (class 1259 OID 29832)
+-- Name: psc_devices_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_devices_id_seq
+    START WITH 96
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_devices_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 199 (class 1259 OID 29834)
+-- Name: psc_devices; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_devices (
+    id bigint DEFAULT nextval('psc_devices_id_seq'::regclass) NOT NULL,
+    device_name character varying(90),
+    device_type character varying(90)
+);
+
+
+ALTER TABLE psc_devices OWNER TO postgres;
+
+--
+-- TOC entry 200 (class 1259 OID 29838)
+-- Name: psc_lock_modes_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_lock_modes_id_seq
+    START WITH 7
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_lock_modes_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 201 (class 1259 OID 29840)
+-- Name: psc_lock_modes; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_lock_modes (
+    id integer DEFAULT nextval('psc_lock_modes_id_seq'::regclass) NOT NULL,
+    lock_mode character varying(90)
+);
+
+
+ALTER TABLE psc_lock_modes OWNER TO postgres;
+
+--
+-- TOC entry 202 (class 1259 OID 29844)
+-- Name: psc_locktypes_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_locktypes_id_seq
+    START WITH 4
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_locktypes_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 203 (class 1259 OID 29846)
+-- Name: psc_lock_types; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_lock_types (
+    id integer DEFAULT nextval('psc_locktypes_id_seq'::regclass) NOT NULL,
+    lock_type character varying(90)
+);
+
+
+ALTER TABLE psc_lock_types OWNER TO postgres;
+
+--
+-- TOC entry 204 (class 1259 OID 29850)
+-- Name: psc_locks; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_locks (
+    sn_id bigint NOT NULL,
+    waiting_locktype_id bigint NOT NULL,
+    waiting_mode_id bigint NOT NULL,
+    waiting_table_id bigint NOT NULL,
+    waiting_query text,
+    waiting_pid integer,
+    waiting_xid xid,
+    other_locktype_id bigint NOT NULL,
+    other_mode_id bigint NOT NULL,
+    other_table_id bigint NOT NULL,
+    other_query text,
+    other_pid integer,
+    other_xid xid,
+    waiting_db_id bigint NOT NULL
+);
+
+
+ALTER TABLE psc_locks OWNER TO postgres;
+
+--
+-- TOC entry 205 (class 1259 OID 29856)
+-- Name: psc_node_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_node_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_node_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 206 (class 1259 OID 29858)
+-- Name: psc_os_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_os_stat_id_seq
+    START WITH 5049332
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_os_stat_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 207 (class 1259 OID 29860)
+-- Name: psc_os_stat; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_os_stat (
+    id bigint DEFAULT nextval('psc_os_stat_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT now(),
+    param_id bigint NOT NULL,
+    val numeric DEFAULT 0.0,
+    device_id bigint
+);
+
+
+ALTER TABLE psc_os_stat OWNER TO postgres;
+
+--
+-- TOC entry 208 (class 1259 OID 29869)
+-- Name: psc_params_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_params_id_seq
+    START WITH 1216
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_params_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 209 (class 1259 OID 29871)
+-- Name: psc_params; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_params (
+    id bigint DEFAULT nextval('psc_params_id_seq'::regclass) NOT NULL,
+    param_name character varying(90)
+);
+
+
+ALTER TABLE psc_params OWNER TO postgres;
+
+--
+-- TOC entry 210 (class 1259 OID 29875)
+-- Name: psc_queries_and_plans_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_queries_and_plans_id_seq
+    START WITH 83569
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_queries_and_plans_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 211 (class 1259 OID 29877)
+-- Name: psc_queries_and_plans; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_queries_and_plans (
+    id bigint DEFAULT nextval('psc_queries_and_plans_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT now(),
+    duration double precision,
+    db_id bigint NOT NULL,
+    query text,
+    plan text,
+    io_read_time double precision,
+    cost_v double precision,
+    total_blks_size character varying(15),
+    shared_hit_v bigint,
+    read_v bigint,
+    dirtied_v bigint
+);
+
+
+ALTER TABLE psc_queries_and_plans OWNER TO postgres;
+
+--
+-- TOC entry 212 (class 1259 OID 29885)
+-- Name: psc_snapshots_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_snapshots_id_seq
+    START WITH 175100
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_snapshots_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 213 (class 1259 OID 29887)
+-- Name: psc_snapshots; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_snapshots (
+    id bigint DEFAULT nextval('psc_snapshots_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT clock_timestamp()
+);
+
+
+ALTER TABLE psc_snapshots OWNER TO postgres;
+
+--
+-- TOC entry 214 (class 1259 OID 29892)
+-- Name: psc_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_stat_id_seq
+    START WITH 41982818
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_stat_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 29894)
+-- Name: psc_tbls_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_tbls_id_seq
+    START WITH 39219
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_tbls_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 29896)
+-- Name: psc_tbls; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_tbls (
+    tbl_relid bigint NOT NULL,
+    tbl_name character varying(90),
+    db_id bigint NOT NULL,
+    id bigint DEFAULT nextval('psc_tbls_id_seq'::regclass) NOT NULL
+);
+
+
+ALTER TABLE psc_tbls OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 29900)
+-- Name: psc_tbls_stat; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_tbls_stat (
+    id bigint DEFAULT nextval('psc_stat_id_seq'::regclass) NOT NULL,
+    dt timestamp with time zone DEFAULT now(),
+    db_id bigint NOT NULL,
+    param_id bigint NOT NULL,
+    tbl_id bigint NOT NULL,
+    val numeric DEFAULT 0.0
+);
+
+
+ALTER TABLE psc_tbls_stat OWNER TO postgres;
+
+--
+-- TOC entry 3383 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: TABLE psc_tbls_stat; Type: COMMENT; Schema: node_template; Owner: postgres
+--
+
+COMMENT ON TABLE psc_tbls_stat IS 'insert example:
+
+INSERT INTO psc_tbls_stat(
+            dt, db_id, param_id, tbl_id, val)
+    VALUES (
+	    ''2015-01-15 21:33:30.280679+04'', 
+	    ( select psc_get_db( ''db_name '') ), 
+	    ( select psc_get_param( ''n_liv_tup'') ), 
+	    ( select psc_get_tbl( 101 , ''tbl3'', 3 ) ), 
+	    0.0
+    );
+';
+
+
+--
+-- TOC entry 218 (class 1259 OID 29909)
+-- Name: psc_users_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_users_id_seq
+    START WITH 4
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_users_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 29911)
+-- Name: psc_users; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_users (
+    id integer DEFAULT nextval('psc_users_id_seq'::regclass) NOT NULL,
+    user_name character varying(90)
+);
+
+
+ALTER TABLE psc_users OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 29915)
+-- Name: psc_wait_name_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_wait_name_id_seq
+    START WITH 24
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_wait_name_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 29917)
+-- Name: psc_wait_names; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_wait_names (
+    id bigint DEFAULT nextval('psc_wait_name_id_seq'::regclass) NOT NULL,
+    wait_name character varying(90)
+);
+
+
+ALTER TABLE psc_wait_names OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1259 OID 29921)
+-- Name: psc_wait_type_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
+--
+
+CREATE SEQUENCE psc_wait_type_id_seq
+    START WITH 24
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_wait_type_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 29923)
+-- Name: psc_wait_types; Type: TABLE; Schema: node_template; Owner: postgres
+--
+
+CREATE TABLE psc_wait_types (
+    id bigint DEFAULT nextval('psc_wait_type_id_seq'::regclass) NOT NULL,
+    wait_type character varying(90)
+);
+
+
+ALTER TABLE psc_wait_types OWNER TO postgres;
+
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 224 (class 1259 OID 29927)
+-- Name: psc_node_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE psc_node_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_node_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 29929)
+-- Name: psc_nodes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE psc_nodes (
+    id integer DEFAULT nextval('psc_node_id_seq'::regclass) NOT NULL,
+    node_name character varying(255),
+    node_desc character varying(255),
+    node_host character varying(255)
+);
+
+
+ALTER TABLE psc_nodes OWNER TO postgres;
+
+--
+-- TOC entry 263 (class 1259 OID 30421)
+-- Name: psc_user_hashes; Type: TABLE; Schema: public; Owner: app_user
+--
+
+CREATE TABLE psc_user_hashes (
+    user_hash character varying(64),
+    dt timestamp with time zone DEFAULT now(),
+    user_ip character varying(64),
+    user_agent character varying(255),
+    user_name character varying(64)
+);
+
+
+ALTER TABLE psc_user_hashes OWNER TO app_user;
+
+SET search_path = node_template, pg_catalog;
+
+--
+-- TOC entry 3192 (class 2606 OID 29937)
+-- Name: psc_app_names psc_app_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_app_names
+    ADD CONSTRAINT psc_app_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3195 (class 2606 OID 29939)
+-- Name: psc_conn_states psc_conn_state_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conn_states
+    ADD CONSTRAINT psc_conn_state_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3201 (class 2606 OID 29941)
+-- Name: psc_dbs psc_db_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_dbs
+    ADD CONSTRAINT psc_db_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3204 (class 2606 OID 29943)
+-- Name: psc_devices psc_device_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_devices
+    ADD CONSTRAINT psc_device_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3206 (class 2606 OID 29945)
+-- Name: psc_lock_modes psc_lock_mode_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_lock_modes
+    ADD CONSTRAINT psc_lock_mode_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3208 (class 2606 OID 29947)
+-- Name: psc_lock_types psc_ocktype_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_lock_types
+    ADD CONSTRAINT psc_ocktype_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3212 (class 2606 OID 29949)
+-- Name: psc_os_stat psc_os_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_os_stat
+    ADD CONSTRAINT psc_os_stat_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3214 (class 2606 OID 29951)
+-- Name: psc_params psc_param_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_params
+    ADD CONSTRAINT psc_param_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3218 (class 2606 OID 29953)
+-- Name: psc_snapshots psc_snapshot_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_snapshots
+    ADD CONSTRAINT psc_snapshot_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3224 (class 2606 OID 29955)
+-- Name: psc_tbls_stat psc_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_tbls_stat
+    ADD CONSTRAINT psc_stat_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3221 (class 2606 OID 29957)
+-- Name: psc_tbls psc_tbl_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_tbls
+    ADD CONSTRAINT psc_tbl_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3227 (class 2606 OID 29959)
+-- Name: psc_users psc_user_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_users
+    ADD CONSTRAINT psc_user_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3229 (class 2606 OID 29961)
+-- Name: psc_wait_names psc_wait_name_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_wait_names
+    ADD CONSTRAINT psc_wait_name_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3231 (class 2606 OID 29963)
+-- Name: psc_wait_types psc_wait_type_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_wait_types
+    ADD CONSTRAINT psc_wait_type_id_unique UNIQUE (id);
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 3233 (class 2606 OID 29965)
+-- Name: psc_nodes psc_node_id_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_nodes
+    ADD CONSTRAINT psc_node_id_unique UNIQUE (id);
+
+
+--
+-- TOC entry 3235 (class 2606 OID 29967)
+-- Name: psc_nodes psc_node_name_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_nodes
+    ADD CONSTRAINT psc_node_name_unique UNIQUE (node_name);
+
+
+--
+-- TOC entry 3237 (class 2606 OID 30425)
+-- Name: psc_user_hashes psc_user_hash_unique; Type: CONSTRAINT; Schema: public; Owner: app_user
+--
+
+ALTER TABLE ONLY psc_user_hashes
+    ADD CONSTRAINT psc_user_hash_unique UNIQUE (user_hash);
+
+
+SET search_path = node_template, pg_catalog;
+
+--
+-- TOC entry 3193 (class 1259 OID 29968)
+-- Name: psc_common_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_common_stat_dt_idx ON psc_common_stat USING btree (dt);
+
+
+--
+-- TOC entry 3196 (class 1259 OID 29969)
+-- Name: psc_conns_backend_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_conns_backend_start_idx ON psc_conns USING btree (backend_start);
+
+
+--
+-- TOC entry 3197 (class 1259 OID 29970)
+-- Name: psc_conns_pid_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_conns_pid_idx ON psc_conns USING btree (pid);
+
+
+--
+-- TOC entry 3198 (class 1259 OID 29971)
+-- Name: psc_conns_query_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_conns_query_start_idx ON psc_conns USING btree (query_start);
+
+
+--
+-- TOC entry 3199 (class 1259 OID 29972)
+-- Name: psc_conns_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_conns_sn_id_idx ON psc_conns USING btree (sn_id);
+
+
+--
+-- TOC entry 3202 (class 1259 OID 29973)
+-- Name: psc_dbs_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_dbs_stat_dt_idx ON psc_dbs_stat USING btree (dt);
+
+
+--
+-- TOC entry 3209 (class 1259 OID 29974)
+-- Name: psc_locks_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_locks_sn_id_idx ON psc_locks USING btree (sn_id);
+
+
+--
+-- TOC entry 3210 (class 1259 OID 29975)
+-- Name: psc_os_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_os_stat_dt_idx ON psc_os_stat USING btree (dt);
+
+
+--
+-- TOC entry 3215 (class 1259 OID 29976)
+-- Name: psc_queries_and_plans_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_queries_and_plans_dt_idx ON psc_queries_and_plans USING btree (dt);
+
+
+--
+-- TOC entry 3216 (class 1259 OID 29977)
+-- Name: psc_queries_and_plans_duration_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_queries_and_plans_duration_idx ON psc_queries_and_plans USING btree (duration);
+
+
+--
+-- TOC entry 3219 (class 1259 OID 29978)
+-- Name: psc_snapshots_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_snapshots_dt_idx ON psc_snapshots USING btree (dt);
+
+
+--
+-- TOC entry 3225 (class 1259 OID 29979)
+-- Name: psc_tbls_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_tbls_stat_dt_idx ON psc_tbls_stat USING btree (dt);
+
+
+--
+-- TOC entry 3222 (class 1259 OID 29980)
+-- Name: psc_tbls_tbl_relid_idx; Type: INDEX; Schema: node_template; Owner: postgres
+--
+
+CREATE INDEX psc_tbls_tbl_relid_idx ON psc_tbls USING btree (tbl_relid);
+
+
+--
+-- TOC entry 3239 (class 2606 OID 29981)
+-- Name: psc_conns psc_app_name_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_app_name_id_fk FOREIGN KEY (app_name) REFERENCES psc_app_names(id);
+
+
+--
+-- TOC entry 3240 (class 2606 OID 29986)
+-- Name: psc_conns psc_conn_state_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_conn_state_id_fk FOREIGN KEY (conn_state) REFERENCES psc_conn_states(id);
+
+
+--
+-- TOC entry 3241 (class 2606 OID 29991)
+-- Name: psc_conns psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_db_id_fk FOREIGN KEY (db_id) REFERENCES psc_dbs(id);
+
+
+--
+-- TOC entry 3246 (class 2606 OID 29996)
+-- Name: psc_dbs_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_dbs_stat
+    ADD CONSTRAINT psc_db_id_fk FOREIGN KEY (db_id) REFERENCES psc_dbs(id);
+
+
+--
+-- TOC entry 3257 (class 2606 OID 30001)
+-- Name: psc_queries_and_plans psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_queries_and_plans
+    ADD CONSTRAINT psc_db_id_fk FOREIGN KEY (db_id) REFERENCES psc_dbs(id);
+
+
+--
+-- TOC entry 3258 (class 2606 OID 30006)
+-- Name: psc_tbls_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_tbls_stat
+    ADD CONSTRAINT psc_db_id_fk FOREIGN KEY (db_id) REFERENCES psc_dbs(id);
+
+
+--
+-- TOC entry 3255 (class 2606 OID 30011)
+-- Name: psc_os_stat psc_device_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_os_stat
+    ADD CONSTRAINT psc_device_id_fk FOREIGN KEY (device_id) REFERENCES psc_devices(id);
+
+
+--
+-- TOC entry 3248 (class 2606 OID 30016)
+-- Name: psc_locks psc_other_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_other_locktype_id_fk FOREIGN KEY (other_locktype_id) REFERENCES psc_lock_types(id);
+
+
+--
+-- TOC entry 3249 (class 2606 OID 30021)
+-- Name: psc_locks psc_other_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_other_mode_id_fk FOREIGN KEY (other_mode_id) REFERENCES psc_lock_modes(id);
+
+
+--
+-- TOC entry 3250 (class 2606 OID 30026)
+-- Name: psc_locks psc_other_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_other_table_id_fk FOREIGN KEY (other_table_id) REFERENCES psc_tbls(id);
+
+
+--
+-- TOC entry 3238 (class 2606 OID 30031)
+-- Name: psc_common_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_common_stat
+    ADD CONSTRAINT psc_param_id_fk FOREIGN KEY (param_id) REFERENCES psc_params(id);
+
+
+--
+-- TOC entry 3247 (class 2606 OID 30036)
+-- Name: psc_dbs_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_dbs_stat
+    ADD CONSTRAINT psc_param_id_fk FOREIGN KEY (param_id) REFERENCES psc_params(id);
+
+
+--
+-- TOC entry 3256 (class 2606 OID 30041)
+-- Name: psc_os_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_os_stat
+    ADD CONSTRAINT psc_param_id_fk FOREIGN KEY (param_id) REFERENCES psc_params(id);
+
+
+--
+-- TOC entry 3259 (class 2606 OID 30046)
+-- Name: psc_tbls_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_tbls_stat
+    ADD CONSTRAINT psc_param_id_fk FOREIGN KEY (param_id) REFERENCES psc_params(id);
+
+
+--
+-- TOC entry 3242 (class 2606 OID 30051)
+-- Name: psc_conns psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_sn_id_fk FOREIGN KEY (sn_id) REFERENCES psc_snapshots(id);
+
+
+--
+-- TOC entry 3251 (class 2606 OID 30056)
+-- Name: psc_locks psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_sn_id_fk FOREIGN KEY (sn_id) REFERENCES psc_snapshots(id);
+
+
+--
+-- TOC entry 3260 (class 2606 OID 30061)
+-- Name: psc_tbls_stat psc_tbl_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_tbls_stat
+    ADD CONSTRAINT psc_tbl_id_fk FOREIGN KEY (tbl_id) REFERENCES psc_tbls(id);
+
+
+--
+-- TOC entry 3243 (class 2606 OID 30066)
+-- Name: psc_conns psc_user_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_user_id_fk FOREIGN KEY (user_id) REFERENCES psc_users(id);
+
+
+--
+-- TOC entry 3244 (class 2606 OID 30071)
+-- Name: psc_conns psc_wait_event_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_wait_event_id_fk FOREIGN KEY (wait_event) REFERENCES psc_wait_names(id);
+
+
+--
+-- TOC entry 3245 (class 2606 OID 30076)
+-- Name: psc_conns psc_wait_event_type_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_conns
+    ADD CONSTRAINT psc_wait_event_type_id_fk FOREIGN KEY (wait_event_type) REFERENCES psc_wait_types(id);
+
+
+--
+-- TOC entry 3252 (class 2606 OID 30081)
+-- Name: psc_locks psc_waiting_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_waiting_locktype_id_fk FOREIGN KEY (waiting_locktype_id) REFERENCES psc_lock_types(id);
+
+
+--
+-- TOC entry 3253 (class 2606 OID 30086)
+-- Name: psc_locks psc_waiting_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_waiting_mode_id_fk FOREIGN KEY (waiting_mode_id) REFERENCES psc_lock_modes(id);
+
+
+--
+-- TOC entry 3254 (class 2606 OID 30091)
+-- Name: psc_locks psc_waiting_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
+--
+
+ALTER TABLE ONLY psc_locks
+    ADD CONSTRAINT psc_waiting_table_id_fk FOREIGN KEY (waiting_table_id) REFERENCES psc_tbls(id);
+
+
+-- Completed on 2017-01-15 23:11:48 MSK
+
+--
+-- PostgreSQL database dump complete
+--
+
