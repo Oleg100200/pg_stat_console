@@ -3260,6 +3260,8 @@ function set_all_click_events()
 		current_node_name = this.value;
 		set_user_auth_data( "selected_node_name", current_node_name );
 		$( "#" + selected_menu_elem.name ).click();
+		$('#db_status_panel').css('visibility', 'hidden');
+		$("#db_status_panel" ).fadeOut( "slow" );
 		get_current_status();
 		get_uptime();
 		get_current_node_info();

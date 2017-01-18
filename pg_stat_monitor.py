@@ -414,14 +414,13 @@ class GetLocksPairsHandler(BaseAsyncHandlerNoParam):
 			substring(other_stm.query from 0 for 400) AS other_query,
 			other.mode AS other_mode,
 			( '<div style="float:left;" link_val="' || other.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">stop query ' || other.pid::text || '</div>' ||
-			'<div style="float:left;margin-top:10px;" link_val="' || other.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || other.pid::text || '</div>' ) as other_pid,	 
-			other.granted AS other_granted
+			'<div style="float:left;margin-top:10px;" link_val="' || other.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || other.pid::text || '</div>' ) as other_pid
 			FROM pg_locks waiting
 			JOIN pg_stat_activity waiting_stm ON waiting_stm.pid = waiting.pid
 			JOIN pg_locks other ON waiting.database = other.database AND waiting.relation = other.relation OR waiting.transactionid = other.transactionid
 			JOIN pg_stat_activity other_stm ON other_stm.pid = other.pid
 			WHERE NOT waiting.granted AND waiting.pid <> other.pid;
-			""" ), [ "waiting_locktype","waiting_query","waiting_pid","other_locktype","other_table","other_query","other_mode","other_pid","other_granted" ], "Locks by pairs", ["other_query","waiting_query"] )
+			""" ), [ "waiting_locktype","waiting_query","waiting_pid","other_locktype","other_table","other_query","other_mode","other_pid" ], "Locks by pairs", ["other_query","waiting_query"] )
 
 class GetStatementsHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
