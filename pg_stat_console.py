@@ -531,10 +531,12 @@ class LoginHandler(BaseAsyncHandlerNoParam):
 		user_hash = ""
 		user_name = ""
 		login = False
+		ip_addr = str( self.request.headers.get("X-Real-IP") if self.request.remote_ip == '127.0.0.1' else self.request.remote_ip )
+		
 		for user in users_list:
 			if user[0] == data["login"] and user[1] == data["password"] and login == False:
 				login = True
-				user_hash =  str( data["login"] ) + "%" + str(data["password"]) + "%" + self.request.headers.get("User-Agent") + "%" + self.request.remote_ip
+				user_hash =  str( data["login"] ) + "%" + str(data["password"]) + "%" + self.request.headers.get("User-Agent") + "%" + ip_addr
 				user_hash = hashlib.sha256( user_hash.encode('utf-8') ).hexdigest()
 				active_users.append( [ user_hash, user[0] ] )
 				user_name = user[0]
@@ -543,8 +545,8 @@ class LoginHandler(BaseAsyncHandlerNoParam):
 			result[ "result" ] = "ok"
 			result[ "user_hash" ] = user_hash
 			self.make_query( 'sys_stat', """select psc_get_user_hash('""" + str( user_hash ) + """', '""" + str( user_name ) + """','""" + \
-				str( self.request.remote_ip ) + """','""" + str( self.request.headers.get("User-Agent") ) + """')""", None, False )
-			logger.log( "Logged user: " + data["login"] + " User-Agent: " + self.request.headers.get("User-Agent") + " remote_ip: " + self.request.remote_ip, "Info" )
+				ip_addr + """','""" + str( self.request.headers.get("User-Agent") ) + """')""", None, False )
+			logger.log( "Logged user: " + data["login"] + " User-Agent: " + self.request.headers.get("User-Agent") + " remote_ip: " + ip_addr, "Info" )
 
 		self.set_header('Content-Type', 'application/json')
 		return json.dumps(result, ensure_ascii=False).encode('utf8')
