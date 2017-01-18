@@ -1100,7 +1100,7 @@ def make_iostat_data():
 
 		network_devices = get_devices( network_vals )
 		for device in network_devices:
-			if os.path.exists('cat /sys/class/net/' + device + '/statistics'):
+			if os.path.exists('/sys/class/net/' + device + '/statistics'):
 				rx_bytes = os.popen('cat /sys/class/net/' + device + '/statistics/rx_bytes').read()
 				tx_bytes = os.popen('cat /sys/class/net/' + device + '/statistics/tx_bytes').read()
 				network_vals.append( [ device, 'rx_bytes', int(rx_bytes) ] )
