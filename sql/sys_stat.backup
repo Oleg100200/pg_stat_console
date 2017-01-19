@@ -5,7 +5,7 @@
 -- Dumped from database version 9.6.0
 -- Dumped by pg_dump version 9.6.0
 
--- Started on 2017-01-15 23:11:47 MSK
+-- Started on 2017-01-19 21:07:36 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -111,6 +111,43 @@ $$;
 
 
 ALTER FUNCTION public.psc_get_db(db_name_p text) OWNER TO postgres;
+
+--
+-- TOC entry 293 (class 1255 OID 31417)
+-- Name: psc_get_db_stat_val(text, text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_db_stat_val(node_name_p text, db_name_p text, param_name_p text, interval_p text, func_p text) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+node_id integer;
+res numeric;
+BEGIN
+
+SELECT id into node_id FROM public.psc_nodes where node_name = node_name_p;
+execute 'set search_path  = ''n' || node_id || ''';';
+
+if interval_p is not null then
+	interval_p = ' and dt >= clock_timestamp() - interval ''' || interval_p || ''' ';
+end if;
+
+if db_name_p is not null then
+	db_name_p = ' and d.db_name = ''' || db_name_p || ''' ';
+end if;
+
+execute 'SELECT round(' || coalesce( func_p, '' ) || '(s.val)::numeric, 2) as res
+	FROM psc_dbs_stat s
+	inner join psc_params p on s.param_id = p.id
+	inner join psc_dbs d on s.db_id = d.id
+	where p.param_name = ''' || param_name_p || '''' || coalesce( interval_p, '' ) || coalesce( db_name_p, '' )
+into res;
+return res;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_db_stat_val(node_name_p text, db_name_p text, param_name_p text, interval_p text, func_p text) OWNER TO postgres;
 
 --
 -- TOC entry 267 (class 1255 OID 29775)
@@ -312,6 +349,47 @@ $$;
 
 
 ALTER FUNCTION public.psc_get_node_info(node_name_p text, last_dt_p text) OWNER TO postgres;
+
+--
+-- TOC entry 292 (class 1255 OID 31416)
+-- Name: psc_get_os_stat_val(text, text, text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION psc_get_os_stat_val(node_name_p text, device_name_p text, device_type_p text, param_name_p text, interval_p text, func_p text) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+node_id integer;
+res numeric;
+BEGIN
+
+SELECT id into node_id FROM public.psc_nodes where node_name = node_name_p;
+execute 'set search_path  = ''n' || node_id || ''';';
+
+if interval_p is not null then
+	interval_p = ' and dt >= clock_timestamp() - interval ''' || interval_p || ''' ';
+end if;
+
+if device_name_p is not null then
+	device_name_p = ' and d.device_name = ''' || device_name_p || ''' ';
+end if;
+
+if device_type_p is not null then
+	device_type_p = ' and d.device_type = ''' || device_type_p || ''' ';
+end if;
+
+execute 'SELECT round(' || coalesce( func_p, '' ) || '(s.val)::numeric, 2) as res
+	FROM psc_os_stat s
+	inner join psc_params p on s.param_id = p.id
+	left join psc_devices d on s.device_id = d.id
+	where p.param_name = ''' || param_name_p || '''' || coalesce( interval_p, '' ) || coalesce( device_name_p, '' ) || coalesce( device_type_p, '' )
+into res;
+return res;
+END;
+$$;
+
+
+ALTER FUNCTION public.psc_get_os_stat_val(node_name_p text, device_name_p text, device_type_p text, param_name_p text, interval_p text, func_p text) OWNER TO postgres;
 
 --
 -- TOC entry 283 (class 1255 OID 29780)
@@ -1052,7 +1130,7 @@ CREATE TABLE psc_tbls_stat (
 ALTER TABLE psc_tbls_stat OWNER TO postgres;
 
 --
--- TOC entry 3383 (class 0 OID 0)
+-- TOC entry 3385 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: TABLE psc_tbls_stat; Type: COMMENT; Schema: node_template; Owner: postgres
 --
@@ -1206,7 +1284,7 @@ ALTER TABLE psc_user_hashes OWNER TO app_user;
 SET search_path = node_template, pg_catalog;
 
 --
--- TOC entry 3192 (class 2606 OID 29937)
+-- TOC entry 3194 (class 2606 OID 29937)
 -- Name: psc_app_names psc_app_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1215,7 +1293,7 @@ ALTER TABLE ONLY psc_app_names
 
 
 --
--- TOC entry 3195 (class 2606 OID 29939)
+-- TOC entry 3197 (class 2606 OID 29939)
 -- Name: psc_conn_states psc_conn_state_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1224,7 +1302,7 @@ ALTER TABLE ONLY psc_conn_states
 
 
 --
--- TOC entry 3201 (class 2606 OID 29941)
+-- TOC entry 3203 (class 2606 OID 29941)
 -- Name: psc_dbs psc_db_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1233,7 +1311,7 @@ ALTER TABLE ONLY psc_dbs
 
 
 --
--- TOC entry 3204 (class 2606 OID 29943)
+-- TOC entry 3206 (class 2606 OID 29943)
 -- Name: psc_devices psc_device_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1242,7 +1320,7 @@ ALTER TABLE ONLY psc_devices
 
 
 --
--- TOC entry 3206 (class 2606 OID 29945)
+-- TOC entry 3208 (class 2606 OID 29945)
 -- Name: psc_lock_modes psc_lock_mode_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1251,7 +1329,7 @@ ALTER TABLE ONLY psc_lock_modes
 
 
 --
--- TOC entry 3208 (class 2606 OID 29947)
+-- TOC entry 3210 (class 2606 OID 29947)
 -- Name: psc_lock_types psc_ocktype_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1260,7 +1338,7 @@ ALTER TABLE ONLY psc_lock_types
 
 
 --
--- TOC entry 3212 (class 2606 OID 29949)
+-- TOC entry 3214 (class 2606 OID 29949)
 -- Name: psc_os_stat psc_os_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1269,7 +1347,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3214 (class 2606 OID 29951)
+-- TOC entry 3216 (class 2606 OID 29951)
 -- Name: psc_params psc_param_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1278,7 +1356,7 @@ ALTER TABLE ONLY psc_params
 
 
 --
--- TOC entry 3218 (class 2606 OID 29953)
+-- TOC entry 3220 (class 2606 OID 29953)
 -- Name: psc_snapshots psc_snapshot_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1287,7 +1365,7 @@ ALTER TABLE ONLY psc_snapshots
 
 
 --
--- TOC entry 3224 (class 2606 OID 29955)
+-- TOC entry 3226 (class 2606 OID 29955)
 -- Name: psc_tbls_stat psc_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1296,7 +1374,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3221 (class 2606 OID 29957)
+-- TOC entry 3223 (class 2606 OID 29957)
 -- Name: psc_tbls psc_tbl_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1305,7 +1383,7 @@ ALTER TABLE ONLY psc_tbls
 
 
 --
--- TOC entry 3227 (class 2606 OID 29959)
+-- TOC entry 3229 (class 2606 OID 29959)
 -- Name: psc_users psc_user_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1314,7 +1392,7 @@ ALTER TABLE ONLY psc_users
 
 
 --
--- TOC entry 3229 (class 2606 OID 29961)
+-- TOC entry 3231 (class 2606 OID 29961)
 -- Name: psc_wait_names psc_wait_name_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1323,7 +1401,7 @@ ALTER TABLE ONLY psc_wait_names
 
 
 --
--- TOC entry 3231 (class 2606 OID 29963)
+-- TOC entry 3233 (class 2606 OID 29963)
 -- Name: psc_wait_types psc_wait_type_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1334,7 +1412,7 @@ ALTER TABLE ONLY psc_wait_types
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 3233 (class 2606 OID 29965)
+-- TOC entry 3235 (class 2606 OID 29965)
 -- Name: psc_nodes psc_node_id_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1343,7 +1421,7 @@ ALTER TABLE ONLY psc_nodes
 
 
 --
--- TOC entry 3235 (class 2606 OID 29967)
+-- TOC entry 3237 (class 2606 OID 29967)
 -- Name: psc_nodes psc_node_name_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1352,7 +1430,7 @@ ALTER TABLE ONLY psc_nodes
 
 
 --
--- TOC entry 3237 (class 2606 OID 30425)
+-- TOC entry 3239 (class 2606 OID 30425)
 -- Name: psc_user_hashes psc_user_hash_unique; Type: CONSTRAINT; Schema: public; Owner: app_user
 --
 
@@ -1363,7 +1441,7 @@ ALTER TABLE ONLY psc_user_hashes
 SET search_path = node_template, pg_catalog;
 
 --
--- TOC entry 3193 (class 1259 OID 29968)
+-- TOC entry 3195 (class 1259 OID 29968)
 -- Name: psc_common_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1371,7 +1449,7 @@ CREATE INDEX psc_common_stat_dt_idx ON psc_common_stat USING btree (dt);
 
 
 --
--- TOC entry 3196 (class 1259 OID 29969)
+-- TOC entry 3198 (class 1259 OID 29969)
 -- Name: psc_conns_backend_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1379,7 +1457,7 @@ CREATE INDEX psc_conns_backend_start_idx ON psc_conns USING btree (backend_start
 
 
 --
--- TOC entry 3197 (class 1259 OID 29970)
+-- TOC entry 3199 (class 1259 OID 29970)
 -- Name: psc_conns_pid_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1387,7 +1465,7 @@ CREATE INDEX psc_conns_pid_idx ON psc_conns USING btree (pid);
 
 
 --
--- TOC entry 3198 (class 1259 OID 29971)
+-- TOC entry 3200 (class 1259 OID 29971)
 -- Name: psc_conns_query_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1395,7 +1473,7 @@ CREATE INDEX psc_conns_query_start_idx ON psc_conns USING btree (query_start);
 
 
 --
--- TOC entry 3199 (class 1259 OID 29972)
+-- TOC entry 3201 (class 1259 OID 29972)
 -- Name: psc_conns_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1403,7 +1481,7 @@ CREATE INDEX psc_conns_sn_id_idx ON psc_conns USING btree (sn_id);
 
 
 --
--- TOC entry 3202 (class 1259 OID 29973)
+-- TOC entry 3204 (class 1259 OID 29973)
 -- Name: psc_dbs_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1411,7 +1489,7 @@ CREATE INDEX psc_dbs_stat_dt_idx ON psc_dbs_stat USING btree (dt);
 
 
 --
--- TOC entry 3209 (class 1259 OID 29974)
+-- TOC entry 3211 (class 1259 OID 29974)
 -- Name: psc_locks_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1419,7 +1497,7 @@ CREATE INDEX psc_locks_sn_id_idx ON psc_locks USING btree (sn_id);
 
 
 --
--- TOC entry 3210 (class 1259 OID 29975)
+-- TOC entry 3212 (class 1259 OID 29975)
 -- Name: psc_os_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1427,7 +1505,7 @@ CREATE INDEX psc_os_stat_dt_idx ON psc_os_stat USING btree (dt);
 
 
 --
--- TOC entry 3215 (class 1259 OID 29976)
+-- TOC entry 3217 (class 1259 OID 29976)
 -- Name: psc_queries_and_plans_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1435,7 +1513,7 @@ CREATE INDEX psc_queries_and_plans_dt_idx ON psc_queries_and_plans USING btree (
 
 
 --
--- TOC entry 3216 (class 1259 OID 29977)
+-- TOC entry 3218 (class 1259 OID 29977)
 -- Name: psc_queries_and_plans_duration_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1443,7 +1521,7 @@ CREATE INDEX psc_queries_and_plans_duration_idx ON psc_queries_and_plans USING b
 
 
 --
--- TOC entry 3219 (class 1259 OID 29978)
+-- TOC entry 3221 (class 1259 OID 29978)
 -- Name: psc_snapshots_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1451,7 +1529,7 @@ CREATE INDEX psc_snapshots_dt_idx ON psc_snapshots USING btree (dt);
 
 
 --
--- TOC entry 3225 (class 1259 OID 29979)
+-- TOC entry 3227 (class 1259 OID 29979)
 -- Name: psc_tbls_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1459,7 +1537,7 @@ CREATE INDEX psc_tbls_stat_dt_idx ON psc_tbls_stat USING btree (dt);
 
 
 --
--- TOC entry 3222 (class 1259 OID 29980)
+-- TOC entry 3224 (class 1259 OID 29980)
 -- Name: psc_tbls_tbl_relid_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1467,7 +1545,7 @@ CREATE INDEX psc_tbls_tbl_relid_idx ON psc_tbls USING btree (tbl_relid);
 
 
 --
--- TOC entry 3239 (class 2606 OID 29981)
+-- TOC entry 3241 (class 2606 OID 29981)
 -- Name: psc_conns psc_app_name_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1476,7 +1554,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3240 (class 2606 OID 29986)
+-- TOC entry 3242 (class 2606 OID 29986)
 -- Name: psc_conns psc_conn_state_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1485,7 +1563,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3241 (class 2606 OID 29991)
+-- TOC entry 3243 (class 2606 OID 29991)
 -- Name: psc_conns psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1494,7 +1572,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3246 (class 2606 OID 29996)
+-- TOC entry 3248 (class 2606 OID 29996)
 -- Name: psc_dbs_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1503,7 +1581,7 @@ ALTER TABLE ONLY psc_dbs_stat
 
 
 --
--- TOC entry 3257 (class 2606 OID 30001)
+-- TOC entry 3259 (class 2606 OID 30001)
 -- Name: psc_queries_and_plans psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1512,7 +1590,7 @@ ALTER TABLE ONLY psc_queries_and_plans
 
 
 --
--- TOC entry 3258 (class 2606 OID 30006)
+-- TOC entry 3260 (class 2606 OID 30006)
 -- Name: psc_tbls_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1521,7 +1599,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3255 (class 2606 OID 30011)
+-- TOC entry 3257 (class 2606 OID 30011)
 -- Name: psc_os_stat psc_device_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1530,7 +1608,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3248 (class 2606 OID 30016)
+-- TOC entry 3250 (class 2606 OID 30016)
 -- Name: psc_locks psc_other_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1539,7 +1617,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3249 (class 2606 OID 30021)
+-- TOC entry 3251 (class 2606 OID 30021)
 -- Name: psc_locks psc_other_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1548,7 +1626,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3250 (class 2606 OID 30026)
+-- TOC entry 3252 (class 2606 OID 30026)
 -- Name: psc_locks psc_other_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1557,7 +1635,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3238 (class 2606 OID 30031)
+-- TOC entry 3240 (class 2606 OID 30031)
 -- Name: psc_common_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1566,7 +1644,7 @@ ALTER TABLE ONLY psc_common_stat
 
 
 --
--- TOC entry 3247 (class 2606 OID 30036)
+-- TOC entry 3249 (class 2606 OID 30036)
 -- Name: psc_dbs_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1575,7 +1653,7 @@ ALTER TABLE ONLY psc_dbs_stat
 
 
 --
--- TOC entry 3256 (class 2606 OID 30041)
+-- TOC entry 3258 (class 2606 OID 30041)
 -- Name: psc_os_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1584,7 +1662,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3259 (class 2606 OID 30046)
+-- TOC entry 3261 (class 2606 OID 30046)
 -- Name: psc_tbls_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1593,7 +1671,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3242 (class 2606 OID 30051)
+-- TOC entry 3244 (class 2606 OID 30051)
 -- Name: psc_conns psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1602,7 +1680,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3251 (class 2606 OID 30056)
+-- TOC entry 3253 (class 2606 OID 30056)
 -- Name: psc_locks psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1611,7 +1689,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3260 (class 2606 OID 30061)
+-- TOC entry 3262 (class 2606 OID 30061)
 -- Name: psc_tbls_stat psc_tbl_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1620,7 +1698,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3243 (class 2606 OID 30066)
+-- TOC entry 3245 (class 2606 OID 30066)
 -- Name: psc_conns psc_user_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1629,7 +1707,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3244 (class 2606 OID 30071)
+-- TOC entry 3246 (class 2606 OID 30071)
 -- Name: psc_conns psc_wait_event_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1638,7 +1716,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3245 (class 2606 OID 30076)
+-- TOC entry 3247 (class 2606 OID 30076)
 -- Name: psc_conns psc_wait_event_type_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1647,7 +1725,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3252 (class 2606 OID 30081)
+-- TOC entry 3254 (class 2606 OID 30081)
 -- Name: psc_locks psc_waiting_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1656,7 +1734,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3253 (class 2606 OID 30086)
+-- TOC entry 3255 (class 2606 OID 30086)
 -- Name: psc_locks psc_waiting_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1665,7 +1743,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3254 (class 2606 OID 30091)
+-- TOC entry 3256 (class 2606 OID 30091)
 -- Name: psc_locks psc_waiting_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1673,7 +1751,7 @@ ALTER TABLE ONLY psc_locks
     ADD CONSTRAINT psc_waiting_table_id_fk FOREIGN KEY (waiting_table_id) REFERENCES psc_tbls(id);
 
 
--- Completed on 2017-01-15 23:11:48 MSK
+-- Completed on 2017-01-19 21:07:36 MSK
 
 --
 -- PostgreSQL database dump complete
