@@ -466,7 +466,8 @@ function get_current_node_info()
 
 function get_current_db_status()
 {
-	if( current_node_name != "null" && current_node_name != null )
+	if( current_node_name != "null" && current_node_name != null && current_node_info.includes("node_class_pg_stat_monitor") )
+	{
 		$.ajax({ url: '/getMaintenanceStatus',
 				type: 'post',
 				data: JSON.stringify( {node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data')} ),
@@ -484,7 +485,8 @@ function get_current_db_status()
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 				}
-		});		
+		});	
+	}
 }
 	
 function getRandomInt(min, max)
@@ -867,24 +869,23 @@ function get_uptime()
 	{
 		$("#uptime").fadeOut( 250 );
 	} else
-	{	
-		$.ajax({ url: '/getUptime',
-				type: 'post',
-				data: JSON.stringify( { node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data') } ),
-				success: function(data) {
-					if( data == 'pg_stat_monitor not allowed')
-						$("#uptime").fadeOut( 250 );
-					else
-					{
-						$("#uptime").fadeIn( 250 );
-						$('#uptime').text( "Uptime " + data );
-					}
-				},
-				error: function(XMLHttpRequest, textStatus, errorThrown) {
-						if( textStatus !== "abort" ) show_error( textStatus, errorThrown, XMLHttpRequest.responseText );
-					}
-		});
-	}
+		if( current_node_info.includes("node_class_pg_stat_monitor") )
+			$.ajax({ url: '/getUptime',
+					type: 'post',
+					data: JSON.stringify( { node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data') } ),
+					success: function(data) {
+						if( data == 'pg_stat_monitor not allowed')
+							$("#uptime").fadeOut( 250 );
+						else
+						{
+							$("#uptime").fadeIn( 250 );
+							$('#uptime').text( "Uptime " + data );
+						}
+					},
+					error: function(XMLHttpRequest, textStatus, errorThrown) {
+							if( textStatus !== "abort" ) show_error( textStatus, errorThrown, XMLHttpRequest.responseText );
+						}
+			});
 }	
 
 function get_refresh_interval()
