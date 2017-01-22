@@ -148,7 +148,8 @@ graph_colors = [ 	[ "dark blue", 		"rgba(0,29,164,0.8)" ],
 					[ "brown", 			"rgba(117,56,11,0.8)" ],
 					[ "light brown", 	"rgba(176,85,17,0.8)" ],
 					[ "pink",			"rgba(255,106,215,0.8)" ],
-					[ "beige", 			"rgba(227,174,94,0.8)" ] ]
+					[ "beige", 			"rgba(227,174,94,0.8)" ],
+					[ "gray", 			"rgba(99,97,124,0.8)" ] ]
 
 def get_color( name ):
 	return next(graph_color[1] for graph_color in graph_colors if graph_color[0]==name)
@@ -174,7 +175,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				["AppMem",get_color("green")], ["MemFree",get_color("light green")], ["Buffers",get_color("brown")],["SwapTotal",get_color("red")],\
 				["SwapFree",get_color("fuchsia")], ["Dirty",get_color("aquamarine")],\
 				["Shmem",get_color("pink")],["Slab",get_color("yellow")],["PageTables",get_color("dark blue")],["SwapCached",get_color("orange")],\
-				["VmallocUsed",get_color("beige")],
+				["VmallocUsed",get_color("beige")], ["Inactive",get_color("gray")],
 
 				['checkpoints_timed', get_color("green") ], ['checkpoints_req', get_color("pink")], \
 				['checkpoint_write_time', get_color("beige") ], ['checkpoint_sync_time', get_color("aquamarine") ], \
@@ -190,7 +191,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				['tup_returned_per_sec', get_color("green") ], ['tup_fetched_per_sec', get_color("light green") ] ]
 	
 custom_graph_sort = [ '%user', '%system', '%nice', '%steal', '%idle', '%iowait', \
-				"AppMem", "PageTables", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "SwapCached", "VmallocUsed", "MemFree"]
+				"AppMem", "PageTables", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "SwapCached", "VmallocUsed", "MemFree", "Inactive"]
 #=======================================================================================================
 admin_methods = [ 'stopQuery', 'downloadLogFile' ]
 #=======================================================================================================
@@ -746,6 +747,7 @@ class Chart():
 		
 		blocks_txt = ""
 		count_blk = 0
+
 		for block in blocks:
 			blocks_txt = blocks_txt + """{
 			  click: function(e){
@@ -955,7 +957,7 @@ class Chart():
 
 			blocks_txt = blocks_txt + """]}"""
 			
-			if count_blk != lines_num:
+			if count_blk <= lines_num:
 				blocks_txt = blocks_txt +  ","
 
 			count_blk = count_blk + 1
@@ -1229,9 +1231,8 @@ class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		if self.check_auth() == False:
 			return ""		
 
-		#[ "AppMem", "MemTotal", "MemFree", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "PageTables", "Cached", "SwapCached", "VmallocUsed" ]
 		queries = self.generate_query_os_stat_in_gb( data[ "date_a" ], data[ "date_b" ], None, \
-			[ "AppMem", "MemFree", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "PageTables", "SwapCached", "VmallocUsed" ] )
+			[ "AppMem", "MemFree", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "PageTables", "SwapCached", "VmallocUsed", "Inactive" ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'Memory usage, GB', 'stackedArea' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
@@ -1563,7 +1564,7 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				current_user_dbs.append( db[1] )
 			
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'autovacuum_workers' )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers', 'stackedColumn' ] )		
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers', 'stackedColumn' ] )
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):

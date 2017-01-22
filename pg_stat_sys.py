@@ -55,7 +55,9 @@ node_host = read_conf_param_value( config['main']['node_host'] )
 
 top_rels_in_snapshot = read_conf_param_value( config['main']['top_rels_in_snapshot'] )
 locks_limit_in_snapshot = read_conf_param_value( config['main']['locks_limit_in_snapshot'] )
-sleep_interval_pg_conn_snapshot = read_conf_param_value( config['main']['sleep_interval_pg_conn_snapshot'] )
+sleep_interval_pg_conn_snapshot = int( read_conf_param_value( config['main']['sleep_interval_pg_conn_snapshot'] ) )
+sleep_interval_pg_single_db_sn = int( read_conf_param_value( config['main']['sleep_interval_pg_single_db_sn'] ) )
+pg_single_db_sn_steps = int( read_conf_param_value( config['main']['pg_single_db_sn_steps'] ) )
 
 collect_pg_sys_stat = read_conf_param_value( config['main']['collect_pg_sys_stat'], True )
 collect_pg_conn_snapshot = read_conf_param_value( config['main']['collect_pg_conn_snapshot'], True )
@@ -404,8 +406,6 @@ query_single_db_t2 = """
 query_single_db_sn = """
 	do $$
 	BEGIN
-		delete from psc_stat_activity_raw;
-		
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
 		select datname, state as state, count(state) from pg_stat_activity
 		where pid <> pg_backend_pid()
@@ -436,7 +436,7 @@ query_single_db_sn = """
 		group by d.datname, l.mode;
 
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
-		select datname, 'autovacuum_workers' as autovacuum_workers, count(state) from pg_stat_activity
+		select datname, 'autovacuum_workers' as autovacuum_workers, count(pid) from pg_stat_activity
 		where query ilike '%autovacuum:%' and pid <> pg_backend_pid()
 		group by datname;	
 	end$$;""";
@@ -958,22 +958,6 @@ def pg_conn_snapshot():
 				for rec in res_data:
 					stm.first( sn_id, str( rec[0] ), str( rec[1] ), rec[2], rec[3], rec[4], str(rec[5]), rec[6], 
 							rec[7], str( rec[8] ), str(rec[9]), rec[10], str(rec[11]), rec[12], rec[13], rec[14], rec[15] )
-			#====================================================================================================
-			firs_node_db_conn.execute( query_single_db_sn )
-			
-			query = firs_node_db_conn.prepare( """
-				select datname, param, round(avg( val ), 3) 
-				from psc_stat_activity_raw
-				group by datname, param;""" )
-			res_data = query()
-			
-			stm = sys_stat_db.prepare( """
-				INSERT INTO psc_dbs_stat( db_id, param_id, val)
-				values( ( select psc_get_db( $1 ) ), ( select psc_get_param( $2 ) ),$3 )""" )
-			with sys_stat_db.xact():			
-				for rec in res_data:
-					stm.first( rec[0], str( rec[1] ), rec[2] )
-			#====================================================================================================
 
 		except Exception as e:
 			logger.log( "Connection pg_conn_snapshot error: " + str( e ), "Error" )
@@ -990,7 +974,54 @@ def pg_conn_snapshot():
 			time.sleep( int( sleep_interval_pg_conn_snapshot ) )
 
 #=======================================================================================================
+def pg_single_db_sn():
+	sys_stat_db = None
+	firs_node_db_conn = None
+	while True:
+		try:
+			firs_node_db = dbs_list[0]
+			firs_node_db_conn = postgresql.open( firs_node_db[1] )
+			firs_node_db_conn.execute( """set application_name = '""" + application_name + """'""" )
+			firs_node_db_conn.execute( query_check_tables_single_db )
 
+			#====================================================================================================
+			firs_node_db_conn.execute( """delete from psc_stat_activity_raw;""" )
+			
+			for step in range(0, pg_single_db_sn_steps ):
+				firs_node_db_conn.execute( query_single_db_sn )
+				time.sleep(sleep_interval_pg_single_db_sn)
+			
+			query = firs_node_db_conn.prepare( """
+				select datname, param, round(avg( val ), 3) 
+				from psc_stat_activity_raw
+				group by datname, param;""" )
+			res_data = query()
+			
+			sys_stat_db = postgresql.open( sys_stat_conn_str )
+			init_sys_stat( sys_stat_db )	
+			
+			stm = sys_stat_db.prepare( """
+				INSERT INTO psc_dbs_stat( db_id, param_id, val)
+				values( ( select psc_get_db( $1 ) ), ( select psc_get_param( $2 ) ),$3 )""" )
+			with sys_stat_db.xact():			
+				for rec in res_data:
+					stm.first( rec[0], str( rec[1] ), rec[2] )
+			#====================================================================================================
+
+		except Exception as e:
+			logger.log( "Connection pg_single_db_sn error: " + str( e ), "Error" )
+			time.sleep(sleep_interval_on_exception)			
+		finally:
+			if sys_stat_db is not None:
+				if not sys_stat_db.closed:
+					sys_stat_db.close()
+			if firs_node_db_conn is not None:	
+				if not firs_node_db_conn.closed:
+					firs_node_db_conn.close()
+
+			logger.log('pg_single_db_sn iteration finished! Start next iteration...', "Info" )
+
+#=======================================================================================================
 def make_iostat_data():
 	def avg_param( param_name, data ):
 		result = 0
@@ -1214,7 +1245,7 @@ def make_iostat_data():
 def make_stat_mem_data():	
 	result = []
 	encoding = locale.getdefaultlocale()[1]
-	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal -e MemFree -e Buffers -e Dirty -e Shmem -e Slab -e PageTables -e SwapFree -e SwapTotal -e Cached -e SwapCached -e VmallocUsed',shell=True,stdout=subprocess.PIPE)
+	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
 	list_begin = False
 	for line in cmd.stdout:
 		columns = line.decode(encoding).split()
@@ -1229,6 +1260,7 @@ def make_stat_mem_data():
 	Slab = 0
 	PageTables = 0
 	VmallocUsed = 0
+
 	for rec in result:
 		if rec[ 0 ] == 'MemTotal':
 			MemTotal = rec[ 1 ]
@@ -1246,8 +1278,9 @@ def make_stat_mem_data():
 			PageTables = rec[ 1 ]
 		if rec[ 0 ] == 'VmallocUsed':
 			VmallocUsed = rec[ 1 ]
-	result.append( [ 'AppMem', str( int(MemTotal) - int(MemFree) - int(Buffers) - int(Cached) - int(SwapCached) - int(Slab) - int(PageTables) - int(VmallocUsed) ) ] )	
 			
+	result.append( [ 'AppMem', str( int(MemTotal) - int(MemFree) - int(Buffers) - int(Cached) - int(SwapCached) - int(Slab) - int(PageTables) ) ] )	
+	
 	return result
 
 def make_stat_disk_data():	
@@ -1322,6 +1355,8 @@ def os_stat_collect():
 if collect_pg_sys_stat:
 	pg_sys_stat_snapshot_thread = Thread( target=pg_sys_stat_snapshot, args=[] )
 	pg_sys_stat_snapshot_thread.start()
+	pg_single_db_sn_thread = Thread( target=pg_single_db_sn, args=[] )
+	pg_single_db_sn_thread.start()
 	logger.log( '-------> pg_sys_stat activated!', "Info" )	
 
 if collect_pg_conn_snapshot:
