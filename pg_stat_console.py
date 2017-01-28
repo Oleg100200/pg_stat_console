@@ -1942,7 +1942,7 @@ class GetActivityHistoryExtHandler(BaseAsyncHandlerNoParam):
 					sum(case when cs.state_name = 'idle in transaction' then 1 else 0 end) as idle_in_tx_count,
 					(select count(1) from psc_locks l where l.sn_id = sn.id ) as locks_count,
 					sum(1) as total_conns,
-					( '<div style="float:left;" link_val="' || sn.id::text || '" class="load_snapshot pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">Show snaphot</div>' ) as sn_id	 
+					( '<div style="float:left;" link_val="' || sn.id::text || '" class="load_snapshot pg_stat_console_fonts pg_stat_console_button">Show snaphot</div>' ) as sn_id	 
 					FROM psc_snapshots sn 
 					inner join psc_conns cn on cn.sn_id = sn.id
 					inner join psc_conn_states cs on cs.id = cn.conn_state  
@@ -1959,7 +1959,7 @@ class GetActivityHistoryExtHandler(BaseAsyncHandlerNoParam):
 					sum(case when cs.state_name = 'idle in transaction' then 1 else 0 end) as idle_in_tx_count,
 					(select count(1) from psc_locks l where l.sn_id = sn.id ) as locks_count,
 					sum(1) as total_conns,
-					( '<div style="float:left;" link_val="' || sn.id::text || '" class="load_snapshot pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">Show snaphot</div>' ) as sn_id	 
+					( '<div style="float:left;" link_val="' || sn.id::text || '" class="load_snapshot pg_stat_console_fonts pg_stat_console_button">Show snaphot</div>' ) as sn_id	 
 					FROM psc_snapshots sn 
 					inner join psc_conns cn on cn.sn_id = sn.id
 					inner join psc_conn_states cs on cs.id = cn.conn_state  
@@ -2253,8 +2253,8 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 						<div class="pg_stat_console_fonts_on_white " style="float:left;">
 							<h2 style="text-align: center;font-size: 20px;">""" + node['node_name'] + """</h2>
 						</div>
-						<div style="margin-left:20px;float:left;margin-top:15px;" class="select_all pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical" node_name=\"""" + node['node_name'] + """\">Select all</div>
-						<div style="margin-left:20px;float:left;margin-top:15px;" class="deselect_all pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical" node_name=\"""" + node['node_name'] + """\">Deselect all</div>
+						<div style="margin-left:20px;float:left;margin-top:15px;" class="select_all pg_stat_console_fonts pg_stat_console_button" node_name=\"""" + node['node_name'] + """\">Select all</div>
+						<div style="margin-left:20px;float:left;margin-top:15px;" class="deselect_all pg_stat_console_fonts pg_stat_console_button" node_name=\"""" + node['node_name'] + """\">Deselect all</div>
 					</div>
 				</div>"""
 

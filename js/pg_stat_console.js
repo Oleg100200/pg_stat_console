@@ -93,7 +93,7 @@ var time_filter = "<div style=\"width: 100%;text-align: center;\"><div style=\"h
 			"<input id=\"date_b\" type=\"text\" size=\"30\" class=\"pg_stat_console_control\" style=\"text-align: center;margin-left:10px;width: 140px;\"/>"+
 		"</p>"+
 	"</div>"+
-	"<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical\">Apply</div>"+
+	"<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button\">Apply</div>"+
 "</div></div>"+
 "<div id=\"graph_space\" style=\"\">"+	
 "</div>";
@@ -113,7 +113,7 @@ var time_filter_logs = "<div style=\"width: 100%;text-align: center;margin-top:2
 "				<input id=\"date_b\" type=\"text\" size=\"30\" class=\"pg_stat_console_control\" style=\"text-align: center;margin-left:10px;width: 140px;\">"+
 "			</p>"+
 "		</div>"+
-"		<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical\">"+
+"		<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button\">"+
 "			Apply"+
 "		</div>"+
 "	</div></div>"+
@@ -154,7 +154,7 @@ var time_filter_compare = "<div style=\"width: 100%;text-align: center;margin-to
 "				<input class=\"pg_stat_console_control\"id=\"date_b\" type=\"text\" size=\"30\" style=\"text-align: center;margin-left:10px;width: 140px;\">"+
 "			</p>"+
 "		</div>"+
-"		<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical\">"+
+"		<div id=\"apply_filter_button\" style=\"margin-left:20px;float:left;margin-top:15px;\" class=\"pg_stat_console_fonts pg_stat_console_button\">"+
 "			Apply"+
 "		</div>"+
 "	</div>"+	
@@ -179,7 +179,7 @@ var time_filter_compare_single_metric = "<div style=\"width: 100%;text-align: ce
   "<tr>" +
 	"<td style=\"width:70px;text-align:right;\">Metric</td>" +
     "<td style=\"text-align:left;\"><select class=\"pg_stat_console_control\" style=\"margin-left:10px;margin-right:10px;\" id=\"cmp_param\"></select></td>" +
-	"<td style=\"text-align:left;width:70px;\"><div id=\"apply_filter_button\" style=\"\" class=\"pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical\">Apply</div></td>" +
+	"<td style=\"text-align:left;width:70px;\"><div id=\"apply_filter_button\" style=\"\" class=\"pg_stat_console_fonts pg_stat_console_button\">Apply</div></td>" +
    "</tr>" + 
 "</table></div>";
 
@@ -853,7 +853,7 @@ function set_old_conn_filter()
 		"			<input id=\"conn_age\" type=\"text\" value=\"0\" class=\"pg_stat_console_control\" style=\"margin-left:5px;margin-right:5px;text-align:center;width:50px;\">"+
 		 "         minutes"+
 			"	</div>"+
-		"		<div id=\"apply_filter_button\" style=\"margin-left:20px;display:inline-block;\" class=\"pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical\">"+
+		"		<div id=\"apply_filter_button\" style=\"margin-left:20px;display:inline-block;\" class=\"pg_stat_console_fonts pg_stat_console_button\">"+
 		"			Apply"+
 		"		</div>"+				
 			"</div>"+

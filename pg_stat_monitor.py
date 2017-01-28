@@ -407,14 +407,14 @@ class GetLocksPairsHandler(BaseAsyncHandlerNoParam):
 			--waiting.relation::regclass AS waiting_table,
 			substring(waiting_stm.query from 0 for 400)  AS waiting_query,
 			--waiting.mode AS waiting_mode,
-			( '<div style="float:left;" link_val="' || waiting.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">stop query ' || waiting.pid::text || '</div>' ||
-			'<div style="float:left;margin-top:10px;" link_val="' || waiting.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || waiting.pid::text || '</div>' ) as waiting_pid,	 
+			( '<div style="float:left;" link_val="' || waiting.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query ' || waiting.pid::text || '</div>' ||
+			'<div style="float:left;margin-top:10px;" link_val="' || waiting.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || waiting.pid::text || '</div>' ) as waiting_pid,	 
 			other.locktype AS other_locktype,
 			other.relation::regclass AS other_table,
 			substring(other_stm.query from 0 for 400) AS other_query,
 			other.mode AS other_mode,
-			( '<div style="float:left;" link_val="' || other.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">stop query ' || other.pid::text || '</div>' ||
-			'<div style="float:left;margin-top:10px;" link_val="' || other.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || other.pid::text || '</div>' ) as other_pid
+			( '<div style="float:left;" link_val="' || other.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query ' || other.pid::text || '</div>' ||
+			'<div style="float:left;margin-top:10px;" link_val="' || other.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || other.pid::text || '</div>' ) as other_pid
 			FROM pg_locks waiting
 			JOIN pg_stat_activity waiting_stm ON waiting_stm.pid = waiting.pid
 			JOIN pg_locks other ON waiting.database = other.database AND waiting.relation = other.relation OR waiting.transactionid = other.transactionid
@@ -1006,7 +1006,7 @@ class GetListLogFilesHandler(BaseAsyncHandlerNoParam):
 		logger.log( str( list_files ), "Info" )
 		report_data = []
 		for file_name in list_files:
-			link = """<div style="float:left;" link_val=\"""" + os.path.basename( file_name ) + """\" class="log_download pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">download</div>"""
+			link = """<div style="float:left;" link_val=\"""" + os.path.basename( file_name ) + """\" class="log_download pg_stat_console_fonts pg_stat_console_button">download</div>"""
 			report_data.append( [ os.path.basename( file_name ), time.ctime(os.path.getmtime(file_name)), str( os.path.getsize(file_name) >> 20 ) + " MB", link ] )
 		return make_html_report_with_head( report_data, [ "File name","Modified","Size","Link" ], "List log files" )
 			
@@ -1043,7 +1043,7 @@ class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 			html_report = make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
 				age(clock_timestamp(), xact_start) AS "xact_age",
 				age(clock_timestamp(), backend_start) AS "backend_age", state, "wait_event_type","wait_event", datname, usename, application_name, client_addr, query,
-				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || pid::text || '</div>' ) as pid			 
+				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || pid::text || '</div>' ) as pid			 
 				from pg_stat_activity 
 				where clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
 				order by "query_age" desc""" ), [ "query_age", "xact_age", "backend_age", "state", "wait_event_type", "wait_event", "datname", "usename", "application_name" , "client_addr", "query", "pid" ], "All old unused connections", ["query"] )
@@ -1051,7 +1051,7 @@ class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 			html_report = make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
 				age(clock_timestamp(), xact_start) AS "xact_age",
 				age(clock_timestamp(), backend_start) AS "backend_age", state, waiting, datname, usename, application_name, client_addr, query,
-				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || pid::text || '</div>' ) as pid			 
+				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || pid::text || '</div>' ) as pid			 
 				from pg_stat_activity 
 				where clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
 				order by "query_age" desc""" ), [ "query_age", "xact_age", "backend_age", "state", "waiting", "datname", "usename", "application_name" , "client_addr", "query", "pid" ], "All old unused connections", ["query"] )
@@ -1069,9 +1069,9 @@ class GetConnManagementHandler(BaseAsyncHandlerNoParam):
 				substring(a.query from 0 for 400) as query,
 				--a.query,
 				a.query_start,
-				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">stop query '  || a.pid::text ||  '</div>'
+				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query '  || a.pid::text ||  '</div>'
 				else a.pid::text end ) as pid,
-				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || a.pid::text || '</div>') as pid2,
+				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || a.pid::text || '</div>') as pid2,
 				age(clock_timestamp(), a.query_start) as age_sort
 			   FROM pg_stat_activity a
 			  WHERE a.pid <> pg_backend_pid()
@@ -1085,9 +1085,9 @@ class GetConnManagementHandler(BaseAsyncHandlerNoParam):
 				substring(a.query from 0 for 400) as query,
 				--a.query,
 				a.query_start,
-				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">stop query '  || a.pid::text ||  '</div>'
+				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query '  || a.pid::text ||  '</div>'
 				else a.pid::text end ) as pid,
-				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button hvr-wobble-vertical">kill connect ' || a.pid::text || '</div>') as pid2,
+				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || a.pid::text || '</div>') as pid2,
 				age(clock_timestamp(), a.query_start) as age_sort
 			   FROM pg_stat_activity a
 			  WHERE a.pid <> pg_backend_pid()

@@ -1831,7 +1831,7 @@
 						<div style="float:left;" class="default-top pg_stat_console_fonts_on_dark_na">default</div>';
 				}
 
-				html += '<div class="normal-top pg_stat_console_fonts_on_dark_na" style="float:right;margin-top:-5px;"><input type="button" class="close_date_picker pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button hvr-wobble-vertical disabled'+ getApplyBtnClass() +'" value="'+lang('apply')+'" /></div>';
+				html += '<div class="normal-top pg_stat_console_fonts_on_dark_na" style="float:right;margin-top:-5px;"><input type="button" class="close_date_picker pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button disabled'+ getApplyBtnClass() +'" value="'+lang('apply')+'" /></div>';
 				html += '</div>'
 			}
 

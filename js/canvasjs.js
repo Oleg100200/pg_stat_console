@@ -1491,7 +1491,7 @@
 		if (button.getAttribute("state") !== state) {
 
 			button.setAttribute("state", state);
-			button.setAttribute("class", "pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button hvr-wobble-vertical");
+			button.setAttribute("class", "pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button");
 			//button.setAttribute("type", 'button');
 			button.style.position = "relative";
 			button.style.margin = "0px 3px 0px 3px";
