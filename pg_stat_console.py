@@ -191,7 +191,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				['tup_returned_per_sec', get_color("green") ], ['tup_fetched_per_sec', get_color("light green") ] ]
 	
 custom_graph_sort = [ '%user', '%system', '%nice', '%steal', '%idle', '%iowait', \
-				"AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapTotal", "SwapFree" ]
+				"AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapFree" ]
 #=======================================================================================================
 admin_methods = [ 'stopQuery', 'downloadLogFile' ]
 #=======================================================================================================
@@ -1232,7 +1232,7 @@ class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			return ""		
 
 		queries = self.generate_query_os_stat_in_gb( data[ "date_a" ], data[ "date_b" ], None, \
-			[ "AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapTotal", "SwapFree" ] )
+			[ "AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapFree" ] )
 				
 		#AppMem + PageTables + Buffers + Shmem + Active(file) + Inactive(file) + Slab  + MemFree = MemTotal
 		#Cached = Shmem + Active(file) + Inactive(file)
