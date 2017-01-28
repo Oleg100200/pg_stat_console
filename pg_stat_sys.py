@@ -1245,12 +1245,12 @@ def make_iostat_data():
 def make_stat_mem_data():	
 	result = []
 	encoding = locale.getdefaultlocale()[1]
-	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
+	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e "Active(file):" -e "Inactive(file):" -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
 	list_begin = False
 	for line in cmd.stdout:
 		columns = line.decode(encoding).split()
 		if len( columns ) == 3:
-			result.append( [ re.findall("\w+", columns[0])[0], columns[1] ] )
+			result.append( [ re.findall("[\w\(\)]+", columns[0])[0], columns[1] ] )
 
 	MemTotal = 0
 	MemFree = 0
@@ -1259,7 +1259,6 @@ def make_stat_mem_data():
 	SwapCached = 0
 	Slab = 0
 	PageTables = 0
-	VmallocUsed = 0
 
 	for rec in result:
 		if rec[ 0 ] == 'MemTotal':
@@ -1276,10 +1275,11 @@ def make_stat_mem_data():
 			Slab = rec[ 1 ]
 		if rec[ 0 ] == 'PageTables':
 			PageTables = rec[ 1 ]
-		if rec[ 0 ] == 'VmallocUsed':
-			VmallocUsed = rec[ 1 ]
-			
-	result.append( [ 'AppMem', str( int(MemTotal) - int(MemFree) - int(Buffers) - int(Cached) - int(SwapCached) - int(Slab) - int(PageTables) ) ] )	
+
+	result.append( [ 'AppMem', str( int(MemTotal) - int(MemFree) - int(Buffers) - int(Cached) - int(SwapCached) - int(Slab) - int(PageTables) ) ] )
+	
+	#AppMem + PageTables + Buffers + Shmem + Active(file) + Inactive(file) + Slab  + MemFree = MemTotal
+	#Cached = Shmem + Active(file) + Inactive(file)
 	
 	return result
 

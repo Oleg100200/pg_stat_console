@@ -175,7 +175,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				["AppMem",get_color("green")], ["MemFree",get_color("light green")], ["Buffers",get_color("brown")],["SwapTotal",get_color("red")],\
 				["SwapFree",get_color("fuchsia")], ["Dirty",get_color("aquamarine")],\
 				["Shmem",get_color("pink")],["Slab",get_color("yellow")],["PageTables",get_color("dark blue")],["SwapCached",get_color("orange")],\
-				["VmallocUsed",get_color("beige")], ["Inactive",get_color("gray")],
+				["VmallocUsed",get_color("beige")], ["Inactive",get_color("gray")], ["Active(file)",get_color("light red")], ["Inactive(file)",get_color("gray")],
 
 				['checkpoints_timed', get_color("green") ], ['checkpoints_req', get_color("pink")], \
 				['checkpoint_write_time', get_color("beige") ], ['checkpoint_sync_time', get_color("aquamarine") ], \
@@ -191,7 +191,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				['tup_returned_per_sec', get_color("green") ], ['tup_fetched_per_sec', get_color("light green") ] ]
 	
 custom_graph_sort = [ '%user', '%system', '%nice', '%steal', '%idle', '%iowait', \
-				"AppMem", "PageTables", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "SwapCached", "VmallocUsed", "MemFree", "Inactive"]
+				"AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapTotal", "SwapFree" ]
 #=======================================================================================================
 admin_methods = [ 'stopQuery', 'downloadLogFile' ]
 #=======================================================================================================
@@ -1232,7 +1232,11 @@ class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			return ""		
 
 		queries = self.generate_query_os_stat_in_gb( data[ "date_a" ], data[ "date_b" ], None, \
-			[ "AppMem", "MemFree", "Buffers", "SwapTotal", "SwapFree", "Dirty", "Shmem", "Slab", "PageTables", "SwapCached", "VmallocUsed", "Inactive" ] )
+			[ "AppMem", "PageTables", "Buffers", "Shmem", "Active(file)", "Inactive(file)", "Slab", "MemFree", "SwapTotal", "SwapFree" ] )
+				
+		#AppMem + PageTables + Buffers + Shmem + Active(file) + Inactive(file) + Slab  + MemFree = MemTotal
+		#Cached = Shmem + Active(file) + Inactive(file)
+	
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'Memory usage, GB', 'stackedArea' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
