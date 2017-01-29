@@ -2179,6 +2179,15 @@ class GetConsoleStatusReportHandler(GetPgStatConsoleStatusHandler):
 		html_report = html_report + make_html_report_with_head( common_stat, [ "Data source", "Collected" ], "Common status" )
 		
 		if self.get_current_user_rights() == 'admin':
+		
+			users_stat = self.make_query( "sys_stat", """
+				SELECT substring(user_hash from 1 for 8), dt::timestamp(0) with time zone, user_name, user_ip, user_agent
+				FROM public.psc_user_hashes
+				order by dt desc
+				limit 100""", data["node_name"] )
+							
+			html_report = html_report + make_html_report_with_head( users_stat, [ "Hash", "Created", "User name", "User IP", "User agent" ], "Users info", [ "Hash", "Created", "User name", "User IP"] )
+			
 			html_report = """<div id="sub_space" class="pg_stat_console_fonts_on_white_na pg_stat_console_log_caption">""" + \
 				html_report + """<h2 style ="text-align: center;font-size: 16px;" class="scrollable_obj">pg_stat_console logs</h2>"""
 			html_report = html_report + self.log_lines(application_name)
