@@ -1710,7 +1710,7 @@ function set_all_click_events()
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
 			
-		$("#nav_str").text( current_node_name + " -> " + current_node_name + " -> " + "Hardware load -> Read/write requests merged per second");
+		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Read/write requests merged per second");
 		set_date_time_filter(24);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
