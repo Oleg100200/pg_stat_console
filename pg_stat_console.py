@@ -2181,7 +2181,7 @@ class GetConsoleStatusReportHandler(GetPgStatConsoleStatusHandler):
 		if self.get_current_user_rights() == 'admin':
 		
 			users_stat = self.make_query( "sys_stat", """
-				SELECT substring(user_hash from 1 for 8), dt::timestamp(0) with time zone, user_name, user_ip, user_agent
+				SELECT substring(user_hash from 1 for 8), dt::timestamp(0) without time zone, user_name, user_ip, user_agent
 				FROM public.psc_user_hashes
 				order by dt desc
 				limit 100""", data["node_name"] )
