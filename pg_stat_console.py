@@ -573,7 +573,6 @@ class GetCustomParamHandler(BaseAsyncHandlerNoParam):
 		try:
 			result[ "result" ] = custom_params[ data["param_name"] ]
 		except Exception as e:
-			logger.log( str( e ), "Error" )
 			result[ "result" ] = "undefined param name"
 		
 		self.set_header('Content-Type', 'application/json')

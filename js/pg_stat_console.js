@@ -16,6 +16,8 @@ var left_menu;
 var user_dashboard;
 var progress_visisble = false;
 var progress_hidden = true;
+var demo_dt_a = "";
+var demo_dt_b = "";
 
 
 var dashboard_dict = [['getCPUStat','CPU load'],
@@ -770,81 +772,167 @@ function date_time_objs( last_hours, date_a_id_name, date_b_id_name, step_back_i
 
 function set_date_time_filter( last_hours )
 {
-	var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );		
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		init_work_space();
+		$( "#work_space" ).append( time_filter );
+		$('input[id^="date"]').unbind( "click" );
+		$('input[id^="date"]').prop('disabled', true);
+		
+		$("#date_a").val(demo_dt_a);
+		$("#date_b").val(demo_dt_b);
+	}
+	else
+	{
+		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
+		init_work_space();
+		$( "#work_space" ).append( time_filter );
+					
+		$('input[id^="date"]').unbind( "click" );
 
-	init_work_space();
-	$( "#work_space" ).append( time_filter );
-				
-	$('#date_a').unbind( "click" );
-	$('#date_b').unbind( "click" );
-	$('.date-picker-wrapper').remove();
-	$('.date-picker-wrapper').remove();
-	$('#date_a').dateRangePicker(date_time_objs_v[2]);
-	$('#date_b').dateRangePicker(date_time_objs_v[2]);		
-	$("#date_a").val(date_time_objs_v[0]);
-	$("#date_b").val(date_time_objs_v[1]);
+		$('.date-picker-wrapper').remove();
+		$('#date_a').dateRangePicker(date_time_objs_v[2]);
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$("#date_a").val(date_time_objs_v[0]);
+		$("#date_b").val(date_time_objs_v[1]);
+	}
 }
 
 function set_date_time_filter_compare_params( last_hours )
 {	
-	var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
-	
-	init_work_space();
-	$( "#work_space" ).append( time_filter_compare );
-	
-	for (var i = 0; i < compare_dict.length; i++)	
-		$('select[id^="cmp_param_"]').append($("<option/>", {
-			value: compare_dict[i][0],
-			text: compare_dict[i][1]
-		}));
-	
-	$('#date_a').dateRangePicker(date_time_objs_v[2]);
-	$('#date_b').dateRangePicker(date_time_objs_v[2]);		
-	$("#date_a").val(date_time_objs_v[0]);
-	$("#date_b").val(date_time_objs_v[1]);
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		init_work_space();
+		$( "#work_space" ).append( time_filter_compare );
+		$('input[id^="date"]').unbind( "click" );
+		$('input[id^="date"]').prop('disabled', true);
+		
+		$('.date-picker-wrapper').remove();
+		
+		for (var i = 0; i < compare_dict.length; i++)	
+			$('select[id^="cmp_param_"]').append($("<option/>", {
+				value: compare_dict[i][0],
+				text: compare_dict[i][1]
+			}));
+		
+		$("#date_a").val(demo_dt_a);
+		$("#date_b").val(demo_dt_b);
+	}
+	else
+	{
+		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
+		
+		init_work_space();
+		$( "#work_space" ).append( time_filter_compare );
+		$('input[id^="date"]').unbind( "click" );
+		$('.date-picker-wrapper').remove();
+		
+		for (var i = 0; i < compare_dict.length; i++)	
+			$('select[id^="cmp_param_"]').append($("<option/>", {
+				value: compare_dict[i][0],
+				text: compare_dict[i][1]
+			}));
+		
+		$('#date_a').dateRangePicker(date_time_objs_v[2]);
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$("#date_a").val(date_time_objs_v[0]);
+		$("#date_b").val(date_time_objs_v[1]);
+	}
 }	
 
 function set_date_time_filter_compare_single_params( last_hours )
 {
-	var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
-	var date_time_objs2_v = date_time_objs( last_hours, 'date2_a', 'date2_b', 24 );
-	
-	init_work_space();
-	$( "#work_space" ).append( time_filter_compare_single_metric );	
-	
-	for (var i = 0; i < compare_dict.length; i++)	
-		$('select[id^="cmp_param"]').append($("<option/>", {
-			value: compare_dict[i][0],
-			text: compare_dict[i][1]
-		}));		
-	
-	$('#date_a').dateRangePicker(date_time_objs_v[2]);
-	$('#date_b').dateRangePicker(date_time_objs_v[2]);		
-	$("#date_a").val(date_time_objs_v[0]);
-	$("#date_b").val(date_time_objs_v[1]);
-	
-	$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
-	$('#date2_b').dateRangePicker(date_time_objs2_v[2]);		
-	$("#date2_a").val(date_time_objs2_v[0]);
-	$("#date2_b").val(date_time_objs2_v[1]);		
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		init_work_space();
+		$( "#work_space" ).append( time_filter_compare_single_metric );
+
+		$('input[id^="date"]').unbind( "click" );
+		$('input[id^="date"]').prop('disabled', true);
+		
+		$('.date-picker-wrapper').remove();
+		
+		for (var i = 0; i < compare_dict.length; i++)
+			$('select[id^="cmp_param"]').append($("<option/>", {
+				value: compare_dict[i][0],
+				text: compare_dict[i][1]
+			}));
+		
+		$("#date_a").val(demo_dt_a);
+		$("#date_b").val(demo_dt_b);
+		
+		var date2_a = new Date( demo_dt_a );
+		var date2_b = new Date( demo_dt_b );
+		
+		date2_a.setHours(date2_a.getHours()-4);
+		date2_b.setHours(date2_b.getHours()-4);
+		
+		$("#date2_a").val(date2_a.toISOString().slice(0, 19).replace('T', ' '));
+		$("#date2_b").val(date2_b.toISOString().slice(0, 19).replace('T', ' '));		
+	}
+	else
+	{
+		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
+		var date_time_objs2_v = date_time_objs( last_hours, 'date2_a', 'date2_b', 24 );
+		
+		init_work_space();
+		$( "#work_space" ).append( time_filter_compare_single_metric );	
+		$('input[id^="date"]').unbind( "click" );
+		$('.date-picker-wrapper').remove();
+		
+		for (var i = 0; i < compare_dict.length; i++)
+			$('select[id^="cmp_param"]').append($("<option/>", {
+				value: compare_dict[i][0],
+				text: compare_dict[i][1]
+			}));		
+		
+		$('#date_a').dateRangePicker(date_time_objs_v[2]);
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$("#date_a").val(date_time_objs_v[0]);
+		$("#date_b").val(date_time_objs_v[1]);
+		
+		$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
+		$('#date2_b').dateRangePicker(date_time_objs2_v[2]);		
+		$("#date2_a").val(date_time_objs2_v[0]);
+		$("#date2_b").val(date_time_objs2_v[1]);	
+	}
 }		
 
 function set_date_time_log_filter(last_hours)
 {
-	var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
-	
-	init_work_space();
-	$( "#work_space" ).append( time_filter_logs );	
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		init_work_space();
+		$( "#work_space" ).append( time_filter_logs );
+		$('input[id^="date"]').unbind( "click" );
+		$('input[id^="date"]').prop('disabled', true);
+		
+		$("#date_a").val(demo_dt_a);
+		$("#date_b").val(demo_dt_b);
+	}
+	else
+	{
+		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
 
-	$('#date_a').dateRangePicker(date_time_objs_v[2]);
-	$('#date_b').dateRangePicker(date_time_objs_v[2]);			
-	$("#date_a").val(date_time_objs_v[0]);
-	$("#date_b").val(date_time_objs_v[1]);
+		init_work_space();
+		$( "#work_space" ).append( time_filter_logs );	
+
+		$('input[id^="date"]').unbind( "click" );
+
+		$('.date-picker-wrapper').remove();
+		$('#date_a').dateRangePicker(date_time_objs_v[2]);
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);			
+		$("#date_a").val(date_time_objs_v[0]);
+		$("#date_b").val(date_time_objs_v[1]);
+	}
 }	
 
 function set_old_conn_filter()
 {
-
 	$( "#work_space" ).empty();
 	$( "#work_space" ).append( "<div>"+
 		"	<div style=\"width: 100%; margin: 0 auto;height:30px;text-align: center; margin-top:20px;margin-bottom:20px;\">"+
@@ -858,7 +946,6 @@ function set_old_conn_filter()
 		"		</div>"+				
 			"</div>"+
 		"</div>" );
-
 	
 	$("#conn_age").val("60");
 }
@@ -1365,7 +1452,14 @@ function set_all_click_events()
 					function build_dashboard(data_dashboard)
 					{
 						for (var i = 0; i < data_dashboard.length; i++) {	
-							var dates = make_dates_interval_str( data_dashboard[ i ][1] );
+							var dates = [];
+							
+							if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+								demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+								dates = [demo_dt_a, demo_dt_b];
+							else
+								dates = make_dates_interval_str( data_dashboard[ i ][1] );
+							
 							if( data_dashboard[ i ][0] == "getLog" )
 							{
 								load_process.push( true );
@@ -3387,19 +3481,33 @@ function set_all_scroll_events()
 	});		
 }
 
-function get_custom_params()
+function get_custom_param( pname, func )
 {
 	$.ajax({ url: '/getCustomParam',
 			type: 'post',
-			data: JSON.stringify( { param_name: 'application_title' } ),
+			data: JSON.stringify( { param_name: pname } ),
 			success: function(data) {
-				title_val = data["result"];
-				$("#app_name").text( title_val );
-				document.title = title_val;
+				if( typeof func !== 'undefined' )
+					func( data["result"] );
 			},
 			error: function(XMLHttpRequest, textStatus, errorThrown) {
 					if( textStatus !== "abort" ) { show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); load_process.pop(); }
 				}
+	});
+}
+
+function get_custom_params()
+{
+	get_custom_param( 'application_title', function(v) { 
+				title_val = v;
+				$("#app_name").text( title_val );
+				document.title = title_val;
+	});
+	get_custom_param( 'demo_dt_a', function(v) { 
+				demo_dt_a = v;
+	});
+	get_custom_param( 'demo_dt_b', function(v) { 
+				demo_dt_b = v;
 	});
 }
 

@@ -21,6 +21,8 @@ hide_host_in_queries = t
 [custom_params]
 application_title = PostgreSQL Stat Console DB1
 help_msg = <p>admin phone</p>
+#demo_dt_a = "2017-01-28 12:00:00"
+#demo_dt_b = "2017-01-28 15:00:00"
 
 [users]
 demo = password	
