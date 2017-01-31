@@ -1,4 +1,17 @@
+#In this file all sections are required. If some section has no parameters you can leave this section is blank.
+#This file contains configuration for pg_stat_console.py. 
+#pg_stat_console is main application which displays the web interface and also makes requests to the distributed nodes "pg_stat_monitor"
+
 [sys_stat]
+#Section "sys_stat" contains two required parameters: sys_stat and sys_stat_conn_str_direct
+#Parameter "sys_stat" has the format compatible with SQLAlchemy, 
+#see http://docs.sqlalchemy.org/en/latest/dialects/postgresql.html#module-sqlalchemy.dialects.postgresql.pypostgresql
+#Parameter "sys_stat_conn_str_direct" has pypostgresql format, 
+#example http://python.projects.pgfoundry.org/docs/1.1/driver.html#postgresql-open
+#Port can be set for pgbouncer or directly to the database
+#If you use pgbouncer you must set "ignore_startup_parameters = client_min_messages" and "pool_mode = session" in pgbouncer.ini
+#Both parameters refers to one and the same base which is the centralized storage for collected statistics
+
 sys_stat = postgresql+pypostgresql://app_user:passw@127.0.0.1:6432/sys_stat_dev
 sys_stat_conn_str_direct = pq://app_user:passw@127.0.0.1:6432/sys_stat_dev
 
