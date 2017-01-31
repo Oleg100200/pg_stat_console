@@ -14,5 +14,5 @@ http://psc.pg-support.com
 * Python 3.x with modules: pytz, tornado, sqlalchemy, requests
 * PostgreSQL 9.2 or higher with extensions: auto_explain, pg_stat_statements
 * OS utils: iotop, iostat, netstat
-
+* RHEL 6, RHEL 7, Ubuntu 12.04 LTS - 16.10
 
