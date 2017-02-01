@@ -23,7 +23,7 @@ port = 8888										#port for access to web interface from browser
 pg_stat_monitor_port = 8889						#port for access to API of distributed monitors (pg_stat_monitor), 
 												#host are desribed in "public.psc_nodes.node_host" and is specific for each node
 												
-enable_exception_catching = 1					#do disable this option for display full stack trace when exception happens
+enable_exception_catching = 1					#do disable this option to display full stack trace when exception happens
 application_name = pg_stat_console				#app name for displaying in pg_stat_activity and naming log file
 time_zone = Europe/Moscow						#value for query "SET timezone = '$1';"
 application_max_mem = 1200						#in MB, if the value of this variable is exceeded, the application will be shut down
@@ -41,23 +41,34 @@ hide_password_in_queries = t					#wipe passwords in the query to be displayed
 hide_host_in_queries = t						#wipe hosts in the query to be displayed
 
 [custom_params]
-application_title = PostgreSQL Stat Console DB1
-help_msg = <p>admin phone</p>
-#demo_dt_a = "2017-01-28 12:00:00"
+#This section contains customized parameters using on client side
+
+application_title = "PostgreSQL Stat Console DB1"	#app title on login window and on main page
+help_msg = <p>admin phone</p>						#show message on click "help" button
+#demo_dt_a = "2017-01-28 12:00:00"					#uncomment this parameters for use pg_stat_console as demo service by predefined stats
 #demo_dt_b = "2017-01-28 15:00:00"
 
 [users]
-demo = password	
-admin = password		#user = password
+#This section contains users and passwords in format: user = password
+
+demo = password
+admin = password
 viewer = password
 
 [users_rights]
+#This section describes users rights. There are two types of users: admin and user
+
 admin = admin
 demo = user
 viewer = user
 
 [users_dashboards]
+#For each user can be described dashboard in format: user_name = "method_name,duration=X_hours;[..]"
+#where "duration" there is last hours interval
+
 admin = getCPUStat,duration=12;getMemUsageStat,duration=4;getLog,duration=2;getDiskUtilStat,duration=24;getWriteStat,duration=5
 
 [nodes_visibility]
+#For each user can be described visibility of nodes in format: user_name = "node1, [..]"
+
 viewer = "test node, node 2"
