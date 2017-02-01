@@ -41,7 +41,7 @@ hide_password_in_queries = t					#wipe passwords in the query to be displayed
 hide_host_in_queries = t						#wipe hosts in the query to be displayed
 
 [custom_params]
-#This section contains customized parameters using on client side
+#This section contains customized parameters used on client side
 
 application_title = "PostgreSQL Stat Console DB1"	#app title on login window and on main page
 help_msg = <p>admin phone</p>						#show message on click "help" button
