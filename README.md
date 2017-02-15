@@ -18,7 +18,7 @@ http://psc.pg-support.com
 
 ## Roadmap
 
-* online dashboard constructor
+* online dashboard builder
 * dashboard for cluster
 * bottleneck assistant
 * alerts constructor
