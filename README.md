@@ -8,6 +8,9 @@ Passw: demo</br>
 
 http://psc.pg-support.com
 
+## How it works
+
+![Alt text](/img/diagram.png?raw=true "pg_stat_console diagram")
 
 ## Dependencies
 
