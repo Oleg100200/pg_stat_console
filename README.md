@@ -16,3 +16,13 @@ http://psc.pg-support.com
 * OS utils: iotop, iostat, netstat
 * RHEL 6, RHEL 7, Ubuntu 12.04 LTS - 16.10
 
+## Roadmap
+
+* online dashboard constructor
+* dashboard for cluster
+* bottleneck assistant
+* alerts constructor
+* aggregation of old data (compression)
+* monthly reports
+
+
