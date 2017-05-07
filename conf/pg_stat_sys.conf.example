@@ -12,6 +12,7 @@ collect_os_stat = 1
 sleep_interval_pg_sys_stat = 300
 sleep_interval_pg_conn_snapshot = 300
 sleep_interval_os_stat = "34 10"		#default "34 10"
+sleep_interval_os_stat_if_iostat_not_working = 300
 sleep_interval_pg_single_db_sn = 10
 pg_single_db_sn_steps = 30
 

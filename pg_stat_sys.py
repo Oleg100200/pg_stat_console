@@ -43,6 +43,7 @@ application_name = read_conf_param_value( config['main']['application_name'] )
 sleep_interval_on_exception= int( read_conf_param_value( config['main']['sleep_interval_on_exception'] ) )
 sleep_interval_os_stat = read_conf_param_value( config['main']['sleep_interval_os_stat'] )
 sleep_interval_pg_sys_stat = int( read_conf_param_value( config['main']['sleep_interval_pg_sys_stat'] ) )
+sleep_interval_os_stat_if_iostat_not_working = int( read_conf_param_value( config['main']['sleep_interval_os_stat_if_iostat_not_working'] ) )
 time_zone = read_conf_param_value( config['main']['time_zone'] )
 
 dbs_list = []
@@ -1093,7 +1094,7 @@ def make_iostat_data():
 	def write_network_vals( cmd_netstat ):
 		count_devices = 0
 		for line in cmd_netstat.stdout:
-			columns = line.decode(encoding).split() 
+			columns = line.decode('utf8').split() 
 			#cmd_netstat	
 			#['Kernel', 'Interface', 'table']
 			#['Iface', 'MTU', 'Met', 'RX-OK', 'RX-ERR', 'RX-DRP', 'RX-OVR', 'TX-OK', 'TX-ERR', 'TX-DRP', 'TX-OVR', 'Flg']
@@ -1137,66 +1138,69 @@ def make_iostat_data():
 				network_vals.append( [ device, 'rx_bytes', int(rx_bytes) ] )
 				network_vals.append( [ device, 'tx_bytes', int(tx_bytes) ] )
 
-	encoding = locale.getdefaultlocale()[1]
 	cmd_netstat_t1 = subprocess.Popen('netstat -i',shell=True,stdout=subprocess.PIPE)
 	write_network_vals( cmd_netstat_t1 )
 
-	cmd_iostat = subprocess.Popen('iostat -d -c -m -x ' + sleep_interval_os_stat,shell=True,stdout=subprocess.PIPE)
+	cmd_iostat = subprocess.Popen('iostat -d -c -m -x ' + sleep_interval_os_stat,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	out, err = cmd_iostat.communicate()
 
-	for line in cmd_iostat.stdout:
-		columns = line.decode(encoding).split()
-		#cmd_iostat	
-		#[]
-		#['avg-cpu:', '%user', '%nice', '%system', '%iowait', '%steal', '%idle']
-		#['9.20', '0.00', '0.95', '0.34', '0.00', '89.51']
-		#[]
-		#['Device:', 'rrqm/s', 'wrqm/s', 'r/s', 'w/s', 'rMB/s', 'wMB/s', 'avgrq-sz', 'avgqu-sz', 'await', 'r_await', 'w_await', 'svctm', '%util']
-		#['sda', '0.00', '5.70', '1.06', '5.64', '0.05', '0.21', '81.05', '0.14', '21.44', '4.10', '24.70', '0.30', '0.20']
-		#['sdb', '0.01', '50.58', '159.75', '602.12', '8.65', '7.04', '42.18', '0.32', '0.42', '1.27', '0.19', '0.07', '5.68']
-		#[]
-	
-		if len( columns ) > 0:
-			if columns[0] == 'avg-cpu:':
-				count_cpu += 1
-			if columns[0] == 'Device:':
-				count_io += 1	
+	if str( err ).find('Cannot find disk data') > -1:
+		time.sleep( sleep_interval_os_stat_if_iostat_not_working )
+	else:
+		for line in cmd_iostat.stdout:
+			columns = line.decode('utf8').split()
+			#cmd_iostat	
+			#[]
+			#['avg-cpu:', '%user', '%nice', '%system', '%iowait', '%steal', '%idle']
+			#['9.20', '0.00', '0.95', '0.34', '0.00', '89.51']
+			#[]
+			#['Device:', 'rrqm/s', 'wrqm/s', 'r/s', 'w/s', 'rMB/s', 'wMB/s', 'avgrq-sz', 'avgqu-sz', 'await', 'r_await', 'w_await', 'svctm', '%util']
+			#['sda', '0.00', '5.70', '1.06', '5.64', '0.05', '0.21', '81.05', '0.14', '21.44', '4.10', '24.70', '0.30', '0.20']
+			#['sdb', '0.01', '50.58', '159.75', '602.12', '8.65', '7.04', '42.18', '0.32', '0.42', '1.27', '0.19', '0.07', '5.68']
+			#[]
+		
+			if len( columns ) > 0:
+				if columns[0] == 'avg-cpu:':
+					count_cpu += 1
+				if columns[0] == 'Device:':
+					count_io += 1	
+					
+				if len( columns ) == 6 and columns[0] != 'avg-cpu:' and count_cpu >= 2:
+					cpu_vals.append( [ '%user', columns[0] ] )
+					cpu_vals.append( [ '%nice', columns[1] ] )
+					cpu_vals.append( [ '%system', columns[2] ] )
+					if float( columns[3] ) <= 100:
+						cpu_vals.append( [ '%iowait', columns[3] ] )
+					cpu_vals.append( [ '%steal', columns[4] ] )
+					cpu_vals.append( [ '%idle', columns[5] ] )
 				
-			if len( columns ) == 6 and columns[0] != 'avg-cpu:' and count_cpu >= 2:
-				cpu_vals.append( [ '%user', columns[0] ] )
-				cpu_vals.append( [ '%nice', columns[1] ] )
-				cpu_vals.append( [ '%system', columns[2] ] )
-				if float( columns[3] ) <= 100:
-					cpu_vals.append( [ '%iowait', columns[3] ] )
-				cpu_vals.append( [ '%steal', columns[4] ] )
-				cpu_vals.append( [ '%idle', columns[5] ] )
-			
-			#if not exists 'r_await', 'w_await' columns and not first measurement
-			if len( columns ) == 12 and columns[0] != 'Device:' and count_io >= 2:
-				io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
-				io_vals.append( [ columns[0], 'wrqm/s', columns[2] ] )
-				io_vals.append( [ columns[0], 'r/s', columns[3] ] )
-				io_vals.append( [ columns[0], 'w/s', columns[4] ] )
-				io_vals.append( [ columns[0], 'rMB/s', columns[5] ] )
-				io_vals.append( [ columns[0], 'wMB/s', columns[6] ] )
-				io_vals.append( [ columns[0], 'avgrq-sz', columns[7] ] )
-				io_vals.append( [ columns[0], 'avgqu-sz', columns[8] ] )
-				io_vals.append( [ columns[0], 'await', columns[9] ] )
-				io_vals.append( [ columns[0], 'svctm', columns[10] ] )
-				io_vals.append( [ columns[0], '%util', columns[11] ] )
-				
-			#if exists 'r_await', 'w_await' columns and not first measurement
-			if len( columns ) == 14 and columns[0] != 'Device:' and count_io >= 2:
-				io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
-				io_vals.append( [ columns[0], 'wrqm/s', columns[2] ] )
-				io_vals.append( [ columns[0], 'r/s', columns[3] ] )
-				io_vals.append( [ columns[0], 'w/s', columns[4] ] )
-				io_vals.append( [ columns[0], 'rMB/s', columns[5] ] )
-				io_vals.append( [ columns[0], 'wMB/s', columns[6] ] )
-				io_vals.append( [ columns[0], 'avgrq-sz', columns[7] ] )
-				io_vals.append( [ columns[0], 'avgqu-sz', columns[8] ] )
-				io_vals.append( [ columns[0], 'await', columns[9] ] )
-				io_vals.append( [ columns[0], 'svctm', columns[12] ] )
-				io_vals.append( [ columns[0], '%util', columns[13] ] )				
+				#if not exists 'r_await', 'w_await' columns and not first measurement
+				if len( columns ) == 12 and columns[0] != 'Device:' and count_io >= 2:
+					io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
+					io_vals.append( [ columns[0], 'wrqm/s', columns[2] ] )
+					io_vals.append( [ columns[0], 'r/s', columns[3] ] )
+					io_vals.append( [ columns[0], 'w/s', columns[4] ] )
+					io_vals.append( [ columns[0], 'rMB/s', columns[5] ] )
+					io_vals.append( [ columns[0], 'wMB/s', columns[6] ] )
+					io_vals.append( [ columns[0], 'avgrq-sz', columns[7] ] )
+					io_vals.append( [ columns[0], 'avgqu-sz', columns[8] ] )
+					io_vals.append( [ columns[0], 'await', columns[9] ] )
+					io_vals.append( [ columns[0], 'svctm', columns[10] ] )
+					io_vals.append( [ columns[0], '%util', columns[11] ] )
+					
+				#if exists 'r_await', 'w_await' columns and not first measurement
+				if len( columns ) == 14 and columns[0] != 'Device:' and count_io >= 2:
+					io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
+					io_vals.append( [ columns[0], 'wrqm/s', columns[2] ] )
+					io_vals.append( [ columns[0], 'r/s', columns[3] ] )
+					io_vals.append( [ columns[0], 'w/s', columns[4] ] )
+					io_vals.append( [ columns[0], 'rMB/s', columns[5] ] )
+					io_vals.append( [ columns[0], 'wMB/s', columns[6] ] )
+					io_vals.append( [ columns[0], 'avgrq-sz', columns[7] ] )
+					io_vals.append( [ columns[0], 'avgqu-sz', columns[8] ] )
+					io_vals.append( [ columns[0], 'await', columns[9] ] )
+					io_vals.append( [ columns[0], 'svctm', columns[12] ] )
+					io_vals.append( [ columns[0], '%util', columns[13] ] )				
 
 	cmd_netstat_t2 = subprocess.Popen('netstat -i',shell=True,stdout=subprocess.PIPE)
 	write_network_vals( cmd_netstat_t2 )	
@@ -1244,11 +1248,10 @@ def make_iostat_data():
 
 def make_stat_mem_data():	
 	result = []
-	encoding = locale.getdefaultlocale()[1]
 	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e "Active(file):" -e "Inactive(file):" -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
 	list_begin = False
 	for line in cmd.stdout:
-		columns = line.decode(encoding).split()
+		columns = line.decode('utf8').split()
 		if len( columns ) == 3:
 			result.append( [ re.findall("[\w\(\)]+", columns[0])[0], columns[1] ] )
 
@@ -1285,11 +1288,10 @@ def make_stat_mem_data():
 
 def make_stat_disk_data():	
 	result = []
-	encoding = locale.getdefaultlocale()[1]
 	cmd = subprocess.Popen('df',shell=True,stdout=subprocess.PIPE)
 	list_begin = False
 	for line in cmd.stdout:
-		columns = line.decode(encoding).split()
+		columns = line.decode('utf8').split()
 		if len( columns ) == 6 and columns[0] != 'Filesystem':
 			result.append( columns ) 
 	return result	
