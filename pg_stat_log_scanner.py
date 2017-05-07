@@ -68,7 +68,7 @@ class LogScanner(Thread):
 				atime = os.path.getatime(full_path) 
 				mtime = os.path.getmtime(full_path) 
 
-				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=3)		
+				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=1)		
 				dt_from_fname = fname[fname.find( '-' )+1:fname.rfind( '.' )]
 				dt_from_fname = dt_from_fname.replace( "_", " " )
 				dt_from_fname = dt_from_fname[:13] + ':' + dt_from_fname[13:]
