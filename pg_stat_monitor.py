@@ -463,32 +463,7 @@ class GetTblSizesHandler(BaseAsyncHandlerNoParam):
 				WITH pg_class_prep AS (
 						 SELECT c_1.relname,
 							c_1.relnamespace,
-							c_1.reltype,
-							c_1.reloftype,
-							c_1.relowner,
-							c_1.relam,
-							c_1.relfilenode,
-							c_1.reltablespace,
-							c_1.relpages,
-							c_1.reltuples,
-							c_1.relallvisible,
-							c_1.reltoastrelid,
-							c_1.relhasindex,
-							c_1.relisshared,
-							c_1.relpersistence,
 							c_1.relkind,
-							c_1.relnatts,
-							c_1.relchecks,
-							c_1.relhasoids,
-							c_1.relhaspkey,
-							c_1.relhasrules,
-							c_1.relhastriggers,
-							c_1.relhassubclass,
-							c_1.relispopulated,
-							c_1.relfrozenxid,
-							c_1.relminmxid,
-							c_1.relacl,
-							c_1.reloptions,
 							c_1.oid,
 							s.n_live_tup,
 							s.n_dead_tup
@@ -1099,17 +1074,16 @@ class ProcessCommonFuncs():
 		cmd = subprocess.Popen("cat /proc/" + str( pid ) + "/cmdline",shell=True,stdout=subprocess.PIPE)
 		result = ""
 		for line in cmd.stdout:	
-			result = line.decode(locale.getdefaultlocale()[1])
+			result = line.decode('utf8')
 		return result
 
 class GetServerProcessesHandler(BaseAsyncHandlerNoParam,ProcessCommonFuncs):
 	def make_proc_data(self):
 		result = []
-		encoding = locale.getdefaultlocale()[1]
 		cmd = subprocess.Popen('top -b -n 1 -c -u postgres',shell=True,stdout=subprocess.PIPE)
 		list_begin = False
 		for line in cmd.stdout:
-			columns = line.decode(encoding).split()
+			columns = line.decode('utf8').split()
 			if list_begin and len( columns ) > 11:
 				result.append( [ columns[0], columns[1],columns[4],columns[5],columns[6],columns[7],columns[8],columns[9],columns[10], self.get_command_by_pid( columns[0] ) ] )
 			if len( columns ) > 11 and columns[0] == 'PID':
@@ -1122,11 +1096,10 @@ class GetServerProcessesHandler(BaseAsyncHandlerNoParam,ProcessCommonFuncs):
 class GetIOServerProcessesHandler(BaseAsyncHandlerNoParam,ProcessCommonFuncs):
 	def make_proc_data(self):
 		result = []
-		encoding = locale.getdefaultlocale()[1]
 		cmd = subprocess.Popen('iotop -o -b -n 1',shell=True,stdout=subprocess.PIPE)
 		list_begin = False
 		for line in cmd.stdout:
-			columns = line.decode(encoding).split()
+			columns = line.decode('utf8').split()
 			if list_begin and len( columns ) >= 10:
 				result.append( [ columns[0], columns[1],columns[2],columns[3] + " " + columns[4], columns[5] + " " + columns[6],columns[7] + " " + columns[8],columns[9]+ " " +columns[10], self.get_command_by_pid( columns[0] ) ] )
 			if len( columns ) >= 10 and columns[0] == 'TID':
