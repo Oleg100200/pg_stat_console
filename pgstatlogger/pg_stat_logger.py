@@ -14,7 +14,7 @@ class PSCLogger( Thread ):
 
 	def __init__( self, application_name, max_bytes = 1024*100*10, backup_count = 100, delay = 3 ):
 		self.logger = logging.getLogger(application_name)
-		hdlr = logging.handlers.RotatingFileHandler(os.path.dirname(sys.argv[0]) + '/log/' + application_name + '.log', max_bytes, backup_count)
+		hdlr = logging.handlers.RotatingFileHandler(os.getcwd() + '/log/' + application_name + '.log', max_bytes, backup_count)
 		formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 		hdlr.setFormatter(formatter)
 		self.logger.addHandler(hdlr)
@@ -35,7 +35,7 @@ class PSCLogger( Thread ):
 			self.lock_logger.release()
 
 	def log( self, msg, code ):
-		#print(msg)
+		print(msg)
 		self.lock_logger.acquire()
 		if code == 'Info':
 			self.log_queue.append( [ 'Info', msg ] )

@@ -33,39 +33,18 @@ from contextlib import contextmanager
 
 import configparser
 from pgstatlogger import PSCLogger
+from pgstatcommon.pg_stat_common import *
 
 import errno
 from socket import error as socket_error
 #=======================================================================================================
-current_dir = os.path.dirname(sys.argv[0]) + '/'
+current_dir = os.getcwd() + '/'
+prepare_dirs()
 #=======================================================================================================
 config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
 config.read( current_dir + 'conf/pg_stat_console.conf')
 #=======================================================================================================
-def read_conf_param_value( raw_value, boolean = False ):
-	#case 1:	param = 100 #comment
-	#case 2:	param = "common args" #comment
-	#case 3:	param = some text #comment
-	value_res = raw_value
-	quotes = re.findall("""\"[^"]*\"""", raw_value)
-	if len( quotes ) > 0:
-		value_res = quotes[0]
-		value_res = value_res.replace("\"", "")
-	else:
-		if raw_value.find("#") > -1:
-			value_res = raw_value[0:raw_value.find("#")-1]
-		value_res = value_res.strip(' \t\n\r')
-	
-	if boolean:
-		return True if value_res in [ '1', 't', 'true', 'True'] else False
-	
-	return value_res
-#=======================================================================================================
-def limit_memory(maxsize):
-	soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-	resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
-
 limit_memory( 1024 * 1000 * int( read_conf_param_value( config['main']['application_max_mem'] ) ) )
 #=======================================================================================================
 EXECUTOR = ThreadPoolExecutor(max_workers=int( read_conf_param_value( config['main']['max_workers'] ) ))

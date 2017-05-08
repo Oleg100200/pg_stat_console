@@ -11,32 +11,15 @@ from operator import itemgetter
 
 from contextlib import contextmanager
 from pgstatlogger import PSCLogger
+from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
-current_dir = os.path.dirname(sys.argv[0]) + '/'
+current_dir = os.getcwd() + '/'
+prepare_dirs()
 #=======================================================================================================
 #init config
 config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
 config.read( current_dir + 'conf/pg_stat_log_scanner.conf')
-#=======================================================================================================
-def read_conf_param_value( raw_value, boolean = False ):
-	#case 1:	param = 100 #comment
-	#case 2:	param = "common args" #comment
-	#case 3:	param = some text #comment
-	value_res = raw_value
-	quotes = re.findall("""\"[^"]*\"""", raw_value)
-	if len( quotes ) > 0:
-		value_res = quotes[0]
-		value_res = value_res.replace("\"", "")
-	else:
-		if raw_value.find("#") > -1:
-			value_res = raw_value[0:raw_value.find("#")-1]
-		value_res = value_res.strip(' \t\n\r')
-	
-	if boolean:
-		return True if value_res in [ '1', 't', 'true', 'True'] else False
-	
-	return value_res
 #=======================================================================================================
 #vars from config
 sys_stat_conn_str = read_conf_param_value( config['sys_stat']['sys_stat'] )
