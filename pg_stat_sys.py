@@ -185,6 +185,14 @@ query_check_tables_all_dbs = """do $$
 		);
 	END IF;
 
+	IF not EXISTS (
+		select 1 
+		from pg_extension 
+		where extname = 'pg_stat_statements'
+	 ) THEN		  
+		create extension if not exists pg_stat_statements;
+	END IF;
+
 	end$$;"""
 
 query_all_dbs_t1 = """
