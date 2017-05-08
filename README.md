@@ -30,11 +30,35 @@ http://psc.pg-support.com
 
 ## Installation (RHEL 7 example)
 
-### OS utils
+### OS utils on all nodes
 
 ```
-yum -y install sysstat iotop
+yum -y install sysstat iotop git
 ```
+
+### Clone pg_stat_console on all nodes
+
+```
+cd /home
+git clone https://github.com/masterlee998/pg_stat_console
+```
+
+### Allow ports
+
+On main node you should to allow <code>8888</code> port: 
+
+```
+#if firewalld installed
+firewall-cmd --zone=public --add-port=8888/tcp --permanent
+firewall-cmd --reload
+
+#or
+iptables -I INPUT -p tcp -m tcp --dport 8888 -j ACCEPT
+iptables-save
+```
+
+On observed nodes you should to allow <code>8889</code> port.
+
 
 ### PostgreSQL installation (Main Node)
 
@@ -71,7 +95,6 @@ autovacuum_vacuum_threshold = 10000
 autovacuum_analyze_threshold = 5000
 autovacuum_vacuum_scale_factor = 0.4
 autovacuum_analyze_scale_factor = 0.2
-autovacuum_freeze_max_age = 800000000
 autovacuum_vacuum_cost_delay = 10ms
 autovacuum_vacuum_cost_limit = 5000
 
@@ -87,7 +110,7 @@ bgwriter_lru_multiplier = 7.0
 stats_temp_directory = '/dev/shm/pg_stat_tmp'
 
 statement_timeout = 3600000            			# in milliseconds, 1 hour
-lock_timeout = 600000                       #10 mins
+lock_timeout = 600000                       # 10 mins
 ```
 
 Create directory for <code>stats_temp_directory</code>:
@@ -97,6 +120,133 @@ mkdir /dev/shm/pg_stat_tmp
 chown postgres /dev/shm/pg_stat_tmp
 ```
 
+Add the directory creation to autorun:
+
+```
+chmod +x /etc/rc.d/rc.local
+```
+
+<code>nano /etc/rc.d/rc.local</code>:
+
+```
+mkdir /dev/shm/pg_stat_tmp
+chown postgres /dev/shm/pg_stat_tmp
+```
+
+In <code>/usr/lib/systemd/system/postgresql-9.6.service</code> replace:
+
+```
+Environment=PGDATA=/var/lib/pgsql/9.6/data/ 
+```
+
+to:
+
+```
+Environment=PGDATA=/home/db_main_node
+```
+
+and then:
+
+```
+systemctl daemon-reload
+systemctl restart postgresql-9.6
+```
+
+Configure DB:
+
+```
+su - postgres
+/usr/pgsql-9.6/bin/psql -d postgres -p 5432
+alter user postgres with password 'postgres';
+CREATE ROLE app_user LOGIN password 'app_user' superuser;
+
+CREATE DATABASE sys_stat
+  WITH OWNER = app_user
+       ENCODING = 'UTF8'
+       template=template0
+       TABLESPACE = pg_default
+       LC_COLLATE = 'en_US.UTF-8'
+       LC_CTYPE = 'en_US.UTF-8'
+       CONNECTION LIMIT = -1;
+```
+
+### Create sys_stat database on Main Node
+
+
+
+### Recommended settings for pg_hba.conf of Main Node
+
+<code>nano /home/db_main_node/pg_hba.conf</code>:
+
+```
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             all                                     trust
+host    all             all             127.0.0.1/32            trust
+host    all             all             ::1/128                 trust
+host    all             app_user        0.0.0.0/0               md5
+```
+
+### pgbouncer configuration on Main Node
+
+
+
+```
+yum install pgbouncer
+```
+
+<code>nano /etc/pgbouncer/pgbouncer.ini</code>:
+
+```
+[databases]
+sys_stat = host=127.0.0.1 user=app_user
+
+[pgbouncer]
+
+logfile = /var/log/pgbouncer.log
+pidfile = /var/run/pgbouncer/pgbouncer.pid
+listen_addr = *
+listen_port = 6432
+
+auth_type = md5
+auth_file = /etc/pgbouncer/userlist.txt
+
+admin_users = postgres
+stats_users = stats, postgres
+
+pool_mode = session
+server_reset_query = DISCARD ALL
+max_client_conn = 600
+default_pool_size = 150
+reserve_pool_size = 50
+
+ignore_startup_parameters = extra_float_digits,client_min_messages
+
+server_lifetime = 10800
+server_idle_timeout = 1200
+
+client_idle_timeout = 3600
+query_wait_timeout = 14400
+idle_transaction_timeout = 3600
+
+log_connections = 0
+log_disconnections = 0
+log_pooler_errors = 1
+```
+
+<code>nano /etc/pgbouncer/userlist.txt</code>:
+
+```
+"app_user" "app_user"
+```
+
+Run bgbouncer:
+
+```
+touch /var/log/pgbouncer.log
+chown pgbouncer:pgbouncer /var/log/pgbouncer.log
+systemctl restart pgbouncer
+systemctl enable pgbouncer
+```
 
 
 ### Required settings for postgresql.conf of NodeX
@@ -152,3 +302,22 @@ pip3.6 install sqlalchemy
 pip3.6 install requests
 ```
 
+### pg_stat_console management
+
+To run use:
+
+```
+nohup /usr/local/bin/python3.6 /home/pg_stat_console/pg_stat_sys.py > /dev/null 2>&1 &
+nohup /usr/local/bin/python3.6 /home/pg_stat_console/pg_stat_monitor.py > /dev/null 2>&1 &
+nohup /usr/local/bin/python3.6 /home/pg_stat_console/pg_stat_log_scanner.py > /dev/null 2>&1 &
+nohup /usr/local/bin/python3.6 /home/pg_stat_console/pg_stat_console.py > /dev/null 2>&1 &
+```
+
+To stop use:
+
+```
+ps -ef | grep pg_stat_sys.py | grep -v grep | awk '{print $2}' | xargs kill
+ps -ef | grep pg_stat_monitor.py | grep -v grep | awk '{print $2}' | xargs kill
+ps -ef | grep pg_stat_log_scanner.py | grep -v grep | awk '{print $2}' | xargs kill
+ps -ef | grep pg_stat_console.py | grep -v grep | awk '{print $2}' | xargs kill
+```
