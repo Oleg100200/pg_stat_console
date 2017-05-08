@@ -338,4 +338,11 @@ mv pg_stat_monitor.conf.example pg_stat_monitor.conf
 mv pg_stat_sys.conf.example pg_stat_sys.conf
 ```
 
+### Configure pg_stat_statements on NodeX in all observed databases
 
+```
+psql -h localhost -d observed_db_X -U postgres -p 5432 -c "create extension pg_stat_statements;"
+
+# if observed DB has version 9.2 then use next patch:
+psql -h localhost -d observed_db_X -U postgres -p 5432 -a -f /home/pg_stat_console/sql/patch_92_pg_stat_statements.sql
+```
