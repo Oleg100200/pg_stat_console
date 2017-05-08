@@ -48,11 +48,11 @@ git clone https://github.com/masterlee998/pg_stat_console
 On main node you should to allow <code>8888</code> port: 
 
 ```
-#if firewalld installed
+# if firewalld installed
 firewall-cmd --zone=public --add-port=8888/tcp --permanent
 firewall-cmd --reload
 
-#or
+# or
 iptables -I INPUT -p tcp -m tcp --dport 8888 -j ACCEPT
 iptables-save
 ```
@@ -170,10 +170,6 @@ CREATE DATABASE sys_stat
        CONNECTION LIMIT = -1;
 ```
 
-### Create sys_stat database on Main Node
-
-
-
 ### Recommended settings for pg_hba.conf of Main Node
 
 <code>nano /home/db_main_node/pg_hba.conf</code>:
@@ -186,9 +182,15 @@ host    all             all             ::1/128                 trust
 host    all             app_user        0.0.0.0/0               md5
 ```
 
+### Restore sys_stat database on Main Node
+
+```
+/usr/pgsql-9.6/bin/psql -h localhost -d sys_stat -U postgres -p 5432 -a -f /home/pg_stat_console/sql/sys_stat.backup
+```
+
 ### pgbouncer configuration on Main Node
 
-
+pgbouncer should be used to improve performance.
 
 ```
 yum install pgbouncer
