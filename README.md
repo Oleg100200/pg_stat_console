@@ -323,3 +323,19 @@ ps -ef | grep pg_stat_monitor.py | grep -v grep | awk '{print $2}' | xargs kill
 ps -ef | grep pg_stat_log_scanner.py | grep -v grep | awk '{print $2}' | xargs kill
 ps -ef | grep pg_stat_console.py | grep -v grep | awk '{print $2}' | xargs kill
 ```
+
+### pg_stat_console configuration
+
+```
+cd /home/pg_stat_console/conf
+
+# on Main Node
+mv pg_stat_console.conf.example pg_stat_console.conf
+
+# on NodeX 
+mv pg_stat_log_scanner.conf.example pg_stat_log_scanner.conf
+mv pg_stat_monitor.conf.example pg_stat_monitor.conf
+mv pg_stat_sys.conf.example pg_stat_sys.conf
+```
+
+
