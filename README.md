@@ -255,7 +255,7 @@ systemctl enable pgbouncer
 
 ```
 shared_preload_libraries = 'pg_stat_statements,auto_explain'
-pg_stat_statements.max = 10000
+pg_stat_statements.max = 1000
 pg_stat_statements.track = all
 
 auto_explain.log_min_duration = '3s'
