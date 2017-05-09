@@ -26,5 +26,6 @@ node_host = "192.168.0.50"
 
 locks_limit_in_snapshot = 200
 top_rels_in_snapshot = 20
+top_queries_in_snapshot = 20
 
 time_zone = Europe/Moscow

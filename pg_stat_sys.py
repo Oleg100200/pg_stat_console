@@ -38,6 +38,7 @@ node_descr = read_conf_param_value( config['main']['node_descr'] )
 node_host = read_conf_param_value( config['main']['node_host'] )
 
 top_rels_in_snapshot = read_conf_param_value( config['main']['top_rels_in_snapshot'] )
+top_queries_in_snapshot = read_conf_param_value( config['main']['top_queries_in_snapshot'] )
 locks_limit_in_snapshot = read_conf_param_value( config['main']['locks_limit_in_snapshot'] )
 sleep_interval_pg_conn_snapshot = int( read_conf_param_value( config['main']['sleep_interval_pg_conn_snapshot'] ) )
 sleep_interval_pg_single_db_sn = int( read_conf_param_value( config['main']['sleep_interval_pg_single_db_sn'] ) )
@@ -186,6 +187,76 @@ query_check_tables_all_dbs = """do $$
 	END IF;
 
 	IF not EXISTS (
+	 SELECT 1
+	 FROM   pg_class c
+	 JOIN   pg_namespace n ON n.oid = c.relnamespace
+	 WHERE  c.relname = 'psc_stm_t1'
+	 AND	n.nspname = 'public'
+	 ) THEN	 
+		CREATE UNLOGGED TABLE psc_stm_t1
+		(
+		  now timestamp with time zone,
+		  userid oid,
+		  dbid oid,
+		  queryid bigint,
+		  query text,
+		  calls bigint,
+		  total_time double precision,
+		  rows bigint,
+		  shared_blks_hit bigint,
+		  shared_blks_read bigint,
+		  shared_blks_dirtied bigint,
+		  shared_blks_written bigint,
+		  local_blks_hit bigint,
+		  local_blks_read bigint,
+		  local_blks_dirtied bigint,
+		  local_blks_written bigint,
+		  temp_blks_read bigint,
+		  temp_blks_written bigint,
+		  blk_read_time double precision,
+		  blk_write_time double precision
+		)
+		WITH (
+		  OIDS=FALSE
+		);
+	END IF;
+
+	IF not EXISTS (
+	 SELECT 1
+	 FROM   pg_class c
+	 JOIN   pg_namespace n ON n.oid = c.relnamespace
+	 WHERE  c.relname = 'psc_stm_t2'
+	 AND	n.nspname = 'public'
+	 ) THEN		  
+		CREATE UNLOGGED TABLE psc_stm_t2
+		(
+		  now timestamp with time zone,
+		  userid oid,
+		  dbid oid,
+		  queryid bigint,
+		  query text,
+		  calls bigint,
+		  total_time double precision,
+		  rows bigint,
+		  shared_blks_hit bigint,
+		  shared_blks_read bigint,
+		  shared_blks_dirtied bigint,
+		  shared_blks_written bigint,
+		  local_blks_hit bigint,
+		  local_blks_read bigint,
+		  local_blks_dirtied bigint,
+		  local_blks_written bigint,
+		  temp_blks_read bigint,
+		  temp_blks_written bigint,
+		  blk_read_time double precision,
+		  blk_write_time double precision
+		)
+		WITH (
+		  OIDS=FALSE
+		);
+	END IF;
+
+	IF not EXISTS (
 		select 1 
 		from pg_extension 
 		where extname = 'pg_stat_statements'
@@ -204,6 +275,17 @@ query_all_dbs_t1 = """
 		insert into psc_data_io_t1 select now(),relid, (schemaname||'.'||relname) as relname, heap_blks_read, idx_blks_read from pg_statio_all_tables;
 		delete from psc_data_all_indexes_t1;
 		insert into psc_data_all_indexes_t1 select now(),indexrelid, (schemaname||'.'||relname||'.'||indexrelname) as relname, idx_scan, idx_tup_read, idx_tup_fetch from pg_stat_all_indexes;
+		delete from psc_stm_t1;
+		INSERT INTO psc_stm_t1(
+					now, userid, dbid, queryid, query, calls, total_time, rows, shared_blks_hit, 
+					shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, 
+					local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, 
+					temp_blks_written, blk_read_time, blk_write_time)
+		SELECT now(), userid, dbid, queryid, query, calls, total_time, rows, shared_blks_hit, 
+					shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, 
+					local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, 
+					temp_blks_written, blk_read_time, blk_write_time 
+		from public.pg_stat_statements(true) where dbid = (select oid from pg_database where datname = current_database());
 	end$$;""";
 
 query_all_dbs_t2 = """
@@ -215,6 +297,17 @@ query_all_dbs_t2 = """
 		insert into psc_data_io_t2 select now(),relid, (schemaname||'.'||relname) as relname, heap_blks_read, idx_blks_read from pg_statio_all_tables;
 		delete from psc_data_all_indexes_t2;
 		insert into psc_data_all_indexes_t2 select now(),indexrelid, (schemaname||'.'||relname||'.'||indexrelname) as relname, idx_scan, idx_tup_read, idx_tup_fetch from pg_stat_all_indexes;
+		delete from psc_stm_t2;
+		INSERT INTO psc_stm_t2(
+					now, userid, dbid, queryid, query, calls, total_time, rows, shared_blks_hit, 
+					shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, 
+					local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, 
+					temp_blks_written, blk_read_time, blk_write_time)
+		SELECT now(), userid, dbid, queryid, query, calls, total_time, rows, shared_blks_hit, 
+					shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, 
+					local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, 
+					temp_blks_written, blk_read_time, blk_write_time 
+		from public.pg_stat_statements(true) where dbid = (select oid from pg_database where datname = current_database());
 	end$$;""";
 
 query_check_tables_single_db = """
@@ -437,11 +530,14 @@ query_single_db_sn = """
 def init_sys_stat( conn ):
 	conn.execute( """set application_name = '""" + application_name + """'""" )
 	conn.execute( """set timezone = '""" + time_zone + """';""" )
-	conn.execute( """select public.psc_init_node('""" + node_name + """', '""" +node_descr + """', '""" + node_host + """')""" )
 	query = conn.prepare( """select public.psc_get_node('""" + node_name + """', '""" + node_descr + """', '""" + node_host + """')""" )
 	shm_name_res = query()
 	conn.execute( """set search_path = 'n""" + str( shm_name_res[0][0] ) + """', 'public'""" )
 
+def init_sys_stat_node( conn ):
+	conn.execute( """set application_name = '""" + application_name + """'""" )
+	conn.execute( """select public.psc_init_node('""" + node_name + """', '""" +node_descr + """', '""" + node_host + """')""" )
+	
 def check_pg_version( conn ):
 	query = conn.prepare( """select case 
 		when position( '9.6.' in version() ) > 0 then '9.6' 
@@ -688,6 +784,217 @@ def pg_sys_stat_snapshot():
 									#['BIGINT', 	'pg_catalog.text', 	'BIGINT', 		'pg_catalog.text', 	'TIMESTAMP WITH TIME ZONE', 	'NUMERIC']
 									# db_id			param				relid	  		relname				dt								val
 									# $1			$2					$3	  			$4					$5								$6
+				#====================================================================================================
+				#pg_stat_statements processing
+				query = conn[1].prepare( """
+				select T.dt, T.query, T.queryid, abs(T.calls_res) as val, 'calls'::text as metric
+				from (
+					select
+					t1.query,
+					t2.calls - t1.calls as calls_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.calls - t1.calls <> 0
+					order by calls_res desc
+					limit """ + top_queries_in_snapshot + """ 
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.total_time_res) as val, 'total_time'::text as metric
+				from (
+					select t1.query,
+					t2.total_time - t1.total_time as total_time_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.total_time - t1.total_time <> 0
+					order by total_time_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.rows_res) as val, 'rows'::text as metric
+				from (
+					select t1.query,
+					t2.rows - t1.rows as rows_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.rows - t1.rows <> 0
+					order by rows_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_hit_res) as val, 'shared_blks_hit'::text as metric
+				from (
+					select t1.query,
+					t2.shared_blks_hit - t1.shared_blks_hit as shared_blks_hit_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.shared_blks_hit - t1.shared_blks_hit <> 0
+					order by shared_blks_hit_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_read_res) as val, 'shared_blks_read'::text as metric
+				from (
+					select t1.query,
+					t2.shared_blks_read - t1.shared_blks_read as shared_blks_read_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.shared_blks_read - t1.shared_blks_read <> 0
+					order by shared_blks_read_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_dirtied_res) as val, 'shared_blks_dirtied'::text as metric
+				from (
+					select t1.query,
+					t2.shared_blks_dirtied - t1.shared_blks_dirtied as shared_blks_dirtied_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.shared_blks_dirtied - t1.shared_blks_dirtied <> 0
+					order by shared_blks_dirtied_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_written_res) as val, 'shared_blks_written'::text as metric
+				from (
+					select t1.query,
+					t2.shared_blks_written - t1.shared_blks_written as shared_blks_written_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.shared_blks_written - t1.shared_blks_written <> 0
+					order by shared_blks_written_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.local_blks_hit_res) as val, 'local_blks_hit'::text as metric
+				from (
+					select t1.query,
+					t2.local_blks_hit - t1.local_blks_hit as local_blks_hit_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.local_blks_hit - t1.local_blks_hit <> 0
+					order by local_blks_hit_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.local_blks_read_res) as val, 'local_blks_read'::text as metric
+				from (
+					select t1.query,
+					t2.local_blks_read - t1.local_blks_read as local_blks_read_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.local_blks_read - t1.local_blks_read <> 0
+					order by local_blks_read_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.local_blks_dirtied_res) as val, 'local_blks_dirtied'::text as metric
+				from (
+					select t1.query,
+					t2.local_blks_dirtied - t1.local_blks_dirtied as local_blks_dirtied_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.local_blks_dirtied - t1.local_blks_dirtied <> 0
+					order by local_blks_dirtied_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.local_blks_written_res) as val, 'local_blks_written'::text as metric
+				from (
+					select t1.query,
+					t2.local_blks_written - t1.local_blks_written as local_blks_written_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.local_blks_written - t1.local_blks_written <> 0
+					order by local_blks_written_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.temp_blks_read_res) as val, 'temp_blks_read'::text as metric
+				from (
+					select t1.query,
+					t2.temp_blks_read - t1.temp_blks_read as temp_blks_read_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.temp_blks_read - t1.temp_blks_read <> 0
+					order by temp_blks_read_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.temp_blks_written_res) as val, 'temp_blks_written'::text as metric
+				from (
+					select t1.query,
+					t2.temp_blks_written - t1.temp_blks_written as temp_blks_written_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.temp_blks_written - t1.temp_blks_written <> 0
+					order by temp_blks_written_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.blk_read_time_res) as val, 'blk_read_time'::text as metric
+				from (
+					select t1.query,
+					t2.blk_read_time - t1.blk_read_time as blk_read_time_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.blk_read_time - t1.blk_read_time <> 0
+					order by blk_read_time_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				union
+				select T.dt, T.query, T.queryid, abs(T.blk_write_time_res) as val, 'blk_write_time'::text as metric
+				from (
+					select t1.query,
+					t2.blk_write_time - t1.blk_write_time as blk_write_time_res,
+					t2.now as dt,
+					t1.queryid
+					from psc_stm_t1 t1
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					where t2.blk_write_time - t1.blk_write_time <> 0
+					order by blk_write_time_res desc
+					limit """ + top_queries_in_snapshot + """
+				) T
+				""" )
+				res_data = query()
+				
+				stm = sys_stat_db.prepare( """
+				INSERT INTO psc_stm_stat(
+					dt, db_id, param_id, query_id, val)
+				values( $2, $1, ( select psc_get_param( $6 ) ), ( select psc_get_stm_query( $1, $4, $3 ) ), $5 )""" )
+				#psc_get_stm_query( db_id, query_id, query )
+				with sys_stat_db.xact():
+					for rec in res_data:
+						stm.first( db_id, rec[0], rec[1], rec[2], rec[3], rec[4] )
+						#			$1		$2		$3		$4		$5		$6
+						#					dt		query	queryid val		metric
 				#====================================================================================================
 				
 				conn[1].execute( query_all_dbs_t1 )
@@ -1344,13 +1651,23 @@ def os_stat_collect():
 					sys_stat_db.close()
 
 #=======================================================================================================
+try:
+	sys_stat_db = postgresql.open( sys_stat_conn_str )
+	init_sys_stat_node( sys_stat_db )
+except Exception as e:
+	logger.log( "Connection sys_stat_conn_str error: " + str( e ), "Error" )
+	time.sleep(sleep_interval_on_exception)
+finally:
+	if sys_stat_db is not None:
+		sys_stat_db.close()
+#=======================================================================================================
 
 if collect_pg_sys_stat:
 	pg_sys_stat_snapshot_thread = Thread( target=pg_sys_stat_snapshot, args=[] )
 	pg_sys_stat_snapshot_thread.start()
 	pg_single_db_sn_thread = Thread( target=pg_single_db_sn, args=[] )
 	pg_single_db_sn_thread.start()
-	logger.log( '-------> pg_sys_stat activated!', "Info" )	
+	logger.log( '-------> pg_sys_stat activated!', "Info" )
 
 if collect_pg_conn_snapshot:
 	pg_conn_snapshot_thread = Thread( target=pg_conn_snapshot, args=[] )
