@@ -66,6 +66,7 @@
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="menu_serv_load" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_psc_os_stat">Hardware load</div>
 				<div id="menu_pg_load" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_psc_tbls_stat">PostgreSQL load</div>
+				<div id="menu_pg_queries" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_psc_tbls_stat">PostgreSQL queries</div>
 				<div id="menu_typically_queries" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_pg_stat_monitor">Typical queries</div>
 				<div id="menu_logs" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_pg_stat_monitor">DB logs</div>
 				<div id="menu_conn_manage" class="pg_stat_console_menu_elem_main_menu pg_stat_console_ani_mi node_class_pg_stat_monitor node_class_psc_snapshots">Connections and processes</div>
@@ -124,10 +125,6 @@
 				<div id="sub_menu_seq_index_scans" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Scans (seq and index) by tables</div>
 				<div id="sub_menu_idx_quality" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Efficiency index scans by tables</div>
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
-				<div id="sub_menu_timing_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Query durations</div>
-				<div id="sub_menu_io_read" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">I/O Timings read by queries</div>
-				<div id="sub_menu_blocks_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blocks by queries</div>	
-				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
 				<div id="sub_menu_autovac" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Autovacuum workers activity</div>
 				<div id="sub_menu_conns" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Connections</div>	
 				<div id="sub_menu_deadlocks_db" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Deadlocks</div>
@@ -138,6 +135,37 @@
 				<div id="sub_menu_compare_single_2" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">[ compare single metric ]</div>
 			</div>	
 		</div>	
+	</div>
+	
+	<div id="sub_menu_2_2" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
+			<div style="display: table-cell; vertical-align: middle;">
+				<div id="sub_menu_timing_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Query durations</div>
+				<div id="sub_menu_io_read" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">I/O Timings read by queries</div>
+				<div id="sub_menu_blocks_by_queries_autoexp" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blocks by queries</div>
+				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
+				<div id="sub_menu_calls_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Calls by queries</div>
+				<div id="sub_menu_total_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Total time by queries</div>
+				<div id="sub_menu_rows_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Rows by queries</div>
+				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
+				<div id="sub_menu_shared_blks_hit_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks hit by queries</div>
+				<div id="sub_menu_shared_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks read by queries</div>
+				<div id="sub_menu_shared_blks_dirtied_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks dirtied by queries</div>
+				<div id="sub_menu_shared_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks written by queries</div>
+				<div id="sub_menu_local_blks_hit_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks hit by queries</div>
+				<div id="sub_menu_local_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks read by queries</div>
+				<div id="sub_menu_local_blks_dirtied_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks dirtied by queries</div>
+				<div id="sub_menu_local_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks written by queries</div>
+				<div id="sub_menu_temp_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Temp blks read by queries</div>
+				<div id="sub_menu_temp_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Temp blks written by queries</div>
+				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
+				<div id="sub_menu_blk_read_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blk read time by queries</div>
+				<div id="sub_menu_blk_write_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blk write time by queries</div>
+				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
+				<div id="sub_menu_compare_2_2" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">[ compare different metrics ]</div>	
+				<div id="sub_menu_compare_single_2_2" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">[ compare single metric ]</div>
+			</div>
+		</div>
 	</div>
 	
 	<div id="sub_menu_3" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">

@@ -243,6 +243,7 @@ function hide_all_submenu()
 {
 	$('#sub_menu_1').fadeOut( 250 );
 	$('#sub_menu_2').fadeOut( 250 );
+	$('#sub_menu_2_2').fadeOut( 250 );	
 	$('#sub_menu_3').fadeOut( 250 );
 	$('#sub_menu_4').fadeOut( 250 );	
 	$('#sub_menu_5').fadeOut( 250 );
@@ -1597,7 +1598,7 @@ function set_all_click_events()
 		progress_notice( '<div style="font-size:25px;"><p>Loading configuration...</p></div>' );
 	});	
 	
-	$( "#sub_menu_compare,#sub_menu_compare_2" ).click(function() {
+	$( "#sub_menu_compare,#sub_menu_compare_2,#sub_menu_compare_2_2" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 
 		$("#nav_str").text( "Compare different metrics");
@@ -1643,7 +1644,7 @@ function set_all_click_events()
 		
 	});
 	
-	$( "#sub_menu_compare_single,#sub_menu_compare_single_2" ).click(function() {
+	$( "#sub_menu_compare_single,#sub_menu_compare_single_2,#sub_menu_compare_single_2_2" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 
 		$("#nav_str").text( "Compare single metric");
@@ -2222,7 +2223,25 @@ function set_all_click_events()
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
 		$( "#apply_filter_button" ).click();		
-	});	
+	});
+	
+	$('div[id^=sub_menu_][id$=_by_queries]').click(function() {
+		$(".pg_stat_console_goto_top").click();
+		
+		selected_menu_elem.name = this.id;
+		selected_menu_elem.auto_refresh = false;
+		hide_autorefresh();
+		
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL queries -> " + $(this).text());
+		set_date_time_filter(12);
+		$( "#apply_filter_button").unbind( "click" );
+		$( "#apply_filter_button" ).click(function() {
+			$( "#graph_space" ).empty();
+			current_xhr.push( graph_post( 'get' + selected_menu_elem.name.replace(/_/g , "").replace("submenu", "") , $("#date_a").val(), $("#date_b").val() ) ); 
+			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
+		});	
+		$( "#apply_filter_button" ).click();
+	});
 
 	$( "#sub_menu_io_read" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -2242,7 +2261,7 @@ function set_all_click_events()
 		$( "#apply_filter_button" ).click();		
 	});	
 
-	$( "#sub_menu_blocks_by_queries" ).click(function() {
+	$( "#sub_menu_blocks_by_queries_autoexp" ).click(function() {
 		
 		$(".pg_stat_console_goto_top").click();
 		
@@ -3391,6 +3410,7 @@ function set_all_mouseenter_events()
 	$( "#menu_serv_load" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeIn( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
+		$('#sub_menu_2_2').fadeOut( 150 );
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
@@ -3398,6 +3418,15 @@ function set_all_mouseenter_events()
 	$( "#menu_pg_load" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeIn( 150 );
+		$('#sub_menu_2_2').fadeOut( 150 );
+		$('#sub_menu_3').fadeOut( 150 );
+		$('#sub_menu_4').fadeOut( 150 );
+		$('#sub_menu_5').fadeOut( 150 );
+	});	
+	$( "#menu_pg_queries" ).mouseenter(function( event ) {
+		$('#sub_menu_1').fadeOut( 150 );
+		$('#sub_menu_2').fadeOut( 150 );
+		$('#sub_menu_2_2').fadeIn( 150 );
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
@@ -3405,6 +3434,7 @@ function set_all_mouseenter_events()
 	$( "#menu_typically_queries" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
+		$('#sub_menu_2_2').fadeOut( 150 );
 		$('#sub_menu_3').fadeIn( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
@@ -3412,6 +3442,7 @@ function set_all_mouseenter_events()
 	$( "#menu_logs" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
+		$('#sub_menu_2_2').fadeOut( 150 );
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeIn( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
@@ -3419,6 +3450,7 @@ function set_all_mouseenter_events()
 	$( "#menu_conn_manage" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
+		$('#sub_menu_2_2').fadeOut( 150 );
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeIn( 150 );

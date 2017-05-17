@@ -1720,7 +1720,37 @@ class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blocks by queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
+class GetCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = """
+		select row_number() OVER(PARTITION BY T.dt_rounded ORDER BY T.dt_rounded ) AS graph_block, T.* 
+							from 
+							(
+								select 
+									psc_round_minutes( s.dt """ + timezone_correct_time_backward +""" , 1 )::timestamp without time zone as dt_rounded, 
+									s.val, 
+									s.id, q.query_text as query
+									FROM psc_stm_stat s
+									inner join psc_stm_queries q on q.id = s.query_id
+									inner join psc_dbs d on d.id = s.db_id
+									where dt >= '""" + data["date_a" ] + """'::timestamp """ + timezone_correct_time_forward + """ and dt < '""" + data["date_b" ] + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
+									order by dt_rounded asc, val asc
+									limit 10
+							) T order by T.dt_rounded asc, graph_block asc"""
 		
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Calls by Queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
 #=======================================================================================================
 
 def make_html_report_with_head( data, columns, head_name, query_column=None ):
@@ -2332,6 +2362,20 @@ application = tornado.web.Application([
 			
 			('/showUserConfig', ShowUserConfigHandler),
 			
+			('/getcallsbyqueries', GetCallsByQueriesHandler),
+			# ('/getTotalTimeByQueries', GetTotalTimeByQueriesHandler),
+			# ('/getRowsByQueries', GetRowsByQueriesHandler),
+			# ('/getSharedBlkshitByQueries', GetSharedBlksHitByQueriesHandler),
+			# ('/getSharedBlksreadByQueries', GetSharedBlksReadByQueriesHandler),
+			# ('/getSharedBlksdirtiedByQueries', GetSharedBlksDirtiedByQueriesHandler),
+			# ('/getSharedBlkswrittenByQueries', GetSharedBlksWrittenByQueriesHandler),
+			# ('/getLocalBlkshitByQueries', GetLocalBlksHitByQueriesHandler),
+			# ('/getLocalBlksreadByQueries', GetLocalBlksReadByQueriesHandler),
+			# ('/getLocalBlksdirtiedByQueries', GetLocalBlksDirtiedByQueriesHandler),
+			# ('/getTempBlksreadByQueries', GetTempBlksReadByQueriesHandler),
+			# ('/getTempBlkswrittenByQueries', GetTempBlksWrittenByQueriesHandler),
+			# ('/getBlkReadTimeByQueries', GetBlkReadTimeByQueriesHandler),			
+			# ('/getBlkWriteTimeByQueries', GetBlkWriteTimeByQueriesHandler),
 			#===================================================================
 			# proxy methods for pg_stat_monitor
 			('/getMaintenanceTasks', GetMaintenanceTasksHandler),
