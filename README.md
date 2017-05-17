@@ -77,7 +77,7 @@ firewall-cmd --reload
 ```
 
 
-### Recommended settings for postgresql.conf of Main Node
+### Recommended settings for postgresql.conf on Main Node
 
 
 ```
@@ -170,7 +170,7 @@ CREATE DATABASE sys_stat
        CONNECTION LIMIT = -1;
 ```
 
-### Recommended settings for pg_hba.conf of Main Node
+### Recommended settings for pg_hba.conf on Main Node
 
 <code>nano /home/db_main_node/pg_hba.conf</code>:
 
@@ -251,7 +251,7 @@ systemctl enable pgbouncer
 ```
 
 
-### Required settings for postgresql.conf of NodeX
+### Required settings for postgresql.conf on NodeX
 
 ```
 shared_preload_libraries = 'pg_stat_statements,auto_explain'
@@ -287,7 +287,7 @@ track_functions = pl
 track_activity_query_size = 2048
 ```
 
-### Python installation
+### Python installation on all nodes
 
 ```
 yum groupinstall -y 'development tools'
