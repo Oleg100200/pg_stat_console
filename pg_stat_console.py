@@ -609,6 +609,9 @@ class Chart():
 		if 'tbl_name' in fields:
 			report_type = "simple_tbl_stat"
 			
+		if 'stm_query' in fields:
+			report_type = "stm_query"			
+			
 		graph_json = """""" 
 		
 		if report_type == "query_durations" or report_type == "query_blocks":
@@ -624,7 +627,19 @@ class Chart():
 				$('#explain_container').empty();	
 				$('#explain_container').append( e.dataPoint.explain.replace(/ /g, "&nbsp;") );	
 			}"""
-		
+			
+		if report_type == "stm_query":
+			graph_json += """function click_event( e )
+			{
+				$('.canvasjs-chart-tooltip').css("visibility", "hidden");
+				
+				$('#details').css("visibility", "visible");
+				details_closed = false;	
+					
+				$('#query_container').empty();	
+				$('#query_container').append( e.dataPoint.stm_query );
+			}"""
+			
 		graph_json += """	
 			$('<div id=\"""" + chart_name + """\" class="scrollable_obj" style="height: 600px; width: 100%;" chart-name=\"""" + graph_name + """\"> </div>').appendTo( $('#graph_space' ) );
 			var """ + chart_name + """ = new CanvasJS.Chart(\"""" + chart_name + """\",
@@ -648,7 +663,14 @@ class Chart():
 		if report_type == "simple_tbl_stat":
 			graph_json += """content: function(e){
 				  var content;
-				  content = "<strong>"+e.entries[0].dataPoint.y + "</strong>" + " " + e.entries[0].dataPoint.tbl_name ;
+				  content = "<strong>"+e.entries[0].dataPoint.y + "</strong>" + " " + e.entries[0].dataPoint.tbl_name;
+				  return content;
+				}"""
+
+		if report_type == "stm_query":
+			graph_json += """content: function(e){
+				  var content;
+				  content = "<div style=\\"margin: 10px;\\"><strong>"+e.entries[0].dataPoint.y + "</strong></div><div style=\\"word-wrap: break-word;width: 500px;margin: 10px;\\">" + e.entries[0].dataPoint.stm_query + "</div>";
 				  return content;
 				}"""
 				
@@ -713,6 +735,15 @@ class Chart():
 									detail = """  detail_1: \"""" + 'Value of calculated data: ' + str( d[ 'total_blks_size_detail' ] ) + """\"""" 
 								blocks[ level_i ].append( '{ y: ' + str( d[ 2 ] ) + ',  label: "' + self.get_date_time_from_str( str( d[ 1 ] ) ) + '",' + detail + \
 								', query: ' + self.escapejs( self.remove_cred_data( str( d[ 'query' ] ) ) ).replace("\\n", "</br>") + ', explain: ' + self.escapejs( self.remove_cred_data( str( d[ 'plan' ] ) ) ).replace("\\n", "</br>") + '}' )	
+							#--------------------------------------------------------------------------------------------------------------------------------
+							if report_type == "stm_query":
+								detail = "detail_1:\"\""
+								#if 'stm_query' in fields:
+								#	detail = """  detail_1: \"""" + 'Loaded from disk: ' + str( d[ 'total_read_blks_size_detail' ] ) + """\"""" 
+								#	detail += """,  detail_2: \"""" + 'I/O read time: ' + str( d[ 'io_read_time_sec' ] ) + """ sec\"""" 
+								#	detail += """,  detail_3: \"""" + 'Duration: ' + str( d[ 'duration_sec' ] ) + """ sec\"""" 							
+								blocks[ level_i ].append( '{ y: ' + str( d[ 2 ] ) + ',  label: "' + self.get_date_time_from_str( str( d[ 1 ] ) ) + '",' + detail + \
+								', stm_query: ' + self.escapejs( self.remove_cred_data( str( d[ 'stm_query' ] ) ) ).replace("\\n", "</br>") + '}' )	
 							#--------------------------------------------------------------------------------------------------------------------------------
 							if report_type == "simple_tbl_stat":
 								detail = "tbl_name:\"" + str( d[ 'tbl_name' ] ) + "\""
@@ -1733,13 +1764,13 @@ class GetCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart):
 								select 
 									psc_round_minutes( s.dt """ + timezone_correct_time_backward +""" , 1 )::timestamp without time zone as dt_rounded, 
 									s.val, 
-									s.id, q.query_text as query
+									s.id, q.query_text as stm_query
 									FROM psc_stm_stat s
 									inner join psc_stm_queries q on q.id = s.query_id
 									inner join psc_dbs d on d.id = s.db_id
-									where dt >= '""" + data["date_a" ] + """'::timestamp """ + timezone_correct_time_forward + """ and dt < '""" + data["date_b" ] + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
+									inner join psc_params p on p.id = s.param_id
+									where p.param_name = 'stm_calls' and dt >= '""" + data["date_a" ] + """'::timestamp """ + timezone_correct_time_forward + """ and dt < '""" + data["date_b" ] + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
 									order by dt_rounded asc, val asc
-									limit 10
 							) T order by T.dt_rounded asc, graph_block asc"""
 		
 		if self.check_auth() == False:

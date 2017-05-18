@@ -521,7 +521,15 @@ query_single_db_sn = """
 		group by d.datname, l.mode;
 
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
-		select datname, 'autovacuum_workers' as autovacuum_workers, count(pid) from pg_stat_activity
+		select datname, 'autovacuum_workers' as autovacuum_workers,
+		sum(
+			case when state = 'active' then 
+				1 
+			else
+				0
+			end
+		) as cnt
+		from pg_stat_activity
 		where query ilike '%autovacuum:%' and pid <> pg_backend_pid()
 		group by datname;	
 	end$$;""";
@@ -787,7 +795,7 @@ def pg_sys_stat_snapshot():
 				#====================================================================================================
 				#pg_stat_statements processing
 				query = conn[1].prepare( """
-				select T.dt, T.query, T.queryid, abs(T.calls_res) as val, 'calls'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.calls_res) as val, 'stm_calls'::text as metric
 				from (
 					select
 					t1.query,
@@ -796,12 +804,12 @@ def pg_sys_stat_snapshot():
 					t1.queryid
 					from psc_stm_t1 t1
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
-					where t2.calls - t1.calls <> 0
+					where t2.calls - t1.calls <> 0  
 					order by calls_res desc
 					limit """ + top_queries_in_snapshot + """ 
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.total_time_res) as val, 'total_time'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.total_time_res) as val, 'stm_total_time'::text as metric
 				from (
 					select t1.query,
 					t2.total_time - t1.total_time as total_time_res,
@@ -809,12 +817,12 @@ def pg_sys_stat_snapshot():
 					t1.queryid
 					from psc_stm_t1 t1
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
-					where t2.total_time - t1.total_time <> 0
+					where round((t2.total_time - t1.total_time)::numeric, 3) <> 0
 					order by total_time_res desc
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.rows_res) as val, 'rows'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.rows_res) as val, 'stm_rows'::text as metric
 				from (
 					select t1.query,
 					t2.rows - t1.rows as rows_res,
@@ -827,7 +835,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.shared_blks_hit_res) as val, 'shared_blks_hit'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_hit_res) as val, 'stm_shared_blks_hit'::text as metric
 				from (
 					select t1.query,
 					t2.shared_blks_hit - t1.shared_blks_hit as shared_blks_hit_res,
@@ -840,7 +848,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.shared_blks_read_res) as val, 'shared_blks_read'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_read_res) as val, 'stm_shared_blks_read'::text as metric
 				from (
 					select t1.query,
 					t2.shared_blks_read - t1.shared_blks_read as shared_blks_read_res,
@@ -853,7 +861,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.shared_blks_dirtied_res) as val, 'shared_blks_dirtied'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_dirtied_res) as val, 'stm_shared_blks_dirtied'::text as metric
 				from (
 					select t1.query,
 					t2.shared_blks_dirtied - t1.shared_blks_dirtied as shared_blks_dirtied_res,
@@ -866,7 +874,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.shared_blks_written_res) as val, 'shared_blks_written'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.shared_blks_written_res) as val, 'stm_shared_blks_written'::text as metric
 				from (
 					select t1.query,
 					t2.shared_blks_written - t1.shared_blks_written as shared_blks_written_res,
@@ -879,7 +887,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.local_blks_hit_res) as val, 'local_blks_hit'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.local_blks_hit_res) as val, 'stm_local_blks_hit'::text as metric
 				from (
 					select t1.query,
 					t2.local_blks_hit - t1.local_blks_hit as local_blks_hit_res,
@@ -892,7 +900,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.local_blks_read_res) as val, 'local_blks_read'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.local_blks_read_res) as val, 'stm_local_blks_read'::text as metric
 				from (
 					select t1.query,
 					t2.local_blks_read - t1.local_blks_read as local_blks_read_res,
@@ -905,7 +913,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.local_blks_dirtied_res) as val, 'local_blks_dirtied'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.local_blks_dirtied_res) as val, 'stm_local_blks_dirtied'::text as metric
 				from (
 					select t1.query,
 					t2.local_blks_dirtied - t1.local_blks_dirtied as local_blks_dirtied_res,
@@ -918,7 +926,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.local_blks_written_res) as val, 'local_blks_written'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.local_blks_written_res) as val, 'stm_local_blks_written'::text as metric
 				from (
 					select t1.query,
 					t2.local_blks_written - t1.local_blks_written as local_blks_written_res,
@@ -931,7 +939,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.temp_blks_read_res) as val, 'temp_blks_read'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.temp_blks_read_res) as val, 'stm_temp_blks_read'::text as metric
 				from (
 					select t1.query,
 					t2.temp_blks_read - t1.temp_blks_read as temp_blks_read_res,
@@ -944,7 +952,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.temp_blks_written_res) as val, 'temp_blks_written'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.temp_blks_written_res) as val, 'stm_temp_blks_written'::text as metric
 				from (
 					select t1.query,
 					t2.temp_blks_written - t1.temp_blks_written as temp_blks_written_res,
@@ -957,7 +965,7 @@ def pg_sys_stat_snapshot():
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.blk_read_time_res) as val, 'blk_read_time'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.blk_read_time_res) as val, 'stm_blk_read_time'::text as metric
 				from (
 					select t1.query,
 					t2.blk_read_time - t1.blk_read_time as blk_read_time_res,
@@ -965,12 +973,12 @@ def pg_sys_stat_snapshot():
 					t1.queryid
 					from psc_stm_t1 t1
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
-					where t2.blk_read_time - t1.blk_read_time <> 0
+					where round((t2.blk_read_time - t1.blk_read_time)::numeric, 3) <> 0
 					order by blk_read_time_res desc
 					limit """ + top_queries_in_snapshot + """
 				) T
 				union
-				select T.dt, T.query, T.queryid, abs(T.blk_write_time_res) as val, 'blk_write_time'::text as metric
+				select T.dt, T.query, T.queryid, abs(T.blk_write_time_res) as val, 'stm_blk_write_time'::text as metric
 				from (
 					select t1.query,
 					t2.blk_write_time - t1.blk_write_time as blk_write_time_res,
@@ -978,7 +986,7 @@ def pg_sys_stat_snapshot():
 					t1.queryid
 					from psc_stm_t1 t1
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
-					where t2.blk_write_time - t1.blk_write_time <> 0
+					where round((t2.blk_write_time - t1.blk_write_time)::numeric, 3) <> 0
 					order by blk_write_time_res desc
 					limit """ + top_queries_in_snapshot + """
 				) T
@@ -1392,7 +1400,7 @@ def make_iostat_data():
 	def write_network_vals( cmd_netstat ):
 		count_devices = 0
 		for line in cmd_netstat.stdout:
-			columns = line.decode('utf8').split() 
+			columns = line.decode('utf8').split()
 			#cmd_netstat	
 			#['Kernel', 'Interface', 'table']
 			#['Iface', 'MTU', 'Met', 'RX-OK', 'RX-ERR', 'RX-DRP', 'RX-OVR', 'TX-OK', 'TX-ERR', 'TX-DRP', 'TX-OVR', 'Flg']
@@ -1441,12 +1449,12 @@ def make_iostat_data():
 
 	cmd_iostat = subprocess.Popen('iostat -d -c -m -x ' + sleep_interval_os_stat,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = cmd_iostat.communicate()
-
 	if str( err ).find('Cannot find disk data') > -1:
 		time.sleep( sleep_interval_os_stat_if_iostat_not_working )
 	else:
-		for line in cmd_iostat.stdout:
-			columns = line.decode('utf8').split()
+		lines = out.decode('utf8').split('\n')
+		for line in lines:
+			columns = line.split()
 			#cmd_iostat	
 			#[]
 			#['avg-cpu:', '%user', '%nice', '%system', '%iowait', '%steal', '%idle']
