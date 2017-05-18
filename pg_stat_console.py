@@ -670,7 +670,7 @@ class Chart():
 		if report_type == "stm_query":
 			graph_json += """content: function(e){
 				  var content;
-				  content = "<div style=\\"margin: 10px;\\"><strong>"+e.entries[0].dataPoint.y + "</strong></div><div style=\\"word-wrap: break-word;width: 500px;margin: 10px;\\">" + e.entries[0].dataPoint.stm_query + "</div>";
+				  content = "<div style=\\"margin: 10px;\\"><strong>Value: "+e.entries[0].dataPoint.y + "</strong></div><div style=\\"word-wrap: break-word;width: 500px;height: auto;margin: 10px;white-space: pre-wrap; */\\">"+ e.entries[0].dataPoint.stm_query + "</div>";
 				  return content;
 				}"""
 				
@@ -1752,33 +1752,263 @@ class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
-class GetCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart):
-	def post_(self):
-		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
-
-		query = """
+class StmStatQuery():
+	def query(self, timezone_correct_time_backward, timezone_correct_time_forward, date_a, date_b, metric):
+		return """
 		select row_number() OVER(PARTITION BY T.dt_rounded ORDER BY T.dt_rounded ) AS graph_block, T.* 
 							from 
 							(
 								select 
-									psc_round_minutes( s.dt """ + timezone_correct_time_backward +""" , 1 )::timestamp without time zone as dt_rounded, 
-									s.val, 
+									( s.dt """ + timezone_correct_time_backward +""" )::timestamp without time zone as dt_rounded, 
+									round(s.val, 3), 
 									s.id, q.query_text as stm_query
 									FROM psc_stm_stat s
 									inner join psc_stm_queries q on q.id = s.query_id
 									inner join psc_dbs d on d.id = s.db_id
 									inner join psc_params p on p.id = s.param_id
-									where p.param_name = 'stm_calls' and dt >= '""" + data["date_a" ] + """'::timestamp """ + timezone_correct_time_forward + """ and dt < '""" + data["date_b" ] + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
+									where p.param_name = '""" + metric + """' and dt >= '""" + date_a + """'::timestamp """ + timezone_correct_time_forward + """ and 
+										dt < '""" + date_b + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
 									order by dt_rounded asc, val asc
 							) T order by T.dt_rounded asc, graph_block asc"""
-		
+
+
+class GetCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_calls')
+
 		if self.check_auth() == False:
 			return ""		
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:		
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Calls by Queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
+class GetTotalTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_total_time')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Total time by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
+class GetRowsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_rows')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Rows by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
+class GetSharedBlksHitByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_hit')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Shared blks hit by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetSharedBlksReadByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_read')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Shared blks read by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetSharedBlksDirtiedByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_dirtied')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Shared blks dirtied by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetSharedBlksWrittenByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_written')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Shared blks written by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetLocalBlksHitByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_hit')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Local blks hit by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetLocalBlksReadByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_read')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Local blks read by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetLocalBlksDirtiedByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_dirtied')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Local blks dirtied by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetLocalBlksWrittenByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_written')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Local blks written by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+						
+class GetTempBlksReadByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_read')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Temp blks read by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		
+class GetTempBlksWrittenByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_written')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Temp blks written by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+	
+class GetBlkReadTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_read_time')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blk read time by queries (' + db[1] + ')' ] )
+		
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+	
+class GetBlkWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_write_time')
+
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:		
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blk write time by queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -2394,19 +2624,20 @@ application = tornado.web.Application([
 			('/showUserConfig', ShowUserConfigHandler),
 			
 			('/getcallsbyqueries', GetCallsByQueriesHandler),
-			# ('/getTotalTimeByQueries', GetTotalTimeByQueriesHandler),
-			# ('/getRowsByQueries', GetRowsByQueriesHandler),
-			# ('/getSharedBlkshitByQueries', GetSharedBlksHitByQueriesHandler),
-			# ('/getSharedBlksreadByQueries', GetSharedBlksReadByQueriesHandler),
-			# ('/getSharedBlksdirtiedByQueries', GetSharedBlksDirtiedByQueriesHandler),
-			# ('/getSharedBlkswrittenByQueries', GetSharedBlksWrittenByQueriesHandler),
-			# ('/getLocalBlkshitByQueries', GetLocalBlksHitByQueriesHandler),
-			# ('/getLocalBlksreadByQueries', GetLocalBlksReadByQueriesHandler),
-			# ('/getLocalBlksdirtiedByQueries', GetLocalBlksDirtiedByQueriesHandler),
-			# ('/getTempBlksreadByQueries', GetTempBlksReadByQueriesHandler),
-			# ('/getTempBlkswrittenByQueries', GetTempBlksWrittenByQueriesHandler),
-			# ('/getBlkReadTimeByQueries', GetBlkReadTimeByQueriesHandler),			
-			# ('/getBlkWriteTimeByQueries', GetBlkWriteTimeByQueriesHandler),
+			('/gettotaltimebyqueries', GetTotalTimeByQueriesHandler),
+			('/getrowsbyqueries', GetRowsByQueriesHandler),
+			('/getsharedblkshitbyqueries', GetSharedBlksHitByQueriesHandler),
+			('/getsharedblksreadbyqueries', GetSharedBlksReadByQueriesHandler),
+			('/getsharedblksdirtiedbyqueries', GetSharedBlksDirtiedByQueriesHandler),
+			('/getsharedblkswrittenbyqueries', GetSharedBlksWrittenByQueriesHandler),
+			('/getlocalblkshitbyqueries', GetLocalBlksHitByQueriesHandler),
+			('/getlocalblksreadbyqueries', GetLocalBlksReadByQueriesHandler),
+			('/getlocalblksdirtiedbyqueries', GetLocalBlksDirtiedByQueriesHandler),
+			('/getlocalblkswrittenbyqueries', GetLocalBlksWrittenByQueriesHandler),
+			('/gettempblksreadbyqueries', GetTempBlksReadByQueriesHandler),
+			('/gettempblkswrittenbyqueries', GetTempBlksWrittenByQueriesHandler),
+			('/getblkreadtimebyqueries', GetBlkReadTimeByQueriesHandler),			
+			('/getblkwritetimebyqueries', GetBlkWriteTimeByQueriesHandler),
 			#===================================================================
 			# proxy methods for pg_stat_monitor
 			('/getMaintenanceTasks', GetMaintenanceTasksHandler),

@@ -801,9 +801,9 @@ def pg_sys_stat_snapshot():
 					t1.query,
 					t2.calls - t1.calls as calls_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.calls - t1.calls <> 0  
 					order by calls_res desc
 					limit """ + top_queries_in_snapshot + """ 
@@ -814,9 +814,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.total_time - t1.total_time as total_time_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.total_time - t1.total_time)::numeric, 3) <> 0
 					order by total_time_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -827,9 +827,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.rows - t1.rows as rows_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.rows - t1.rows <> 0
 					order by rows_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -840,9 +840,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.shared_blks_hit - t1.shared_blks_hit as shared_blks_hit_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_hit - t1.shared_blks_hit <> 0
 					order by shared_blks_hit_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -853,9 +853,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.shared_blks_read - t1.shared_blks_read as shared_blks_read_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_read - t1.shared_blks_read <> 0
 					order by shared_blks_read_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -866,9 +866,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.shared_blks_dirtied - t1.shared_blks_dirtied as shared_blks_dirtied_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_dirtied - t1.shared_blks_dirtied <> 0
 					order by shared_blks_dirtied_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -879,9 +879,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.shared_blks_written - t1.shared_blks_written as shared_blks_written_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_written - t1.shared_blks_written <> 0
 					order by shared_blks_written_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -892,9 +892,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.local_blks_hit - t1.local_blks_hit as local_blks_hit_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_hit - t1.local_blks_hit <> 0
 					order by local_blks_hit_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -905,9 +905,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.local_blks_read - t1.local_blks_read as local_blks_read_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_read - t1.local_blks_read <> 0
 					order by local_blks_read_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -918,9 +918,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.local_blks_dirtied - t1.local_blks_dirtied as local_blks_dirtied_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_dirtied - t1.local_blks_dirtied <> 0
 					order by local_blks_dirtied_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -931,9 +931,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.local_blks_written - t1.local_blks_written as local_blks_written_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_written - t1.local_blks_written <> 0
 					order by local_blks_written_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -944,9 +944,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.temp_blks_read - t1.temp_blks_read as temp_blks_read_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.temp_blks_read - t1.temp_blks_read <> 0
 					order by temp_blks_read_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -957,9 +957,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.temp_blks_written - t1.temp_blks_written as temp_blks_written_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.temp_blks_written - t1.temp_blks_written <> 0
 					order by temp_blks_written_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -970,9 +970,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.blk_read_time - t1.blk_read_time as blk_read_time_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.blk_read_time - t1.blk_read_time)::numeric, 3) <> 0
 					order by blk_read_time_res desc
 					limit """ + top_queries_in_snapshot + """
@@ -983,9 +983,9 @@ def pg_sys_stat_snapshot():
 					select t1.query,
 					t2.blk_write_time - t1.blk_write_time as blk_write_time_res,
 					t2.now as dt,
-					t1.queryid
+					(select ('x'||substr(md5(t1.queryid::text || t1.userid::text),1,16))::bit(64)::bigint) as queryid
 					from psc_stm_t1 t1
-					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid
+					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.blk_write_time - t1.blk_write_time)::numeric, 3) <> 0
 					order by blk_write_time_res desc
 					limit """ + top_queries_in_snapshot + """
