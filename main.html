@@ -84,7 +84,7 @@
 		</div>	
 	</div>
 	
-	<div id="sub_menu_1" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_1" parent_menu_id="menu_serv_load" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="sub_menu_start_dashboard" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Start dashboard</div>
@@ -110,7 +110,7 @@
 		</div>	
 	</div>	
 	
-	<div id="sub_menu_2" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_2" parent_menu_id="menu_pg_load" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 			
@@ -137,38 +137,30 @@
 		</div>	
 	</div>
 	
-	<div id="sub_menu_2_2" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_2_2" parent_menu_id="menu_pg_queries" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="sub_menu_timing_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Query durations</div>
 				<div id="sub_menu_io_read" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">I/O Timings read by queries</div>
 				<div id="sub_menu_blocks_by_queries_autoexp" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blocks by queries</div>
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
-				<div id="sub_menu_calls_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Calls by queries</div>
-				<div id="sub_menu_total_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Total time by queries</div>
-				<div id="sub_menu_rows_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Rows by queries</div>
+				<div id="sub_menu_stm_calls_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Calls by queries</div>
+				<div id="sub_menu_stm_total_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Total time by queries</div>
+				<div id="sub_menu_stm_rows_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Rows by queries</div>
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
-				<div id="sub_menu_shared_blks_hit_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks hit by queries</div>
-				<div id="sub_menu_shared_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks read by queries</div>
-				<div id="sub_menu_shared_blks_dirtied_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks dirtied by queries</div>
-				<div id="sub_menu_shared_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks written by queries</div>
-				<div id="sub_menu_local_blks_hit_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks hit by queries</div>
-				<div id="sub_menu_local_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks read by queries</div>
-				<div id="sub_menu_local_blks_dirtied_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks dirtied by queries</div>
-				<div id="sub_menu_local_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks written by queries</div>
-				<div id="sub_menu_temp_blks_read_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Temp blks read by queries</div>
-				<div id="sub_menu_temp_blks_written_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Temp blks written by queries</div>
+				<div id="sub_menu_stm_shared_blks_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Shared blks by queries</div>
+				<div id="sub_menu_stm_local_blks_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Local blks by queries</div>
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
-				<div id="sub_menu_blk_read_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blk read time by queries</div>
-				<div id="sub_menu_blk_write_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blk write time by queries</div>
-				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
+				<div id="sub_menu_stm_temp_blks_read_write_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Temp blks read/write by queries</div>
+				<div id="sub_menu_stm_blk_read_write_time_by_queries" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Blk read/write time by queries</div>
+				<div id="" class="pg_stat_console_menu_elem_inactive"></div>
 				<div id="sub_menu_compare_2_2" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">[ compare different metrics ]</div>	
 				<div id="sub_menu_compare_single_2_2" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">[ compare single metric ]</div>
 			</div>
 		</div>
 	</div>
 	
-	<div id="sub_menu_3" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_3" parent_menu_id="menu_typically_queries" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="sub_menu_stat_activity" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Connections pg_stat_activity</div>			
@@ -189,7 +181,7 @@
 		</div>	
 	</div>	
 	
-	<div id="sub_menu_4" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_4" parent_menu_id="menu_logs" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="sub_menu_common_log" class="pg_stat_console_menu_elem pg_stat_console_ani_mi">Common DB log</div>			
@@ -204,7 +196,7 @@
 		</div>	
 	</div>		
 
-	<div id="sub_menu_5" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
+	<div id="sub_menu_5" parent_menu_id="menu_conn_manage" class="pg_stat_console_menu" style="z-index:100;display: none; width:250px;height:100%;position:fixed;margin-left:250px;">
 		<div class="pg_stat_console_fonts" style="display: table; text-align:left;height:100%;">
 			<div style="display: table-cell; vertical-align: middle;">
 				<div id="sub_menu_conn_management" class="pg_stat_console_menu_elem pg_stat_console_ani_mi node_class_pg_stat_monitor">Connection management</div>	

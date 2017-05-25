@@ -19,70 +19,110 @@ var progress_hidden = true;
 var demo_dt_a = "";
 var demo_dt_b = "";
 
+CanvasJS.addColorSet("pscColors",
+	[
+	"#0d2e6b",
+	"#244582",
+	"#324f87",
+	"#415b8e",
+	"#4a5d84",
+	"#410f8c",
+	"#6128b7",
+	"#7544bf",
+	"#8058bc",
+	"#8a6aba"
+	]);
 
-var dashboard_dict = [['getCPUStat','CPU load'],
-['getMemUsageStat','Memory usage'],
-['getDiskUtilStat','Disk utilization'],
-['getDiskUsageStat','Disk usage'],
-['getWRQMRRQMStat','rrqm/s wrqm/s'],
-['getWRStat','r/s w/s'],
-['getRSecWSecStat','rMB/s wMB/s'],
-['getAVGRQStat','avgrq-sz'],
-['getAVGQUStat','avgqu-sz'],
-['getAWaitStat','await'],
-['getNetworkTrafficStat','Network Traffic'],
-['getNetworkPacketsStat','Network Packets'],
-['getNetworkErrorsStat','Network Errors'],
-['getReadStat','heap_blks_read_per_sec'],
-['getWriteStat','_tup_per_sec'],
-['getTupStat','tup_fetch_sum'], ['getTupStat','idx_tup_fetch_per_sec'], ['getTupStat','seq_tup_read_per_sec'],
-['getIndexStat','reads / fetched'],['getIndexStat','reads / scans'],['getIndexStat','fetched / scans'],
-['getQueryDurations','Query durations in sec'],
-['getQueryIODurations','I/O Timings read by queries'],
-['getQueryBlks','Blocks by queries'],
-['getBgwriterStat','checkpoints_timed'],['getBgwriterStat','checkpoint_write_time'],['getBgwriterStat','buffers_checkpoint'],
-['getBlockHitDB','blks_hit_per_sec'],
-['getBlockReadDB','blks_read_per_sec'],
-['getTupWriteDB','tup_inserted_per_sec'],
-['getTupRetFetchDB','tup_returned_per_sec'],
-['getTxDB','xact_commit_per_sec'],
-['getDeadlocksDB','deadlocks'],
-['getAutovacStat','autovacuum_workers'],
-['getConnsStat','conns'],
-['getLocksStat','All locks'],
-['getLog','']];
+var div_id_to_method_dict = [
+	['sub_menu_stm_calls_by_queries', 'getStmCallsByQueries'],
+	['sub_menu_stm_total_time_by_queries', 'getStmTotalTimeByQueries'],
+	['sub_menu_stm_rows_by_queries', 'getStmRowsByQueries'],
+	['sub_menu_stm_shared_blks_by_queries', 'getStmSharedBlksByQueries'],
+	['sub_menu_stm_local_blks_by_queries', 'getStmLocalBlksByQueries'],
+	['sub_menu_stm_temp_blks_read_write_by_queries', 'getStmTempBlksReadWriteTimeByQueries'],
+	['sub_menu_stm_blk_read_write_time_by_queries', 'getStmBlkReadWriteTimeByQueries']
+];
 
+var dashboard_dict = [
+	['getCPUStat','CPU load'],
+	['getMemUsageStat','Memory usage'],
+	['getDiskUtilStat','Disk utilization'],
+	['getDiskUsageStat','Disk usage'],
+	['getWRQMRRQMStat','rrqm/s wrqm/s'],
+	['getWRStat','r/s w/s'],
+	['getRSecWSecStat','rMB/s wMB/s'],
+	['getAVGRQStat','avgrq-sz'],
+	['getAVGQUStat','avgqu-sz'],
+	['getAWaitStat','await'],
+	['getNetworkTrafficStat','Network Traffic'],
+	['getNetworkPacketsStat','Network Packets'],
+	['getNetworkErrorsStat','Network Errors'],
+	['getReadStat','heap_blks_read_per_sec'],
+	['getWriteStat','_tup_per_sec'],
+	['getTupStat','tup_fetch_sum'], ['getTupStat','idx_tup_fetch_per_sec'], ['getTupStat','seq_tup_read_per_sec'],
+	['getIndexStat','reads / fetched'],['getIndexStat','reads / scans'],['getIndexStat','fetched / scans'],
+	['getQueryDurations','Query durations in sec'],
+	['getQueryIODurations','I/O Timings read by queries'],
+	['getQueryBlks','Blocks by queries'],
+	['getBgwriterStat','checkpoints_timed'],['getBgwriterStat','checkpoint_write_time'],['getBgwriterStat','buffers_checkpoint'],
+	['getBlockHitDB','blks_hit_per_sec'],
+	['getBlockReadDB','blks_read_per_sec'],
+	['getTupWriteDB','tup_inserted_per_sec'],
+	['getTupRetFetchDB','tup_returned_per_sec'],
+	['getTxDB','xact_commit_per_sec'],
+	['getDeadlocksDB','deadlocks'],
+	['getAutovacStat','autovacuum_workers'],
+	['getConnsStat','conns'],
+	['getLocksStat','All locks'],
+	['getLog',''],
+	['getStmCallsByQueries','Calls by queries'],	
+	['getStmTotalTimeByQueries','Total time by queries'],
+	['getStmRowsByQueries','Rows by queries'],
+	['getStmSharedBlksByQueries','Shared blks by queries'],
+	['getStmLocalBlksByQueries','Local blks by queries'],
+	['getStmTempBlksReadWriteTimeByQueries','Temp blks read/write by queries'],
+	['getStmBlkReadWriteTimeByQueries','Blk read/write time by queries']
+];
 
-var compare_dict = [['getCPUStat','HW load -> CPU'],
-['getMemUsageStat','HW load -> Memory usage'],
-['getDiskUtilStat','HW load -> Disk utilization'],
-['getDiskUsageStat','HW load -> Disk usage'],
-['getWRQMRRQMStat','HW load -> Read/write req merged per sec'],
-['getWRStat','HW load -> Read/Write req per sec'],
-['getRSecWSecStat','HW load -> Read/Write MBytes per sec'],
-['getAVGRQStat','HW load -> Avg size request'],
-['getAVGQUStat','HW load -> Avg queue lenght of requests'],
-['getAWaitStat','HW load -> Avg time for I/O requests'],
-['getNetworkTrafficStat','HW load -> Network Traffic'],
-['getNetworkPacketsStat','HW load -> Network Packets'],
-['getNetworkErrorsStat','HW load -> Network Errors'],
-['getReadStat','PG load -> Blocks read by tables'],
-['getWriteStat','PG load -> Tuples write by tables'],
-['getTupStat','PG load -> Scans (seq and index) by tables'], 
-['getIndexStat','PG load -> Efficiency index scans by tables'],
-['getQueryDurations','PG load -> Query durations'],
-['getQueryIODurations','PG load -> I/O Timings read by queries'],
-['getQueryBlks','PG load -> Blocks by queries'],
-['getBgwriterStat','PG load -> Bgwriter stat'],
-['getBlockHitDB','PG load -> Blocks hit by databases'],
-['getBlockReadDB','PG load -> Blocks read by databases'],
-['getTupWriteDB','PG load -> Tuples write by databases'],
-['getTupRetFetchDB','PG load -> Tuples returned/fetched by databases'],
-['getTxDB','PG load -> Transactions by databases'],
-['getDeadlocksDB','PG load -> Deadlocks'],
-['getAutovacStat','PG load -> Autovacuum workers activity'],
-['getConnsStat','PG load -> Connections'],
-['getLocksStat','PG load -> Locks']];
+var compare_dict = [
+	['getCPUStat','HW load -> CPU'],
+	['getMemUsageStat','HW load -> Memory usage'],
+	['getDiskUtilStat','HW load -> Disk utilization'],
+	['getDiskUsageStat','HW load -> Disk usage'],
+	['getWRQMRRQMStat','HW load -> Read/write req merged per sec'],
+	['getWRStat','HW load -> Read/Write req per sec'],
+	['getRSecWSecStat','HW load -> Read/Write MBytes per sec'],
+	['getAVGRQStat','HW load -> Avg size request'],
+	['getAVGQUStat','HW load -> Avg queue lenght of requests'],
+	['getAWaitStat','HW load -> Avg time for I/O requests'],
+	['getNetworkTrafficStat','HW load -> Network Traffic'],
+	['getNetworkPacketsStat','HW load -> Network Packets'],
+	['getNetworkErrorsStat','HW load -> Network Errors'],
+	['getReadStat','PG load -> Blocks read by tables'],
+	['getWriteStat','PG load -> Tuples write by tables'],
+	['getTupStat','PG load -> Scans (seq and index) by tables'], 
+	['getIndexStat','PG load -> Efficiency index scans by tables'],
+	['getBgwriterStat','PG load -> Bgwriter stat'],
+	['getBlockHitDB','PG load -> Blocks hit by databases'],
+	['getBlockReadDB','PG load -> Blocks read by databases'],
+	['getTupWriteDB','PG load -> Tuples write by databases'],
+	['getTupRetFetchDB','PG load -> Tuples returned/fetched by databases'],
+	['getTxDB','PG load -> Transactions by databases'],
+	['getDeadlocksDB','PG load -> Deadlocks'],
+	['getAutovacStat','PG load -> Autovacuum workers activity'],
+	['getConnsStat','PG load -> Connections'],
+	['getLocksStat','PG load -> Locks'],
+	['getQueryDurations','PG queries -> Query durations'],
+	['getQueryIODurations','PG queries -> I/O Timings read by queries'],
+	['getQueryBlks','PG queries -> Blocks by queries'],
+	['getStmCallsByQueries','PG queries -> Calls by queries'],	
+	['getStmTotalTimeByQueries','PG queries -> Total time by queries'],
+	['getStmRowsByQueries','PG queries -> Rows by queries'],
+	['getStmSharedBlksByQueries','PG queries -> Shared blks by queries'],
+	['getStmLocalBlksByQueries','PG queries -> Local blks by queries'],
+	['getStmTempBlksReadWriteTimeByQueries','PG queries -> Temp blks read/write by queries'],
+	['getStmBlkReadWriteTimeByQueries','PG queries -> Blk read/write time by queries']
+];
 
 var time_filter = "<div style=\"width: 100%;text-align: center;\"><div style=\"height:70px;display: inline-block;\">"+
 	"<div class=\"pg_stat_console_fonts_on_white \" style=\"float:left;\"> " +
@@ -209,6 +249,14 @@ function all_xhr_abort()
 	}
 	current_xhr = [];
 	load_process = [];
+}
+	
+function get_method_by_div_id( div_id )
+{
+	for (var i = 0; i < div_id_to_method_dict.length; i++)
+		if(div_id_to_method_dict[ i ][ 0 ] == div_id)
+			return div_id_to_method_dict[ i ][ 1 ];
+	return 'div_id = ' + div_id + ' not found'
 }
 	
 function show_error( textStatus, errorThrown, descr )
@@ -1422,8 +1470,11 @@ function set_all_click_events()
 			$(this).click(function(){
 				reset_up_down_buttons();		
 
-				$( ".pg_stat_console_menu_elem" ).removeClass( "pg_stat_console_selected_elem" );
-				$(this).addClass( "pg_stat_console_selected_elem" );
+				$( ".pg_stat_console_menu_elem" ).removeClass( "pg_stat_console_selected_elem_clicked" );
+				$(this).addClass( "pg_stat_console_selected_elem_clicked" );
+				$( ".pg_stat_console_menu_elem_main_menu" ).removeClass( "pg_stat_console_selected_elem_clicked" );
+				$( "#" + $(this).parent().parent().parent().attr("parent_menu_id") ).addClass( "pg_stat_console_selected_elem_clicked" );
+				
 				all_xhr_abort();
 									
 			});
@@ -1601,7 +1652,7 @@ function set_all_click_events()
 	$( "#sub_menu_compare,#sub_menu_compare_2,#sub_menu_compare_2_2" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 
-		$("#nav_str").text( "Compare different metrics");
+		$("#nav_str").text( current_node_name + " -> " + "Compare different metrics");
 		
 		set_date_time_filter_compare_params(4);
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
@@ -1647,7 +1698,7 @@ function set_all_click_events()
 	$( "#sub_menu_compare_single,#sub_menu_compare_single_2,#sub_menu_compare_single_2_2" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 
-		$("#nav_str").text( "Compare single metric");
+		$("#nav_str").text( current_node_name + " -> " + "Compare single metric");
 		
 		set_date_time_filter_compare_single_params(4);
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
@@ -2225,7 +2276,7 @@ function set_all_click_events()
 		$( "#apply_filter_button" ).click();		
 	});
 	
-	$('div[id^=sub_menu_][id$=_by_queries]').click(function() {
+ 	$('div[id^=sub_menu_stm_][id$=_by_queries]').click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		selected_menu_elem.name = this.id;
@@ -2237,7 +2288,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#graph_space" ).empty();
-			current_xhr.push( graph_post( 'get' + selected_menu_elem.name.replace(/_/g , "").replace("submenu", "") , $("#date_a").val(), $("#date_b").val() ) ); 
+			current_xhr.push( graph_post( get_method_by_div_id( selected_menu_elem.name ), $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
 		$( "#apply_filter_button" ).click();
@@ -2624,7 +2675,7 @@ function set_all_click_events()
 			$( "#sub_space" ).empty();
 			current_xhr.push( $.ajax({ url: '/getLog',
 					type: 'post',
-					data: JSON.stringify( { node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data'), date_a: $("#date_a").val(), date_b: $("#date_b").val(), duration: "true", duration_g: duration_g_state, duration_v: $("#time_len_val").val() } ),
+					data: JSON.stringify( { node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data'), date_a: $("#date_a").val(), date_b: $("#date_b").val(), common: "true", duration: "true", duration_g: duration_g_state, duration_v: $("#time_len_val").val() } ),
 					success: function(data) {
 						//set_date_time_filter();
 						$( "#sub_space" ).empty();

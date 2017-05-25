@@ -884,7 +884,9 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 								if x > duration_val:
 									str_res += line
 							elif x < duration_val:
-								str_res += line	
+								str_res += line
+						if "common" in params:
+							str_res += line
 				except Exception as e:						
 					unique_str=re.search(r"duration\:\s\d+((.|,)\d+)?\sms",line)
 					if (unique_str is not None):

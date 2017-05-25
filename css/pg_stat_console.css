@@ -149,6 +149,10 @@ background-color:#2e3846;
 	background-color: rgb(78,95,118);
 }
 
+.pg_stat_console_selected_elem_clicked {
+	background-color: rgb(121,90,172);
+}
+
 .pg_stat_console_centered {
    /* position:absolute; 
     width:100%;

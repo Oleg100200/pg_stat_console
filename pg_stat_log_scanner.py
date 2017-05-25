@@ -11,15 +11,32 @@ from operator import itemgetter
 
 from contextlib import contextmanager
 from pgstatlogger import PSCLogger
-from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
-current_dir = os.getcwd() + '/'
-prepare_dirs()
+current_dir = os.path.dirname(sys.argv[0]) + '/'
 #=======================================================================================================
 #init config
 config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
 config.read( current_dir + 'conf/pg_stat_log_scanner.conf')
+#=======================================================================================================
+def read_conf_param_value( raw_value, boolean = False ):
+	#case 1:	param = 100 #comment
+	#case 2:	param = "common args" #comment
+	#case 3:	param = some text #comment
+	value_res = raw_value
+	quotes = re.findall("""\"[^"]*\"""", raw_value)
+	if len( quotes ) > 0:
+		value_res = quotes[0]
+		value_res = value_res.replace("\"", "")
+	else:
+		if raw_value.find("#") > -1:
+			value_res = raw_value[0:raw_value.find("#")-1]
+		value_res = value_res.strip(' \t\n\r')
+	
+	if boolean:
+		return True if value_res in [ '1', 't', 'true', 'True'] else False
+	
+	return value_res
 #=======================================================================================================
 #vars from config
 sys_stat_conn_str = read_conf_param_value( config['sys_stat']['sys_stat'] )
@@ -51,7 +68,7 @@ class LogScanner(Thread):
 				atime = os.path.getatime(full_path) 
 				mtime = os.path.getmtime(full_path) 
 
-				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=1)		
+				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=3)		
 				dt_from_fname = fname[fname.find( '-' )+1:fname.rfind( '.' )]
 				dt_from_fname = dt_from_fname.replace( "_", " " )
 				dt_from_fname = dt_from_fname[:13] + ':' + dt_from_fname[13:]
@@ -63,7 +80,43 @@ class LogScanner(Thread):
 					list_files.append( str( dirname ) + "/" + str( fname ) )
 		list_files.sort()
 		return list_files
-		
+
+	def get_date_pos_in_log_map( self, map, curr_pos ):
+		val = max(map,key=itemgetter(1))[1] 
+		for v in map:
+			if v[0] != 'p' and v[0] != 'l' and v[1] < val and v[1] > curr_pos:
+				val = v[1]
+		return val
+
+	def get_prev_date_pos_in_log_map( self, map, curr_pos ):
+		val = 0
+		for v in map:
+			if v[0] != 'p' and v[0] != 'l' and v[1] > val and v[1] < curr_pos:
+				val = v[1]
+		return val	
+
+	def get_prev_link_in_log_map( self, map, curr_pos ):
+		val = 0
+		link = ""	
+		for v in map:
+			if v[0] == 'l' and v[1] > val and v[1] < curr_pos:
+				val = v[1]
+				link = v[3]			
+		return link	
+
+	def get_query_by_link( self, map, link ):
+		links = []
+		for v in map:
+			if v[0] == 'l' and v[3] == link:
+				links.append( v )
+		return links
+
+	def get_link( self, full_list, val ):
+		pos = [y[1] for y in full_list].index(val)
+		if len( full_list ) >= pos + 1:
+			return full_list[ pos + 1 ][3]
+		return -1
+
 	@contextmanager
 	def closing_file(self, fo):
 		try:
@@ -109,6 +162,7 @@ class LogScanner(Thread):
 			try:
 				db_pg_stat = postgresql.open( sys_stat_conn_str )
 				self.init_sys_stat( db_pg_stat )
+
 				for file_name in list_files:
 					logger.log( "Processing... " + file_name, 'Info' )
 					fo = open( file_name, "r" )
@@ -121,7 +175,7 @@ class LogScanner(Thread):
 							if line_len > int(pg_log_line_max_len):
 								log_lines.append( str( line )[:int(pg_log_line_max_len)] )
 							else:
-								log_lines.append( str( line ) )
+								log_lines.append( str( line ) )	
 					
 					for line in log_lines:
 						str_val += str( line )
@@ -129,57 +183,25 @@ class LogScanner(Thread):
 					if len( str_val ) < 1:
 						continue
 
-					links=re.finditer(r"\,(\w+\.\w+)\,\d+\,\"", str_val)
+					links=re.finditer(r"\,\d+\/\d+\,\d+\,LOG\,\d+", str_val)
 					plans=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms\s\splan\:", str_val)
-					queries=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms\s\s(?!plan\:)", str_val)
 					dates=re.finditer(r"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9]):([0-5][0-9])\.([0-9][0-9][0-9])", str_val)
 					
-					map_links_and_dates = []
-					map_queries_and_plans = []
+					full_map = []
 					log_map = []
-
+					
 					#======================================
 					for m in links:
-						link_val = str_val[ m.span()[0]:m.span()[1]]
-						link_res = re.finditer(r"(\w+\.\w+)", link_val)
-						link_res_text = ""
-						for v in link_res:
-							link_res_text = link_val[v.span()[0]:v.span()[1]]
-						map_links_and_dates.append( [ "l", m.span()[0], m.span()[1], link_res_text ] )
-
+						full_map.append( [ "l", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
+						
 					for m in plans:
-						map_queries_and_plans.append( [ "p", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
-
-					for m in queries:
-						map_queries_and_plans.append( [ "q", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
-
+						full_map.append( [ "p", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
+						
 					for m in dates:
-						map_links_and_dates.append( [ "d", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
+						full_map.append( [ "d", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
 					#======================================
-
-					mapped_objs = []
-					#structure
-					#['p', '5908a708.2b87', ['p', 6730, 6759, 'duration: 37907.973 ms  plan:'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], ['l', 6655, 6673, '5908a708.2b87'], ['d', 8181, 8181, None], datetime_left]
-					#['q', '5908a708.2b87', ['q', 6127, 6151, 'duration: 37907.982 ms  '], ['d', 5983, 6006, '2017-05-04 15:27:30.733'], ['l', 6050, 6068, '5908a708.2b87'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], datetime_left]
-
-					for v in map_queries_and_plans:
-						nearest_dt_left = ['d', 0, 0, None]
-						nearest_dt_right = ['d',len( str_val ), len( str_val ), None]
-						nearest_link = ['l', 0, 0, None]
-
-						for vi in map_links_and_dates:
-							if vi[0] == 'd':
-								if vi[1] >= nearest_dt_left[1] and vi[1] < v[1]:
-									nearest_dt_left = vi
-
-								if vi[1] < nearest_dt_right[1] and vi[1] > v[1]:
-									nearest_dt_right = vi
-
-							if vi[0] == 'l':
-								if vi[1] > nearest_link[1] and vi[1] < v[1]:
-									nearest_link = vi
-
-						mapped_objs.append( [v[0], nearest_link[3], v, nearest_dt_left, nearest_link, nearest_dt_right, datetime.strptime(nearest_dt_left[3], "%Y-%m-%d %H:%M:%S.%f") ] )
+					
+					full_map_sorted = sorted(full_map, key=lambda x: x[1], reverse=False)
 
 					ps_queries_and_plans = db_pg_stat.prepare("""
 							INSERT INTO psc_queries_and_plans(
@@ -192,102 +214,112 @@ class LogScanner(Thread):
 					ps_queries_and_plans_check = db_pg_stat.prepare("""
 							select exists( select 1 from psc_queries_and_plans where dt = (($1::text)::timestamp with time zone) and 
 								duration = $2::double precision and query = $3::text )""")
-									
-					for v in mapped_objs:
-						if v[0] == 'p':
-							for vi in mapped_objs:
-								if vi[0] == 'q' and v[1] == vi[1] and (v[6]-vi[6]).total_seconds() < 2:
-									
-									txt_plan = str_val[ v[3][1]:v[5][1] ]
-									txt_query = str_val[ vi[3][1]:vi[5][1] ]
-									
-									#-----------------------------------------------------------------------------------
-									dt = "2000-01-01 00:00:00"
-									dt_str=re.search(r"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9]):([0-5][0-9])\.([0-9][0-9][0-9])",txt_query)
-									if (dt_str is not None):
-										dt = dt_str.group()
-									#-----------------------------------------------------------------------------------
-									dbname = "unknown"
-									pos_first = txt_query.find('","')
-									if pos_first > 0:
-										dbname =txt_query[ pos_first + 3: txt_query.find('",', pos_first + 3, len( txt_query ) ) ]
-									#-----------------------------------------------------------------------------------
-									
-									shared_hit = 0
-									read = 0
-									dirtied = 0
-									io_read_time = 0
-									cost = 0
-									duration = 0
-									
-									duration_str=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms", txt_plan)
-									cost_str=re.finditer(r"cost\=\d+((.|,)\d+)?\.\.\d+((.|,)\d+)?\s", txt_plan)
-									io_read_time_str=re.finditer(r"I\/O\sTimings\:\sread\=\d+((.|,)\d+)?", txt_plan)
-									shared_hit_str=re.finditer(r"shared\shit\=\d+((.|,)\d+)?", txt_plan)
-									read_str=re.finditer(r"read\=\d+((.|,)\d+)?", txt_plan)
-									dirtied_str=re.finditer(r"dirtied\=\d+((.|,)\d+)?", txt_plan)
 
-									durations = []
-									for m in duration_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											durations.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( durations ) > 0:						
-										duration = max( durations )
-										
-									costs = []
-									for m in cost_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											costs.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( costs ) > 0:						
-										cost = max( costs )
+					for v in full_map_sorted:
+						if v[ 0 ] == "p":
 
-									shared_hits = []
-									for m in shared_hit_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											shared_hits.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( shared_hits ) > 0:
-										shared_hit = max( shared_hits )
+							txt_plan = str_val[ self.get_prev_date_pos_in_log_map( full_map_sorted, v[ 1 ] ):self.get_date_pos_in_log_map( full_map_sorted, v[ 1 ] ) ]
+							txt_query = ""
+							
+							links = self.get_query_by_link( full_map_sorted, self.get_prev_link_in_log_map( full_map_sorted, v[ 1 ] ) )
+							if len(links) == 2:
+								txt_query = str_val[ self.get_prev_date_pos_in_log_map( full_map_sorted, \
+									links[ 0 ][1] ):self.get_date_pos_in_log_map( full_map_sorted, links[0][ 1 ] ) ]
+								if txt_query.find("ms  plan:") > -1:
+									txt_query = str_val[ self.get_prev_date_pos_in_log_map( full_map_sorted, \
+										links[ 1 ][1] ):self.get_date_pos_in_log_map( full_map_sorted, links[1][ 1 ] ) ]
+							else:
+								continue
 
-									io_read_times = []
-									for m in io_read_time_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											io_read_times.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( io_read_times ) > 0:
-										io_read_time = max( io_read_times )	
-										
-									reads = []
-									for m in read_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											reads.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( reads ) > 0:
-										if io_read_time in reads:
-											reads.remove(io_read_time)
-										read = max( reads )
-										
-									dirtieds = []
-									for m in dirtied_str:
-										sub_str = txt_plan[m.span()[0]:m.span()[1]]
-										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											dirtieds.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
-									if len( dirtieds ) > 0:
-										dirtied = max( dirtieds )			
+							#-----------------------------------------------------------------------------------
+							dt = "2000-01-01 00:00:00"
+							dt_str=re.search(r"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9]):([0-5][0-9])\.([0-9][0-9][0-9])",txt_query)
+							if (dt_str is not None):
+								dt = dt_str.group()
+								
+							#-----------------------------------------------------------------------------------			
 
-									if float(duration) != 0:
-										if not ps_queries_and_plans_check.first(str(dt), float(duration), str(txt_query) ):
-											query_result = ps_queries_and_plans.first(str(dt), float(duration), str(dbname), str(txt_query), \
-												str(txt_plan), float(io_read_time), float(cost), int(float(shared_hit)), int(float(read)), int(float(dirtied)) )
-											logger.log( "Writed query at " + str(dt), "Info" )	
+							#-----------------------------------------------------------------------------------
+							dbname = "unknown"
+							pos_first = txt_query.find('","')
+							if pos_first > 0:
+								dbname =txt_query[ pos_first + 3: txt_query.find('",', pos_first + 3, len( txt_query ) ) ]
+							#-----------------------------------------------------------------------------------
+							
+							shared_hit = 0
+							read = 0
+							dirtied = 0
+							io_read_time = 0
+							cost = 0
+							duration = 0
+							
+							duration_str=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms", txt_plan)
+							cost_str=re.finditer(r"cost\=\d+((.|,)\d+)?\.\.\d+((.|,)\d+)?\s", txt_plan)
+							io_read_time_str=re.finditer(r"I\/O\sTimings\:\sread\=\d+((.|,)\d+)?", txt_plan)
+							shared_hit_str=re.finditer(r"shared\shit\=\d+((.|,)\d+)?", txt_plan)
+							read_str=re.finditer(r"read\=\d+((.|,)\d+)?", txt_plan)
+							dirtied_str=re.finditer(r"dirtied\=\d+((.|,)\d+)?", txt_plan)
+
+							durations = []
+							for m in duration_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									durations.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( durations ) > 0:						
+								duration = max( durations )
+								
+							costs = []
+							for m in cost_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									costs.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( costs ) > 0:						
+								cost = max( costs )
+
+							shared_hits = []
+							for m in shared_hit_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									shared_hits.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( shared_hits ) > 0:
+								shared_hit = max( shared_hits )
+
+							io_read_times = []
+							for m in io_read_time_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									io_read_times.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( io_read_times ) > 0:
+								io_read_time = max( io_read_times )	
+								
+							reads = []
+							for m in read_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									reads.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( reads ) > 0:
+								if io_read_time in reads:
+									reads.remove(io_read_time)
+								read = max( reads )
+								
+							dirtieds = []
+							for m in dirtied_str:
+								sub_str = txt_plan[m.span()[0]:m.span()[1]]
+								val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
+								for v in val:
+									dirtieds.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+							if len( dirtieds ) > 0:
+								dirtied = max( dirtieds )			
+
+							if not ps_queries_and_plans_check.first(str(dt), float(duration), str(txt_query) ):
+								query_result = ps_queries_and_plans.first(str(dt), float(duration), str(dbname), str(txt_query), \
+									str(txt_plan), float(io_read_time), float(cost), int(float(shared_hit)), int(float(read)), int(float(dirtied)) )
+								logger.log( "Writed query at " + str(dt), "Info" )	
 							
 			except Exception as e:
 				logger.log( "Connection db_pg_stat error: " + str( e ), "Error" )

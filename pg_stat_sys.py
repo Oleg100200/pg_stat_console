@@ -38,7 +38,7 @@ node_descr = read_conf_param_value( config['main']['node_descr'] )
 node_host = read_conf_param_value( config['main']['node_host'] )
 
 top_rels_in_snapshot = read_conf_param_value( config['main']['top_rels_in_snapshot'] )
-top_queries_in_snapshot = read_conf_param_value( config['main']['top_queries_in_snapshot'] )
+top_stm_queries_in_snapshot = read_conf_param_value( config['main']['top_stm_queries_in_snapshot'] )
 locks_limit_in_snapshot = read_conf_param_value( config['main']['locks_limit_in_snapshot'] )
 sleep_interval_pg_conn_snapshot = int( read_conf_param_value( config['main']['sleep_interval_pg_conn_snapshot'] ) )
 sleep_interval_pg_single_db_sn = int( read_conf_param_value( config['main']['sleep_interval_pg_single_db_sn'] ) )
@@ -806,7 +806,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.calls - t1.calls <> 0  
 					order by calls_res desc
-					limit """ + top_queries_in_snapshot + """ 
+					limit """ + top_stm_queries_in_snapshot + """ 
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.total_time_res) as val, 'stm_total_time'::text as metric
@@ -819,7 +819,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.total_time - t1.total_time)::numeric, 3) <> 0
 					order by total_time_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.rows_res) as val, 'stm_rows'::text as metric
@@ -832,7 +832,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.rows - t1.rows <> 0
 					order by rows_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.shared_blks_hit_res) as val, 'stm_shared_blks_hit'::text as metric
@@ -845,7 +845,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_hit - t1.shared_blks_hit <> 0
 					order by shared_blks_hit_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.shared_blks_read_res) as val, 'stm_shared_blks_read'::text as metric
@@ -858,7 +858,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_read - t1.shared_blks_read <> 0
 					order by shared_blks_read_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.shared_blks_dirtied_res) as val, 'stm_shared_blks_dirtied'::text as metric
@@ -871,7 +871,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_dirtied - t1.shared_blks_dirtied <> 0
 					order by shared_blks_dirtied_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.shared_blks_written_res) as val, 'stm_shared_blks_written'::text as metric
@@ -884,7 +884,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.shared_blks_written - t1.shared_blks_written <> 0
 					order by shared_blks_written_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.local_blks_hit_res) as val, 'stm_local_blks_hit'::text as metric
@@ -897,7 +897,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_hit - t1.local_blks_hit <> 0
 					order by local_blks_hit_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.local_blks_read_res) as val, 'stm_local_blks_read'::text as metric
@@ -910,7 +910,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_read - t1.local_blks_read <> 0
 					order by local_blks_read_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.local_blks_dirtied_res) as val, 'stm_local_blks_dirtied'::text as metric
@@ -923,7 +923,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_dirtied - t1.local_blks_dirtied <> 0
 					order by local_blks_dirtied_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.local_blks_written_res) as val, 'stm_local_blks_written'::text as metric
@@ -936,7 +936,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.local_blks_written - t1.local_blks_written <> 0
 					order by local_blks_written_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.temp_blks_read_res) as val, 'stm_temp_blks_read'::text as metric
@@ -949,7 +949,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.temp_blks_read - t1.temp_blks_read <> 0
 					order by temp_blks_read_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.temp_blks_written_res) as val, 'stm_temp_blks_written'::text as metric
@@ -962,7 +962,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where t2.temp_blks_written - t1.temp_blks_written <> 0
 					order by temp_blks_written_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.blk_read_time_res) as val, 'stm_blk_read_time'::text as metric
@@ -975,7 +975,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.blk_read_time - t1.blk_read_time)::numeric, 3) <> 0
 					order by blk_read_time_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				union
 				select T.dt, T.query, T.queryid, abs(T.blk_write_time_res) as val, 'stm_blk_write_time'::text as metric
@@ -988,7 +988,7 @@ def pg_sys_stat_snapshot():
 					inner join psc_stm_t2 t2 on t2.queryid = t1.queryid and t2.userid = t1.userid
 					where round((t2.blk_write_time - t1.blk_write_time)::numeric, 3) <> 0
 					order by blk_write_time_res desc
-					limit """ + top_queries_in_snapshot + """
+					limit """ + top_stm_queries_in_snapshot + """
 				) T
 				""" )
 				res_data = query()
