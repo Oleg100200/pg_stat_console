@@ -3417,6 +3417,7 @@ function set_all_click_events()
 			details_closed = false;		
 		} else {
 			$('#details').css("visibility", "hidden");
+			$("#explain_container").css('visibility', 'hidden');
 			details_closed = true;
 			$('.canvasjs-chart-tooltip').css("visibility", "visible");
 		}

@@ -149,6 +149,8 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				['RowShareLock', get_color("dark blue")],['ShareLock', get_color("violet")],['AccessExclusiveLock', get_color("red")],\
 				['RowShareUpdateExclusiveLock', get_color("yellow")], \
 
+				['xact_commit_per_sec', get_color("green")], ['xact_rollback_per_sec', get_color("light red")], \
+				
 				['idle in transaction',get_color("yellow")],['idle',get_color("orange")],['active',get_color("green")],['waiting_conns', get_color("dark blue")], \
 				
 				["AppMem",get_color("green")], ["MemFree",get_color("light green")], ["Buffers",get_color("brown")],["SwapTotal",get_color("red")],\
@@ -619,9 +621,12 @@ class Chart():
 			{
 				$('.canvasjs-chart-tooltip').css("visibility", "hidden");
 				
+				$("#query_container").css('height', '200px');
+				$("#explain_container").css('visibility', 'visible');
+				
 				$('#details').css("visibility", "visible");
 				details_closed = false;	
-					
+
 				$('#query_container').empty();	
 				$('#query_container').append( e.dataPoint.query );
 				$('#explain_container').empty();	
@@ -633,6 +638,9 @@ class Chart():
 			{
 				$('.canvasjs-chart-tooltip').css("visibility", "hidden");
 				
+				$("#explain_container").css('visibility', 'hidden');
+				$("#query_container").css('height', '530px');
+
 				$('#details').css("visibility", "visible");
 				details_closed = false;	
 					
@@ -671,7 +679,7 @@ class Chart():
 		if report_type == "stm_query":
 			graph_json += """content: function(e){
 				  var content;
-				  content = "<div style=\\"margin: 10px;\\"><strong>Value: "+e.entries[0].dataPoint.y + "</strong></div><div style=\\"word-wrap: break-word;width: 500px;height: auto;margin: 10px;white-space: pre-wrap; */\\">"+ e.entries[0].dataPoint.stm_query + "</div>";
+				  content = "<div style=\\"margin: 10px;\\"><strong>Date time: "+e.entries[0].dataPoint.label + "</strong></div><div style=\\"margin: 10px;\\"><strong>Total value: "+e.entries[0].dataPoint.y + "</strong></div><div style=\\"word-wrap: break-word;width: 500px;height: auto;margin: 10px;white-space: pre-wrap; */\\">"+ e.entries[0].dataPoint.stm_query + "</div>";
 				  return content;
 				}"""
 				
@@ -1541,10 +1549,12 @@ class GetTxDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		for db in self.current_user_dbs:
 			if data["node_name"] == db[0]:
 				current_user_dbs.append( db[1] )
-			
-		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], [ 'xact_commit_per_sec', 'xact_rollback_per_sec' ] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'xact_commit_per_sec, xact_rollback_per_sec', 'stackedArea' ] )
+
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:
+				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], [ 'xact_commit_per_sec', 'xact_rollback_per_sec' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+					'xact_commit_per_sec, xact_rollback_per_sec (' + db[1] + ')', 'stackedArea' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
