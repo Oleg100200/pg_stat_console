@@ -1909,38 +1909,6 @@ class GetStmBlkReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmSt
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 #=======================================================================================================
-
-def make_html_report_with_head( data, columns, head_name, query_column=None ):
-	html_report = ""
-	html_columns = ""
-	for v in columns:
-		if query_column is not None:
-			if str(v) in query_column:
-				html_columns = html_columns + """<th style="width:220px;">""" + str(v) + "</th>"
-			else:
-				html_columns = html_columns + "<th>" + str(v) + "</th>"
-		else:
-			html_columns = html_columns + "<th>" + str(v) + "</th>"
-	
-	html_rows = ""
-	for v in data:
-		html_col_vals = ""
-		for val in v:
-			val_res = str(val)
-			if hide_password_in_queries:
-				val_res = re.sub(r"password=\w+", '', val_res) 
-			if hide_host_in_queries:
-				val_res = re.sub(r"host=\w+", '', val_res)				 
-			html_col_vals = html_col_vals + """<td>""" + str( val_res ) + """</td>"""
-		html_row = """<tr>""" + html_col_vals + """</tr>"""
-		html_rows = html_rows + html_row
-	
-	html_table = """<div class="report_table pg_stat_console_fonts_on_white scrollable_obj"><h2 style ="text-align: center;font-size: 16px;">""" + head_name + """</h2><table style="table-layout: fixed;word-wrap:break-word;" class="bordered tablesorter"><thead><tr>""" + html_columns + """</tr></thead>""" + html_rows + """</table></div>"""
-
-
-	html_report = html_report + str( html_table )
-	return html_report	
-	
 class GetActivityHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
 		return self.proxy_http_post( 'getActivity' )

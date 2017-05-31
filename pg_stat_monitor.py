@@ -236,38 +236,7 @@ class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 
 class PgStatConsoleStaticFileHandler(tornado.web.StaticFileHandler):
 	def set_extra_headers(self, path):
-		self.set_header('Cache-Control', 'store, cache, must-revalidate, max-age=0')
-#=======================================================================================================
-def make_html_report_with_head( data, columns, head_name, query_column=None ):
-	html_report = ""
-	html_columns = ""
-	for v in columns:
-		if query_column is not None:
-			if str(v) in query_column:
-				html_columns = html_columns + """<th style="width:220px;">""" + str(v) + "</th>"
-			else:
-				html_columns = html_columns + "<th>" + str(v) + "</th>"
-		else:
-			html_columns = html_columns + "<th>" + str(v) + "</th>"
-	
-	html_rows = ""
-	for v in data:
-		html_col_vals = ""
-		for val in v:
-			val_res = str(val)
-			if hide_password_in_queries:
-				val_res = re.sub(r"password=\w+", '', val_res) 
-			if hide_host_in_queries:
-				val_res = re.sub(r"host=\w+", '', val_res)			 
-			html_col_vals = html_col_vals + """<td>""" + str( val_res ) + """</td>"""
-		html_row = """<tr>""" + html_col_vals + """</tr>"""
-		html_rows = html_rows + html_row
-	
-	html_table = """<div class="report_table pg_stat_console_fonts_on_white scrollable_obj"><h2 style ="text-align: center;font-size: 16px;">""" + head_name + """</h2><table style="table-layout: fixed;word-wrap:break-word;" class="bordered tablesorter"><thead><tr>""" + html_columns + """</tr></thead>""" + html_rows + """</table></div>"""
-
-
-	html_report = html_report + str( html_table )
-	return html_report		
+		self.set_header('Cache-Control', 'store, cache, must-revalidate, max-age=0')	
 #=======================================================================================================
 class GetUptimeHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -428,11 +397,24 @@ class GetLongQueriesHandler(BaseAsyncHandlerNoParam):
 				a.query,
 				a.query_start,
 				age(clock_timestamp(), a.query_start) AS age,
-				a.pid
+				a.pid,
+				a.state
 			   FROM pg_stat_activity a
-			  WHERE a.state = 'active'::text AND NOT a.query ~~* '%age(clock_timestamp(), a.query_start)%'::text
+			  WHERE a.state = 'active' AND a.pid <> pg_backend_pid()
 			  ORDER BY a.query_start		
-		) T""" ), [ "datname", "query", "age", "pid" ], "Long queries", ["query"] )
+		) T""" ), [ "datname", "query", "age", "pid" ], "Long queries", ["query"] ) + \
+		make_html_report_with_head( self.make_query( check_base, """select T.datname, substring(T.query from 0 for 8000), T.xact_age::text, T.pid, T.state from (
+			SELECT a.datname,
+				a.usename,
+				a.query,
+				a.query_start,
+				age(clock_timestamp(), a.xact_start) AS xact_age,
+				a.pid,
+				a.state
+			   FROM pg_stat_activity a
+			  WHERE a.pid <> pg_backend_pid() and age(clock_timestamp(), a.xact_start) is not null
+			  ORDER BY a.xact_start	NULLS LAST	
+		) T""" ), [ "datname", "query", "xact_age", "pid", "state" ], "Long transactions", ["query"] )
 		
 class GetTblSizesHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -844,7 +826,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 
 		str_res = ""
 
-		logger.log( "Start parsing logger.log lines... len( all_log ) = " + str( len( all_log ) ), "Info" )
+		logger.log( "Start parsing log lines... len( all_log ) = " + str( len( all_log ) ), "Info" )
 		for line in all_log:
 			if self.break_scan_log:
 				break;
@@ -885,8 +867,9 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 									str_res += line
 							elif x < duration_val:
 								str_res += line
-						if "common" in params:
-							str_res += line
+						else:
+							if "common" in params:
+								str_res += line
 				except Exception as e:						
 					unique_str=re.search(r"duration\:\s\d+((.|,)\d+)?\sms",line)
 					if (unique_str is not None):

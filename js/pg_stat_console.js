@@ -1491,6 +1491,9 @@ function set_all_click_events()
 		selected_menu_elem.auto_refresh = true;
 		show_autorefresh();
 		
+		get_current_status();
+		get_current_node_info();
+		
 		init_work_space();
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
 		$( "#work_space" ).append( sub_space );
@@ -3647,7 +3650,7 @@ function pg_stat_console_init()
 	setInterval( function() {
 		get_current_status();
 		get_current_node_info();
-	}, 60000*3);
+	}, 60000);
 
 	setInterval( function() {
 		get_current_db_status()
