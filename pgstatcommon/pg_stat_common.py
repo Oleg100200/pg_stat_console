@@ -1,10 +1,17 @@
 import re
 import os
-import resource
+
+resource_avaible = True
+try:
+	import resource
+except ImportError:
+	resource_avaible = False
+
 #=======================================================================================================
 def limit_memory(maxsize):
-	soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-	resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
+	if resource_avaible:
+		soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+		resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
 #=======================================================================================================
 def read_conf_param_value( raw_value, boolean = False ):
 	#case 1:	param = 100 #comment

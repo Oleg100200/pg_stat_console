@@ -751,8 +751,9 @@ class GetTableBloatHandler(BaseAsyncHandlerNoParam):
 class GetPGConfigHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
 		return make_html_report_with_head( self.make_query( check_base, \
-			"""select name, setting, unit, category, short_desc, vartype, boot_val from pg_settings order by category asc""" ), \
-			[ "name", "setting", "unit", "category", "short_desc", "vartype", "boot_val" ], "Current cluster configuration", ["short_desc", "name"] )
+			"""select name, setting as value, (case when unit = '8kB' then pg_size_pretty(setting::bigint * 1024 * 8) when unit = 'kB' and setting <> '-1' then pg_size_pretty(setting::bigint * 1024) else '' end) as pretty_value, unit, category, short_desc, vartype, boot_val 
+			from pg_settings order by category asc""" ), \
+			[ "name", "value", "pretty_value", "unit", "category", "short_desc", "vartype", "boot_val" ], "Current cluster configuration", ["short_desc", "name"] )
 
 class GetPGVersionHandler(BaseAsyncHandlerNoParam):
 	def post_(self):

@@ -12,7 +12,6 @@ import http.client
 import json
 import hashlib
 import sys
-import resource
 import gzip
 import locale
 from operator import itemgetter
