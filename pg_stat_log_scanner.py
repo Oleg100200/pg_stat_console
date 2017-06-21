@@ -8,6 +8,7 @@ import re
 import time
 import configparser
 from operator import itemgetter
+import traceback
 
 from contextlib import contextmanager
 from pgstatlogger import PSCLogger
@@ -192,7 +193,7 @@ class LogScanner(Thread):
 					ps_queries_and_plans_check = db_pg_stat.prepare("""
 							select exists( select 1 from psc_queries_and_plans where dt = (($1::text)::timestamp with time zone) and 
 								duration = $2::double precision and query = $3::text )""")
-									
+
 					for v in mapped_objs:
 						if v[0] == 'p':
 							for vi in mapped_objs:
@@ -231,8 +232,8 @@ class LogScanner(Thread):
 									for m in duration_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											durations.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											durations.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( durations ) > 0:						
 										duration = max( durations )
 										
@@ -240,8 +241,8 @@ class LogScanner(Thread):
 									for m in cost_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											costs.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											costs.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( costs ) > 0:						
 										cost = max( costs )
 
@@ -249,8 +250,8 @@ class LogScanner(Thread):
 									for m in shared_hit_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											shared_hits.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											shared_hits.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( shared_hits ) > 0:
 										shared_hit = max( shared_hits )
 
@@ -258,8 +259,8 @@ class LogScanner(Thread):
 									for m in io_read_time_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											io_read_times.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											io_read_times.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( io_read_times ) > 0:
 										io_read_time = max( io_read_times )	
 										
@@ -267,8 +268,8 @@ class LogScanner(Thread):
 									for m in read_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											reads.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											reads.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( reads ) > 0:
 										if io_read_time in reads:
 											reads.remove(io_read_time)
@@ -278,8 +279,8 @@ class LogScanner(Thread):
 									for m in dirtied_str:
 										sub_str = txt_plan[m.span()[0]:m.span()[1]]
 										val = re.finditer(r"\d+((.|,)\d+)?", sub_str)
-										for v in val:
-											dirtieds.append( float( sub_str[v.span()[0]:v.span()[1]] ) )
+										for vv in val:
+											dirtieds.append( float( sub_str[vv.span()[0]:vv.span()[1]] ) )
 									if len( dirtieds ) > 0:
 										dirtied = max( dirtieds )			
 
@@ -290,7 +291,12 @@ class LogScanner(Thread):
 											logger.log( "Writed query at " + str(dt), "Info" )	
 							
 			except Exception as e:
-				logger.log( "Connection db_pg_stat error: " + str( e ), "Error" )
+				exc_type, exc_value, exc_traceback = sys.exc_info()
+				exc_res = traceback.format_exception( exc_type, exc_value, exc_traceback )
+				exc_text = ""
+				for vv in exc_res:
+					exc_text += '\n' + str( vv )
+				logger.log( "Connection db_pg_stat error: " + str( e ) + exc_text, "Error" )
 				time.sleep( int( sleep_interval ) )
 			finally:
 				if db_pg_stat is not None:
