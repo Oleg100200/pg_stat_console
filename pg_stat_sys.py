@@ -48,8 +48,15 @@ collect_pg_sys_stat = read_conf_param_value( config['main']['collect_pg_sys_stat
 collect_pg_conn_snapshot = read_conf_param_value( config['main']['collect_pg_conn_snapshot'], True )
 collect_os_stat = read_conf_param_value( config['main']['collect_os_stat'], True )
 #=======================================================================================================
+create_lock( application_name )
+#=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
+#=======================================================================================================
+exclude_tables = """'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
+					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
+					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2',
+					   'public.psc_stm_t1', 'public.psc_stm_t2'"""
 #=======================================================================================================
 query_check_tables_all_dbs = """do $$ 
 	begin
@@ -154,8 +161,10 @@ query_check_tables_all_dbs = """do $$
 		  seq_tup_read bigint,
 		  idx_scan bigint,
 		  idx_tup_fetch bigint,
-		  n_live_tup bigint,
-		  n_dead_tup bigint
+		  n_tup_ins bigint, 
+		  n_tup_upd bigint, 
+		  n_tup_del bigint, 
+		  n_tup_hot_upd bigint
 		)
 		WITH (
 		  OIDS=FALSE
@@ -178,8 +187,10 @@ query_check_tables_all_dbs = """do $$
 		  seq_tup_read bigint,
 		  idx_scan bigint,
 		  idx_tup_fetch bigint,
-		  n_live_tup bigint,
-		  n_dead_tup bigint
+		  n_tup_ins bigint, 
+		  n_tup_upd bigint, 
+		  n_tup_del bigint, 
+		  n_tup_hot_upd bigint
 		)
 		WITH (
 		  OIDS=FALSE
@@ -270,7 +281,7 @@ query_all_dbs_t1 = """
 	do $$ 
 	begin
 		delete from psc_data_t1;
-		insert into psc_data_t1 select now(),relid, (schemaname||'.'||relname) as relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch, n_live_tup, n_dead_tup from pg_stat_all_tables;
+		insert into psc_data_t1 select now(),relid, (schemaname||'.'||relname) as relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch, n_tup_ins, n_tup_upd, n_tup_del, n_tup_hot_upd from pg_stat_all_tables;
 		delete from psc_data_io_t1;
 		insert into psc_data_io_t1 select now(),relid, (schemaname||'.'||relname) as relname, heap_blks_read, idx_blks_read from pg_statio_all_tables;
 		delete from psc_data_all_indexes_t1;
@@ -292,7 +303,7 @@ query_all_dbs_t2 = """
 	do $$ 
 	begin
 		delete from psc_data_t2;
-		insert into psc_data_t2 select now(),relid, (schemaname||'.'||relname) as relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch, n_live_tup, n_dead_tup from pg_stat_all_tables;
+		insert into psc_data_t2 select now(),relid, (schemaname||'.'||relname) as relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch, n_tup_ins, n_tup_upd, n_tup_del, n_tup_hot_upd from pg_stat_all_tables;
 		delete from psc_data_io_t2;
 		insert into psc_data_io_t2 select now(),relid, (schemaname||'.'||relname) as relname, heap_blks_read, idx_blks_read from pg_statio_all_tables;
 		delete from psc_data_all_indexes_t2;
@@ -628,9 +639,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_tup_fetch - T1.idx_tup_fetch) as idx_tup_fetch,
 								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
 						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T where idx_scan_per_sec > 0 and idx_tup_fetch_per_sec > 0
 				order by idx_scale3 desc nulls last 
 				limit """ + top_rels_in_snapshot + """ )T
@@ -647,9 +656,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_tup_read - T1.idx_tup_read) as idx_tup_read,
 								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
 						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T where idx_scan_per_sec > 0 and idx_tup_read_per_sec > 0 
 				order by idx_scale2 desc nulls last 
 				limit """ + top_rels_in_snapshot + """ )T
@@ -664,9 +671,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_tup_fetch - T1.idx_tup_fetch) as idx_tup_fetch, 
 								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
 						inner join psc_data_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
 				order by tup_fetch_sum desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
@@ -679,9 +684,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_tup_fetch - T1.idx_tup_fetch) as idx_tup_fetch, 
 								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
 						inner join psc_data_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
 				order by idx_tup_fetch_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
@@ -694,41 +697,61 @@ def pg_sys_stat_snapshot():
 								(T2.seq_tup_read - T1.seq_tup_read) as seq_tup_read,
 								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
 						inner join psc_data_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
 				order by seq_tup_read_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
 				union
-				select * from ( select 'n_dead_tup_per_sec'::text, relid, relname, dt, n_dead_tup_per_sec from (
+				select * from ( select 'n_tup_ins_per_sec'::text, relid, relname, dt, n_tup_ins_per_sec from (
 					select relid, relname, dt, 
-					round(n_dead_tup/seconds::numeric, 3) as n_dead_tup_per_sec
+					round(n_tup_ins/seconds::numeric, 3) as n_tup_ins_per_sec
 					from (
 						SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, 
-								(T2.n_dead_tup - T1.n_dead_tup) as n_dead_tup, 
+								(T2.n_tup_ins - T1.n_tup_ins) as n_tup_ins, 
 								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
 						inner join psc_data_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
-				order by n_dead_tup_per_sec desc nulls last
+				order by n_tup_ins_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
 				union
-				select * from ( select 'n_live_tup_per_sec'::text, relid, relname, dt, n_live_tup_per_sec from (
+				select * from ( select 'n_tup_upd_per_sec'::text, relid, relname, dt, n_tup_upd_per_sec from (
 					select relid, relname, dt,
-					round(n_live_tup/seconds::numeric, 3) as n_live_tup_per_sec
+					round(n_tup_upd/seconds::numeric, 3) as n_tup_upd_per_sec
 					from (
 						SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, 
-								(T2.n_live_tup - T1.n_live_tup) as n_live_tup,
+								(T2.n_tup_upd - T1.n_tup_upd) as n_tup_upd,
 								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
 						inner join psc_data_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
-				order by n_live_tup_per_sec desc nulls last
+				order by n_tup_upd_per_sec desc nulls last
+				limit """ + top_rels_in_snapshot + """ )T
+				union
+				select * from ( select 'n_tup_del_per_sec'::text, relid, relname, dt, n_tup_del_per_sec from (
+					select relid, relname, dt,
+					round(n_tup_del/seconds::numeric, 3) as n_tup_del_per_sec
+					from (
+						SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, 
+								(T2.n_tup_del - T1.n_tup_del) as n_tup_del,
+								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
+						inner join psc_data_t2 T2 on T1.relid = T2.relid
+					) T where relname not in ( """ + exclude_tables + """ )
+				) T
+				order by n_tup_del_per_sec desc nulls last
+				limit """ + top_rels_in_snapshot + """ )T
+				union
+				select * from ( select 'n_tup_hot_upd_per_sec'::text, relid, relname, dt, n_tup_hot_upd_per_sec from (
+					select relid, relname, dt,
+					round(n_tup_hot_upd/seconds::numeric, 3) as n_tup_hot_upd_per_sec
+					from (
+						SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, 
+								(T2.n_tup_hot_upd - T1.n_tup_hot_upd) as n_tup_hot_upd,
+								T1.relname, T2.now as dt, T2.relid from psc_data_t1 T1
+						inner join psc_data_t2 T2 on T1.relid = T2.relid
+					) T where relname not in ( """ + exclude_tables + """ )
+				) T
+				order by n_tup_hot_upd_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
 				union
 				select * from ( select 'idx_blks_read_per_sec'::text, relid, relname, dt, idx_blks_read_per_sec from (
@@ -739,9 +762,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_blks_read - T1.idx_blks_read) as idx_blks_read,
 								T1.relname, T2.now as dt, T2.relid from psc_data_io_t1 T1
 						inner join psc_data_io_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
 				order by idx_blks_read_per_sec desc nulls last 
 				limit """ + top_rels_in_snapshot + """ )T
@@ -754,9 +775,7 @@ def pg_sys_stat_snapshot():
 								(T2.heap_blks_read - T1.heap_blks_read) as heap_blks_read, 
 								T1.relname, T2.now as dt, T2.relid from psc_data_io_t1 T1
 						inner join psc_data_io_t2 T2 on T1.relid = T2.relid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T
 				order by heap_blks_read_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
@@ -773,9 +792,7 @@ def pg_sys_stat_snapshot():
 								(T2.idx_tup_fetch - T1.idx_tup_fetch) as idx_tup_fetch,
 								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
 						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
-					) T where relname not in ( 'public.psc_stat_bgwriter_t2', 'public.psc_stat_bgwriter_t1', 'public.psc_stat_dbs_t2', 
-					   'public.psc_stat_dbs_t1', 'public.psc_data_t1', 'public.psc_data_io_t1', 'public.psc_data_all_indexes_t1', 
-					   'public.psc_data_t2', 'public.psc_data_io_t2', 'public.psc_data_all_indexes_t2' )
+					) T where relname not in ( """ + exclude_tables + """ )
 				) T where idx_tup_read_per_sec > 0 and idx_tup_fetch_per_sec > 0 
 				order by idx_scale1 desc nulls last 
 				limit """ + top_rels_in_snapshot + """ )T""" )

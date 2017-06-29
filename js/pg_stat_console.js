@@ -261,11 +261,13 @@ function get_method_by_div_id( div_id )
 	
 function show_error( textStatus, errorThrown, descr )
 {
-	var descr_v;
-	if (descr.length >= 1500)
-		descr_v = descr.substring(0, 1500) + "...";
-	else
-		descr_v = descr;
+	var descr_v = "";
+	
+	if(typeof descr !== 'undefined' )
+		if (descr.length >= 1500)
+			descr_v = descr.substring(0, 1500) + "...";
+		else
+			descr_v = descr;
 	
 	descr_v = descr_v.replace(/ /g, '&nbsp;');
 	descr_v = descr_v.replace(/(?:\r\n|\r|\n)/g, '<br />');

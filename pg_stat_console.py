@@ -175,6 +175,8 @@ custom_graph_sort = [ '%user', '%system', '%nice', '%steal', '%idle', '%iowait',
 #=======================================================================================================
 admin_methods = [ 'stopQuery', 'downloadLogFile' ]
 #=======================================================================================================
+create_lock( application_name )
+#=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
 #=======================================================================================================
@@ -1634,9 +1636,11 @@ class GetWriteStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 			return ""		
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:	
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_dead_tup_per_sec' ), data["node_name"] ), 'n_dead_tup_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_live_tup_per_sec' ), data["node_name"] ), 'n_live_tup_per_sec (' + db[1] + ')' ] )
+			if db[0] == data["node_name"]:
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_ins_sec' ), data["node_name"] ), 'n_tup_ins_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_upd_per_sec' ), data["node_name"] ), 'n_tup_upd_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_hot_upd_per_sec' ), data["node_name"] ), 'n_tup_hot_upd_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_del_sec' ), data["node_name"] ), 'n_tup_del_per_sec (' + db[1] + ')' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 

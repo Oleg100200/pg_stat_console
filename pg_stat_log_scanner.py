@@ -38,6 +38,8 @@ node_name = read_conf_param_value( config['main']['node_name'] )
 node_descr = read_conf_param_value( config['main']['node_descr'] )
 node_host = read_conf_param_value( config['main']['node_host'] )
 #=======================================================================================================
+create_lock( application_name )
+#=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
 #=======================================================================================================

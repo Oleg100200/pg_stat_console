@@ -42,10 +42,6 @@ config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
 config.read( current_dir + 'conf/pg_stat_monitor.conf')
 #=======================================================================================================
-def limit_memory(maxsize):
-	soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-	resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
-
 limit_memory( 1024 * 1000 * int( read_conf_param_value( config['main']['application_max_mem'] ) ) )
 #=======================================================================================================
 EXECUTOR = ThreadPoolExecutor(max_workers=int( read_conf_param_value( config['main']['max_workers'] ) ))
@@ -87,6 +83,8 @@ port = int( read_conf_param_value( config['main']['port'] ) )
 pg_log_dir = read_conf_param_value( config['main']['pg_log_dir'] )
 pg_log_file_extension = read_conf_param_value( config['main']['pg_log_file_extension'] )
 pg_log_line_max_len = read_conf_param_value( config['main']['pg_log_line_max_len'] )
+#=======================================================================================================
+create_lock( application_name )
 #=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()

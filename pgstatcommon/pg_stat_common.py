@@ -9,6 +9,7 @@ except ImportError:
 
 #=======================================================================================================
 def limit_memory(maxsize):
+	global resource_avaible
 	if resource_avaible:
 		soft, hard = resource.getrlimit(resource.RLIMIT_AS)
 		resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
@@ -70,4 +71,23 @@ def make_html_report_with_head( data, columns, head_name, query_column=None ):
 
 	html_report = html_report + str( html_table )
 	return html_report
+#=======================================================================================================
+do_unlock = True
+def create_lock(application_name):
+	global do_unlock
+	import atexit
+	@atexit.register
+	def unlock():
+		global do_unlock
+		if do_unlock:
+			try:
+				os.remove( application_name + ".lock" )
+			except IOError as e:
+				print( "can't unlock " + application_name + ".lock" )
+	try:
+		fd = os.open( application_name + ".lock", os.O_CREAT|os.O_EXCL)
+	except IOError as e:
+		print( application_name + " already runned!" )
+		do_unlock = False
+		exit()
 #=======================================================================================================
