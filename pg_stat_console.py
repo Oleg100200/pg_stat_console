@@ -11,7 +11,6 @@ import html
 import http.client
 import json
 import hashlib
-import sys
 import gzip
 import locale
 from operator import itemgetter
@@ -1637,7 +1636,7 @@ class GetWriteStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_ins_sec' ), data["node_name"] ), 'n_tup_ins_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_ins_per_sec' ), data["node_name"] ), 'n_tup_ins_per_sec (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_upd_per_sec' ), data["node_name"] ), 'n_tup_upd_per_sec (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_hot_upd_per_sec' ), data["node_name"] ), 'n_tup_hot_upd_per_sec (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_del_sec' ), data["node_name"] ), 'n_tup_del_per_sec (' + db[1] + ')' ] )
@@ -2322,7 +2321,7 @@ class GetConsoleStatusReportHandler(GetPgStatConsoleStatusHandler):
 				order by dt desc
 				limit 100""", data["node_name"] )
 							
-			html_report = html_report + make_html_report_with_head( users_stat, [ "Hash", "Created", "User name", "User IP", "User agent" ], "Users info", [ "Hash", "Created", "User name", "User IP"] )
+			html_report = html_report + make_html_report_with_head( users_stat, [ "Hash", "Created", "User name", "User IP", "User agent" ], "Users info", [ "User name", "User IP" ] )
 			
 			html_report = """<div id="sub_space" class="pg_stat_console_fonts_on_white_na pg_stat_console_log_caption">""" + \
 				html_report + """<h2 style ="text-align: center;font-size: 16px;" class="scrollable_obj">pg_stat_console logs</h2>"""

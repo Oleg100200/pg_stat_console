@@ -11,7 +11,15 @@ class PSCLogger( Thread ):
 	delay = None
 	log_queue = []
 	lock_logger = threading.Lock()
+	do_stop = False
+	__instance = None
 
+	@staticmethod
+	def instance():
+		if PSCLogger.__instance == None:
+			PSCLogger()
+		return PSCLogger.__instance 
+			
 	def __init__( self, application_name, max_bytes = 1024*100*10, backup_count = 100, delay = 3 ):
 		self.logger = logging.getLogger(application_name)
 		hdlr = logging.handlers.RotatingFileHandler(os.getcwd() + '/log/' + application_name + '.log', max_bytes, backup_count)
@@ -20,10 +28,11 @@ class PSCLogger( Thread ):
 		self.logger.addHandler(hdlr)
 		self.logger.setLevel(logging.DEBUG)
 		self.delay = delay
+		PSCLogger.__instance = self
 		Thread.__init__(self)
 
 	def run( self ):
-		while True:
+		while True and not self.do_stop:
 			time.sleep(self.delay)
 			self.lock_logger.acquire()
 			for v in self.log_queue:
@@ -33,7 +42,11 @@ class PSCLogger( Thread ):
 					self.logger.info( str( v[1] ) )
 			del self.log_queue[:]				 
 			self.lock_logger.release()
+		print("PSCLogger stopped!")
 
+	def stop( self ):
+		self.do_stop = True
+			
 	def log( self, msg, code ):
 		print(msg)
 		self.lock_logger.acquire()

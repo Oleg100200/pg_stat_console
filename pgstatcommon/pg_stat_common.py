@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 
 resource_avaible = True
 try:
@@ -76,14 +77,26 @@ do_unlock = True
 def create_lock(application_name):
 	global do_unlock
 	import atexit
+	import signal
+	from tornado.ioloop import IOLoop
+	from pgstatlogger import PSCLogger
 	@atexit.register
 	def unlock():
 		global do_unlock
 		if do_unlock:
 			try:
+				do_unlock = False
+				print( application_name + " stopped!" )
 				os.remove( application_name + ".lock" )
 			except IOError as e:
 				print( "can't unlock " + application_name + ".lock" )
+			finally:
+				IOLoop.instance().stop()
+				PSCLogger.instance().stop()
+				sys.exit(0)
+	def handler(signum, frame):
+		unlock()
+	signal.signal(signal.SIGTERM, handler)	
 	try:
 		fd = os.open( application_name + ".lock", os.O_CREAT|os.O_EXCL)
 	except IOError as e:
