@@ -160,7 +160,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				['checkpoint_write_time', get_color("beige") ], ['checkpoint_sync_time', get_color("aquamarine") ], \
 				
 				['buffers_checkpoint', get_color("green") ], ['buffers_clean', get_color("dark blue") ], ['maxwritten_clean', get_color("yellow") ], \
-				['buffers_backend', get_color("beige") ], ['buffers_alloc', get_color("fuchsia") ],\
+				['buffers_backend', get_color("beige") ], ['buffers_alloc', get_color("fuchsia") ], ['buffers_backend_fsync', get_color("violet") ],\
 				
 				[ "rrqm/s", get_color("orange") ], ["wrqm/s", get_color("brown") ], \
 				[ "r/s", get_color("orange") ], ["w/s", get_color("brown") ],\
@@ -1481,9 +1481,13 @@ class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 			'checkpoint_write_time, checkpoint_sync_time; sec', 'stackedColumn' ] )
 		
-		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'buffers_checkpoint', 'buffers_clean', 'maxwritten_clean', 'buffers_backend', 'buffers_alloc' ], 'blocks_to_mb' )
+		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'buffers_checkpoint', 'buffers_clean', 'buffers_backend', 'buffers_alloc' ], 'blocks_to_mb' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc; MB', 'stackedArea' ] )
+			'buffers_checkpoint, buffers_clean, buffers_backend, buffers_alloc; MB', 'stackedArea' ] )
+		
+		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'maxwritten_clean', 'buffers_backend_fsync' ] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+			'maxwritten_clean, buffers_backend_fsync', 'stackedColumn' ] )
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )			
 		
@@ -1583,13 +1587,12 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		if self.check_auth() == False:
 			return ""		
 
-		current_user_dbs = []
 		for db in self.current_user_dbs:
 			if data["node_name"] == db[0]:
-				current_user_dbs.append( db[1] )
+				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['autovacuum_workers_total','autovacuum_workers_wraparound'] )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), \
+					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound', 'stackedColumn' ] )
 			
-		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'autovacuum_workers' )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers', 'stackedColumn' ] )
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):

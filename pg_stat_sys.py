@@ -344,7 +344,8 @@ query_check_tables_single_db = """
 		  buffers_clean bigint,
 		  maxwritten_clean bigint,
 		  buffers_backend bigint,
-		  buffers_alloc bigint
+		  buffers_alloc bigint,
+		  buffers_backend_fsync bigint
 		)
 		WITH (
 		  OIDS=FALSE
@@ -370,32 +371,13 @@ query_check_tables_single_db = """
 		  buffers_clean bigint,
 		  maxwritten_clean bigint,
 		  buffers_backend bigint,
-		  buffers_alloc bigint
+		  buffers_alloc bigint,
+		  buffers_backend_fsync bigint
 		)
 		WITH (
 		  OIDS=FALSE
 		);
 	END IF;	
-	
-	IF not EXISTS (
-	 SELECT 1
-	 FROM   pg_class c
-	 JOIN   pg_namespace n ON n.oid = c.relnamespace
-	 WHERE  c.relname = 'psc_stat_activity_raw'
-	 AND	n.nspname = 'public'
-	 ) THEN
-
-		CREATE UNLOGGED TABLE public.psc_stat_activity_raw
-		(
-		  dt timestamp with time zone DEFAULT now(),
-		  datname character varying(255),
-		  param character varying(255),
-		  val numeric DEFAULT 0.0
-		)
-		WITH (
-		  OIDS=FALSE
-		);
-	END IF;
 	
 	IF not EXISTS (
 	 SELECT 1
@@ -459,6 +441,32 @@ query_check_tables_single_db = """
 
 	end$$;"""
 
+query_check_single_db = """
+	do $$ 
+	begin
+	
+	IF not EXISTS (
+	 SELECT 1
+	 FROM   pg_class c
+	 JOIN   pg_namespace n ON n.oid = c.relnamespace
+	 WHERE  c.relname = 'psc_stat_activity_raw'
+	 AND	n.nspname = 'public'
+	 ) THEN
+
+		CREATE UNLOGGED TABLE public.psc_stat_activity_raw
+		(
+		  dt timestamp with time zone DEFAULT now(),
+		  datname character varying(255),
+		  param character varying(255),
+		  val numeric DEFAULT 0.0
+		)
+		WITH (
+		  OIDS=FALSE
+		);
+	END IF;
+
+	end$$;"""
+	
 query_single_db_t1 = """
 	do $$
 	begin
@@ -466,10 +474,10 @@ query_single_db_t1 = """
 		INSERT INTO psc_stat_bgwriter_t1(
 				now, checkpoints_timed, checkpoints_req, checkpoint_write_time, 
 				checkpoint_sync_time, buffers_checkpoint, buffers_clean, maxwritten_clean, 
-				buffers_backend, buffers_alloc)
+				buffers_backend, buffers_alloc, buffers_backend_fsync)
 			select now(), checkpoints_timed, checkpoints_req, checkpoint_write_time, 
 				checkpoint_sync_time, buffers_checkpoint, buffers_clean, maxwritten_clean, 
-				buffers_backend, buffers_alloc from pg_stat_bgwriter;
+				buffers_backend, buffers_alloc, buffers_backend_fsync from pg_stat_bgwriter;
 		delete from psc_stat_dbs_t1;
 		INSERT INTO psc_stat_dbs_t1(
 				now, datid, datname, numbackends, xact_commit, xact_rollback, 
@@ -486,10 +494,10 @@ query_single_db_t2 = """
 		INSERT INTO psc_stat_bgwriter_t2(
 				now, checkpoints_timed, checkpoints_req, checkpoint_write_time, 
 				checkpoint_sync_time, buffers_checkpoint, buffers_clean, maxwritten_clean, 
-				buffers_backend, buffers_alloc)
+				buffers_backend, buffers_alloc, buffers_backend_fsync)
 			select now(), checkpoints_timed, checkpoints_req, checkpoint_write_time, 
 				checkpoint_sync_time, buffers_checkpoint, buffers_clean, maxwritten_clean, 
-				buffers_backend, buffers_alloc from pg_stat_bgwriter;
+				buffers_backend, buffers_alloc, buffers_backend_fsync from pg_stat_bgwriter;
 		delete from psc_stat_dbs_t2;
 		INSERT INTO psc_stat_dbs_t2(
 				now, datid, datname, numbackends, xact_commit, xact_rollback, 
@@ -532,17 +540,41 @@ query_single_db_sn = """
 		group by d.datname, l.mode;
 
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
-		select datname, 'autovacuum_workers' as autovacuum_workers,
-		sum(
-			case when state = 'active' then 
-				1 
-			else
-				0
-			end
-		) as cnt
-		from pg_stat_activity
-		where query ilike '%autovacuum:%' and pid <> pg_backend_pid()
-		group by datname;	
+		select datname, autovacuum_workers, sum( cnt ) as cnt from
+		(
+				select datname, 'autovacuum_workers_total' as autovacuum_workers,
+				sum(
+					case when state = 'active' then 
+						1 
+					else
+						0
+					end
+				) as cnt
+				from pg_stat_activity
+				where query ilike '%autovacuum:%' and query not ilike '%psc_stat_activity_raw%' 
+					and pid <> pg_backend_pid()
+				group by datname
+				union all
+				select datname, 'autovacuum_workers_wraparound' as autovacuum_workers,
+				sum(
+					case when state = 'active' then 
+						1 
+					else
+						0
+					end
+				) as cnt
+				from pg_stat_activity
+				where query ilike '%autovacuum:%' and query ilike '%wraparound%' and query not ilike '%psc_stat_activity_raw%' 
+					and pid <> pg_backend_pid()
+				group by datname
+				union all
+				select datname, 'autovacuum_workers_total', 0 
+				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
+				union all
+				select datname, 'autovacuum_workers_wraparound', 0 
+				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )		
+		) T
+		group by datname, autovacuum_workers;
 	end$$;""";
 
 #=======================================================================================================
@@ -555,7 +587,7 @@ def init_sys_stat( conn ):
 
 def init_sys_stat_node( conn ):
 	conn.execute( """set application_name = '""" + application_name + """'""" )
-	conn.execute( """select public.psc_init_node('""" + node_name + """', '""" +node_descr + """', '""" + node_host + """')""" )
+	conn.execute( """select public.psc_init_node('""" + node_name + """', '""" + node_descr + """', '""" + node_host + """')""" )
 	
 def check_pg_version( conn ):
 	query = conn.prepare( """select case 
@@ -1056,7 +1088,10 @@ def pg_sys_stat_snapshot():
 				(select buffers_backend from psc_stat_bgwriter_t1 limit 1)
 				union
 				select 'buffers_alloc' , (select buffers_alloc from psc_stat_bgwriter_t2 limit 1) -
-				(select buffers_alloc from psc_stat_bgwriter_t1 limit 1)""" )
+				(select buffers_alloc from psc_stat_bgwriter_t1 limit 1)
+				union
+				select 'buffers_backend_fsync' , (select buffers_backend_fsync from psc_stat_bgwriter_t2 limit 1) -
+				(select buffers_backend_fsync from psc_stat_bgwriter_t1 limit 1)""" )
 			res_data = query()
 			
 			stm = sys_stat_db.prepare( """
@@ -1179,8 +1214,6 @@ def pg_sys_stat_snapshot():
 					firs_node_db_conn.close()
 			if sys_stat_db is not None:
 				sys_stat_db.close()
-			logger.log('pg_sys_stat_snapshot iteration finished! Sleep on ' + str( sleep_interval_pg_sys_stat ) + " seconds...", "Info" )
-			time.sleep( sleep_interval_pg_sys_stat )
 				
 #=======================================================================================================
 
@@ -1195,7 +1228,6 @@ def pg_conn_snapshot():
 			firs_node_db = dbs_list[0]
 			firs_node_db_conn = postgresql.open( firs_node_db[1] )
 			firs_node_db_conn.execute( """set application_name = '""" + application_name + """'""" )
-			firs_node_db_conn.execute( query_check_tables_all_dbs )
 
 			pg_version = check_pg_version( firs_node_db_conn )
 
@@ -1306,7 +1338,7 @@ def pg_single_db_sn():
 			firs_node_db = dbs_list[0]
 			firs_node_db_conn = postgresql.open( firs_node_db[1] )
 			firs_node_db_conn.execute( """set application_name = '""" + application_name + """'""" )
-			firs_node_db_conn.execute( query_check_tables_single_db )
+			firs_node_db_conn.execute( query_check_single_db )
 
 			#====================================================================================================
 			firs_node_db_conn.execute( """delete from psc_stat_activity_raw;""" )
