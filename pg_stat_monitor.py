@@ -35,8 +35,8 @@ import configparser
 from pgstatlogger import PSCLogger
 from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
-current_dir = os.getcwd() + '/'
-prepare_dirs()
+current_dir = os.path.dirname(os.path.realpath(__file__)) + '/'
+prepare_dirs(current_dir)
 #=======================================================================================================
 config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
@@ -84,7 +84,7 @@ pg_log_dir = read_conf_param_value( config['main']['pg_log_dir'] )
 pg_log_file_extension = read_conf_param_value( config['main']['pg_log_file_extension'] )
 pg_log_line_max_len = read_conf_param_value( config['main']['pg_log_line_max_len'] )
 #=======================================================================================================
-create_lock( application_name )
+create_lock( current_dir, application_name )
 #=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
@@ -584,7 +584,7 @@ class GetIndexBloatHandler(BaseAsyncHandlerNoParam):
 						/*table_bytes,*/ pg_size_pretty(table_bytes) as table_size,
 						index_scans, realbloat, def, conname
 				FROM raw_bloat
-				WHERE ( realbloat > 30 and wastedbytes > 1000000 ) and indisprimary = 'false' --and nspname = 'public'
+				WHERE ( realbloat > 30 and wastedbytes > 1000000 ) --and indisprimary = 'false' --and nspname = 'public'
 				ORDER BY realbloat DESC;"""
 				
 		html_report = ""

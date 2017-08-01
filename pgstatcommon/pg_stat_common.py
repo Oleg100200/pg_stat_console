@@ -37,11 +37,11 @@ def read_conf_param_value( raw_value, boolean = False ):
 	
 	return value_res
 #=======================================================================================================
-def prepare_dirs():
-	dirs = [ '/log/', '/download/' ]
+def prepare_dirs(current_dir):
+	dirs = [ 'log/', 'download/' ]
 	for v in dirs:
-		if not os.path.exists( os.getcwd() + v[0] ):
-			os.makedirs( os.getcwd() + v[0] )
+		if not os.path.exists( current_dir + v ):
+			os.makedirs( current_dir + v )
 #=======================================================================================================
 def make_html_report_with_head( data, columns, head_name, query_column=None ):
 	html_report = ""
@@ -74,7 +74,7 @@ def make_html_report_with_head( data, columns, head_name, query_column=None ):
 	return html_report
 #=======================================================================================================
 do_unlock = True
-def create_lock(application_name):
+def create_lock(dir, application_name):
 	global do_unlock
 	import atexit
 	import signal
@@ -87,7 +87,7 @@ def create_lock(application_name):
 			try:
 				do_unlock = False
 				print( application_name + " stopped!" )
-				os.remove( application_name + ".lock" )
+				os.remove( dir + application_name + ".lock" )
 			except IOError as e:
 				print( "can't unlock " + application_name + ".lock" )
 			finally:
@@ -98,7 +98,7 @@ def create_lock(application_name):
 		unlock()
 	signal.signal(signal.SIGTERM, handler)	
 	try:
-		fd = os.open( application_name + ".lock", os.O_CREAT|os.O_EXCL)
+		fd = os.open( dir + application_name + ".lock", os.O_CREAT|os.O_EXCL)
 	except IOError as e:
 		print( application_name + " already runned!" )
 		do_unlock = False

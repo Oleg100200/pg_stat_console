@@ -12,8 +12,8 @@ import subprocess
 from pgstatlogger import PSCLogger
 from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
-current_dir = os.getcwd() + '/'
-prepare_dirs()
+current_dir = os.path.dirname(os.path.realpath(__file__)) + '/'
+prepare_dirs(current_dir)
 #=======================================================================================================
 #init config
 config = configparser.RawConfigParser()
@@ -48,7 +48,7 @@ collect_pg_sys_stat = read_conf_param_value( config['main']['collect_pg_sys_stat
 collect_pg_conn_snapshot = read_conf_param_value( config['main']['collect_pg_conn_snapshot'], True )
 collect_os_stat = read_conf_param_value( config['main']['collect_os_stat'], True )
 #=======================================================================================================
-create_lock( application_name )
+create_lock( current_dir, application_name )
 #=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
@@ -659,6 +659,54 @@ def pg_sys_stat_snapshot():
 
 				#====================================================================================================
 				query = conn[1].prepare( """
+				select * from ( select 'idx_scan_per_sec'::text, relid, relname, dt,
+				round( idx_scan_per_sec::numeric, 3) as idx_scan_per_sec 		
+				from (
+					select relid, relname, dt,
+					idx_scan/seconds as idx_scan_per_sec
+					from (
+						SELECT
+								( extract(epoch from (T2.now-T1.now)) ) as seconds,
+								(T2.idx_scan - T1.idx_scan) as idx_scan, 
+								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
+						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
+					) T where relname not in ( """ + exclude_tables + """ )
+				) T where idx_scan_per_sec > 0
+				order by idx_scan_per_sec desc nulls last
+				limit """ + top_rels_in_snapshot + """ )T
+				union
+				select * from ( select 'idx_tup_read_per_sec'::text, relid, relname, dt,
+				round( idx_tup_read_per_sec::numeric, 3) as idx_tup_read_per_sec 		
+				from (
+					select relid, relname, dt,
+					idx_tup_read/seconds as idx_tup_read_per_sec
+					from (
+						SELECT
+								( extract(epoch from (T2.now-T1.now)) ) as seconds,
+								(T2.idx_tup_read - T1.idx_tup_read) as idx_tup_read, 
+								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
+						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
+					) T where relname not in ( """ + exclude_tables + """ )
+				) T where idx_tup_read_per_sec > 0
+				order by idx_tup_read_per_sec desc nulls last
+				limit """ + top_rels_in_snapshot + """ )T
+				union				
+				select * from ( select 'idx_tup_fetch_per_sec'::text, relid, relname, dt,
+				round( idx_tup_fetch_per_sec::numeric, 3) as idx_tup_fetch_per_sec 		
+				from (
+					select relid, relname, dt,
+					idx_tup_fetch/seconds as idx_tup_fetch_per_sec
+					from (
+						SELECT
+								( extract(epoch from (T2.now-T1.now)) ) as seconds,
+								(T2.idx_tup_fetch - T1.idx_tup_fetch) as idx_tup_fetch, 
+								T1.relname, T2.now as dt, T2.indexrelid as relid from psc_data_all_indexes_t1 T1
+						inner join psc_data_all_indexes_t2 T2 on T1.indexrelid = T2.indexrelid
+					) T where relname not in ( """ + exclude_tables + """ )
+				) T where idx_tup_fetch_per_sec > 0
+				order by idx_tup_fetch_per_sec desc nulls last
+				limit """ + top_rels_in_snapshot + """ )T
+				union				
 				select * from ( select 'fetched / scans'::text, relid, relname, dt,
 				round( (idx_tup_fetch_per_sec::float/idx_scan_per_sec)::numeric, 3) as idx_scale3 		
 				from (

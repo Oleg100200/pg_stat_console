@@ -36,8 +36,8 @@ from pgstatcommon.pg_stat_common import *
 import errno
 from socket import error as socket_error
 #=======================================================================================================
-current_dir = os.getcwd() + '/'
-prepare_dirs()
+current_dir = os.path.dirname(os.path.realpath(__file__)) + '/'
+prepare_dirs(current_dir)
 #=======================================================================================================
 config = configparser.RawConfigParser()
 config.optionxform = lambda option: option
@@ -174,7 +174,7 @@ custom_graph_sort = [ '%user', '%system', '%nice', '%steal', '%idle', '%iowait',
 #=======================================================================================================
 admin_methods = [ 'stopQuery', 'downloadLogFile' ]
 #=======================================================================================================
-create_lock( application_name )
+create_lock( current_dir, application_name )
 #=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
@@ -1662,6 +1662,22 @@ class GetTupStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] ) 
 	
+class GetIdxStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []	
+		
+		if self.check_auth() == False:
+			return ""		
+		
+		for db in self.current_user_dbs:
+			if db[0] == data["node_name"]:	
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_scan_per_sec' ), data["node_name"] ), 'idx_scan_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), data["node_name"] ), 'idx_tup_read_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), data["node_name"] ), 'idx_tup_fetch_per_sec (' + db[1] + ')' ] )			  
+
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] ) 	
+
 class GetIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body)
@@ -2462,6 +2478,7 @@ application = tornado.web.Application([
 			('/getReadStat', GetReadStatHandler),
 			('/getWriteStat', GetWriteStatHandler),
 			('/getTupStat', GetTupStatHandler),
+			('/getIdxStat', GetIdxStatHandler),
 			('/getIndexStat', GetIndexStatHandler),
 			('/getQueryDurations', GetQueryDurationsHandler),
 			('/getQueryIODurations', GetQueryIODurationsHandler),

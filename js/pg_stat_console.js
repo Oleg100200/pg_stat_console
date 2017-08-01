@@ -2232,7 +2232,7 @@ function set_all_click_events()
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
 		
-		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Disk Scans (seq/index)");
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Scans (seq and index) by tables");
 		set_date_time_filter(4);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
@@ -2243,7 +2243,25 @@ function set_all_click_events()
 		$( "#apply_filter_button" ).click();		
 	});	
 		
-
+	$( "#sub_menu_index_scans" ).click(function() {
+		
+		$(".pg_stat_console_goto_top").click();
+		
+		selected_menu_elem.name = this.id;
+		selected_menu_elem.auto_refresh = false;
+		hide_autorefresh();
+		
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Index scans");
+		set_date_time_filter(4);
+		$( "#apply_filter_button").unbind( "click" );
+		$( "#apply_filter_button" ).click(function() {
+			$( "#graph_space" ).empty();
+			current_xhr.push( graph_post( 'getIdxStat', $("#date_a").val(), $("#date_b").val() ) ); 
+			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
+		});	
+		$( "#apply_filter_button" ).click();		
+	});	
+	
 	$( "#sub_menu_idx_quality" ).click(function() {
 		
 		$(".pg_stat_console_goto_top").click();

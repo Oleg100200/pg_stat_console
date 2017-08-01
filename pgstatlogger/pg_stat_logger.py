@@ -17,12 +17,13 @@ class PSCLogger( Thread ):
 	@staticmethod
 	def instance():
 		if PSCLogger.__instance == None:
-			PSCLogger()
+			PSCLogger("")
 		return PSCLogger.__instance 
 			
 	def __init__( self, application_name, max_bytes = 1024*100*10, backup_count = 100, delay = 3 ):
 		self.logger = logging.getLogger(application_name)
-		hdlr = logging.handlers.RotatingFileHandler(os.getcwd() + '/log/' + application_name + '.log', max_bytes, backup_count)
+		parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+		hdlr = logging.handlers.RotatingFileHandler(parent_dir + '/log/' + application_name + '.log', max_bytes, backup_count)
 		formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 		hdlr.setFormatter(formatter)
 		self.logger.addHandler(hdlr)

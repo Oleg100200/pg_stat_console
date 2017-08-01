@@ -14,8 +14,8 @@ from contextlib import contextmanager
 from pgstatlogger import PSCLogger
 from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
-current_dir = os.getcwd() + '/'
-prepare_dirs()
+current_dir = os.path.dirname(os.path.realpath(__file__)) + '/'
+prepare_dirs(current_dir)
 #=======================================================================================================
 #init config
 config = configparser.RawConfigParser()
@@ -38,7 +38,7 @@ node_name = read_conf_param_value( config['main']['node_name'] )
 node_descr = read_conf_param_value( config['main']['node_descr'] )
 node_host = read_conf_param_value( config['main']['node_host'] )
 #=======================================================================================================
-create_lock( application_name )
+create_lock( current_dir, application_name )
 #=======================================================================================================
 logger = PSCLogger( application_name )
 logger.start()
@@ -132,7 +132,7 @@ class LogScanner(Thread):
 					if len( str_val ) < 1:
 						continue
 
-					links=re.finditer(r"\,(\w+\.\w+)\,\d+\,\"", str_val)
+					links=re.finditer(r"(\,(\w+\.\w+)\,\d+\,\".*duration)", str_val)
 					plans=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms\s\splan\:", str_val)
 					queries=re.finditer(r"duration\:\s\d+((.|,)\d+)?\sms\s\s(?!plan\:)", str_val)
 					dates=re.finditer(r"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9]):([0-5][0-9])\.([0-9][0-9][0-9])", str_val)
@@ -140,14 +140,20 @@ class LogScanner(Thread):
 					map_links_and_dates = []
 					map_queries_and_plans = []
 					log_map = []
-
+						
 					#======================================
 					for m in links:
-						link_val = str_val[ m.span()[0]:m.span()[1]]
-						link_res = re.finditer(r"(\w+\.\w+)", link_val)
+						link_val = str_val[ m.span()[0]:m.span()[1]] #,597f51d5.7ee4,615,"SELECT",2017-05-04 15:27:30 MSK,55/4139,0,LOG,00000,"duration
+						
+						link_res = re.finditer(r"(\w+\.\w+)", link_val)		#597f51d5.7ee4
 						link_res_text = ""
 						for v in link_res:
 							link_res_text = link_val[v.span()[0]:v.span()[1]]
+						
+						link_res = re.finditer(r"(\,\d+\/\d+\,\d+\,)", link_val)		#,55/4139,0,
+						for v in link_res:
+							link_res_text += link_val[v.span()[0]:v.span()[1]]
+						
 						map_links_and_dates.append( [ "l", m.span()[0], m.span()[1], link_res_text ] )
 
 					for m in plans:
@@ -158,12 +164,11 @@ class LogScanner(Thread):
 
 					for m in dates:
 						map_links_and_dates.append( [ "d", m.span()[0], m.span()[1], str_val[ m.span()[0]:m.span()[1]] ] )
-					#======================================
-
+					#======================================				
 					mapped_objs = []
 					#structure
-					#['p', '5908a708.2b87', ['p', 6730, 6759, 'duration: 37907.973 ms  plan:'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], ['l', 6655, 6673, '5908a708.2b87'], ['d', 8181, 8181, None], datetime_left]
-					#['q', '5908a708.2b87', ['q', 6127, 6151, 'duration: 37907.982 ms  '], ['d', 5983, 6006, '2017-05-04 15:27:30.733'], ['l', 6050, 6068, '5908a708.2b87'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], datetime_left]
+					#['p', '597f51d5.7ee4,55/3765,0,', ['p', 6730, 6759, 'duration: 37907.973 ms  plan:'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], ['l', 6655, 6673, '597f51d5.7ee4,55/3765,0,'], ['d', 8181, 8181, None], datetime_left]
+					#['q', '597f51d5.7ee4,55/3765,0,', ['q', 6127, 6151, 'duration: 37907.982 ms  '], ['d', 5983, 6006, '2017-05-04 15:27:30.733'], ['l', 6050, 6068, '597f51d5.7ee4,55/3765,0,'], ['d', 6588, 6611, '2017-05-04 15:27:30.735'], datetime_left]
 
 					for v in map_queries_and_plans:
 						nearest_dt_left = ['d', 0, 0, None]
@@ -191,11 +196,11 @@ class LogScanner(Thread):
 									(($1::text)::timestamp with time zone), $2::double precision, (select psc_get_db($3::text)), $4::text, $5::text, $6::double precision, 
 										$7::double precision, $8::bigint, $9::bigint, $10::bigint, (select pg_size_pretty((($8::bigint + $9::bigint + $10::bigint)*8192)::bigint)) 
 								);""")
-						
+					
 					ps_queries_and_plans_check = db_pg_stat.prepare("""
 							select exists( select 1 from psc_queries_and_plans where dt = (($1::text)::timestamp with time zone) and 
 								duration = $2::double precision and query = $3::text )""")
-
+					
 					for v in mapped_objs:
 						if v[0] == 'p':
 							for vi in mapped_objs:
