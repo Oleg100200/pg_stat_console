@@ -17,7 +17,7 @@ class PSCLogger( Thread ):
 	@staticmethod
 	def instance():
 		if PSCLogger.__instance == None:
-			PSCLogger("")
+			PSCLogger("PSCLogger")
 		return PSCLogger.__instance 
 			
 	def __init__( self, application_name, max_bytes = 1024*100*10, backup_count = 100, delay = 3 ):
