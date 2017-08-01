@@ -292,10 +292,10 @@ track_activity_query_size = 2048
 ```
 yum groupinstall -y 'development tools'
 yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel
-wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
-xz -d Python-3.6.1.tar.xz
-tar -xvf Python-3.6.1.tar
-cd Python-3.6.1
+wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
+xz -d Python-3.6.2.tar.xz
+tar -xvf Python-3.6.2.tar
+cd Python-3.6.2
 ./configure
 make && make altinstall
 pip3.6 install pytz
