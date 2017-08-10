@@ -98,6 +98,7 @@ autovacuum_analyze_scale_factor = 0.2
 autovacuum_vacuum_cost_delay = 10ms
 autovacuum_vacuum_cost_limit = 5000
 
+synchronous_commit = off
 checkpoint_timeout = 10min		
 max_wal_size = 1GB
 min_wal_size = 80MB
