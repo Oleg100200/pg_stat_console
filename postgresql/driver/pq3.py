@@ -1515,7 +1515,12 @@ class Statement(pg_api.Statement):
 				self.closed = True
 				raise
 
-		(*head, argtypes, tupdesc, last) = self._xact.messages_received()
+		try:
+			(*head, argtypes, tupdesc, last) = self._xact.messages_received()
+		except ValueError as e:
+			self.closed = True
+			self._xact = None
+			return
 
 		typio = self.database.typio
 		if tupdesc is None or tupdesc is element.NoDataMessage:
