@@ -1,0 +1,10 @@
+[Unit]
+Description=pg_stat_monitor
+
+[Service]
+Type=idle
+ExecStart=PYTHON PSC_PATH/pg_stat_monitor.py
+Restart=always
+
+[Install]
+WantedBy=default.target

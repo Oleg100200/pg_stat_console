@@ -341,6 +341,26 @@ mv pg_stat_sys.conf.example pg_stat_sys.conf
 
 Then open the configuration files <code>conf/*.conf</code> and edit all sections and parameters according to your tasks.
 
+### systemctl configuration
+
+You can install sevice files for all components of pg_stat_console:
+
+```
+cd /home/pg_stat_console/units
+chmod a+x install.sh
+./install.sh
+
+systemctl enable pg_stat_sys
+systemctl enable pg_stat_monitor
+systemctl enable pg_stat_log_scanner
+systemctl enable pg_stat_console
+
+systemctl start pg_stat_sys
+systemctl start pg_stat_monitor
+systemctl start pg_stat_log_scanner
+systemctl start pg_stat_console
+```
+
 ### Configure pg_stat_statements on NodeX in all observed databases
 
 If observed DB has version 9.2 or 9.3 then use next patch:

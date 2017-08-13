@@ -1,0 +1,10 @@
+[Unit]
+Description=pg_stat_console
+
+[Service]
+Type=idle
+ExecStart=PYTHON PSC_PATH/pg_stat_console.py
+Restart=always
+
+[Install]
+WantedBy=default.target
