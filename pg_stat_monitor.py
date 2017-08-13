@@ -204,7 +204,7 @@ class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 			self.set_status(400)
 			self.finish( "Host " + incoming_host + " not alowed!" )
 			
-	@tornado.web.asynchronous						
+	@tornado.web.asynchronous
 	def post(self):
 		def callback(future):
 			if enable_exception_catching:
@@ -234,7 +234,7 @@ class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 
 class PgStatConsoleStaticFileHandler(tornado.web.StaticFileHandler):
 	def set_extra_headers(self, path):
-		self.set_header('Cache-Control', 'store, cache, must-revalidate, max-age=0')	
+		self.set_header('Cache-Control', 'store, cache, must-revalidate, max-age=0')
 #=======================================================================================================
 class GetUptimeHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -399,7 +399,7 @@ class GetLongQueriesHandler(BaseAsyncHandlerNoParam):
 				a.state
 			   FROM pg_stat_activity a
 			  WHERE a.state = 'active' AND a.pid <> pg_backend_pid()
-			  ORDER BY a.query_start		
+			  ORDER BY a.query_start
 		) T""" ), [ "datname", "query", "age", "pid" ], "Long queries", ["query"] ) + \
 		make_html_report_with_head( self.make_query( check_base, """select T.datname, substring(T.query from 0 for 8000), T.xact_age::text, T.pid, T.state from (
 			SELECT a.datname,
@@ -769,7 +769,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 				atime = os.path.getatime(full_path) 
 				mtime = os.path.getmtime(full_path) 
 
-				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=3)		
+				mtime_dt = datetime.fromtimestamp( mtime ) + timedelta(hours=3)	
 				dt_from_fname = fname[fname.find( '-' )+1:fname.rfind( '.' )]
 				dt_from_fname = dt_from_fname.replace( "_", " " )
 				dt_from_fname = dt_from_fname[:13] + ':' + dt_from_fname[13:]
@@ -836,7 +836,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 					if dt >= date_a and dt <= date_b: 
 						if line.find( ',ERROR,' ) > -1:
 							str_res += line	
-				except Exception as e:						
+				except Exception as e:
 					if line.find( ',ERROR,' ) > -1:
 						str_res += line
 			elif "fatal" in params:
@@ -846,7 +846,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 					if dt >= date_a and dt <= date_b: 
 						if line.find( ',FATAL,' ) > -1:
 							str_res += line	
-				except Exception as e:						
+				except Exception as e:
 					if line.find( ',FATAL,' ) > -1:
 						str_res += line
 			elif "duration" in params and "reports" not in params:
@@ -869,7 +869,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 						else:
 							if "common" in params:
 								str_res += line
-				except Exception as e:						
+				except Exception as e:
 					unique_str=re.search(r"duration\:\s\d+((.|,)\d+)?\sms",line)
 					if (unique_str is not None):
 						digit = re.search("\d+((.|,)\d+)?",str(unique_str.group()))
@@ -878,7 +878,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 							if x > duration_val:
 								str_res += line
 						elif x < duration_val:
-							str_res += line					
+							str_res += line
 			elif "locked" in params:
 				dt_str = line[:line.find(".")]
 				try:
@@ -886,16 +886,16 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 					if dt >= date_a and dt <= date_b: 
 						if ( ( line.find( ' still waiting for ' ) > 0 ) or ( line.find( 'deadlock detected' ) > 0 ) ):
 							str_res += line	
-				except Exception as e:						
+				except Exception as e:
 					if ( ( line.find( ' still waiting for ' ) > 0 ) or ( line.find( 'deadlock detected' ) > 0 ) ):
-						str_res += line			
+						str_res += line
 			else:
 				dt_str = line[:line.find(".")]
 				try:
 					dt = datetime.strptime( dt_str, "b'%Y-%m-%d %H:%M:%S") - timedelta(hours=1)
 					if dt >= date_a and dt <= date_b: 
-						str_res += line		
-				except Exception as e:						
+						str_res += line
+				except Exception as e:
 					str_res += line
 		logger.log( "End parsing logger.log lines...", "Info" )
 		str_res = html.escape( str_res )
@@ -1103,13 +1103,13 @@ class GetMaintenanceStatusHandler(BaseAsyncHandlerNoParam):
 			where application_name <> '""" + application_name + """' and pid <> pg_backend_pid() and state = 'active' and ( 
 				query ilike '%create%index%' or 
 				query ilike '%alter%table%' or 
-				query ilike '%drop%table%' or	 
+				query ilike '%drop%table%' or 
 				query ilike '%truncate%' or 
 				query like '%COPY%'  or
-				query like '%reindex%'  or	
-				query like '%cluster%'  or		
+				query like '%reindex%'  or
+				query like '%cluster%'  or
 				query like '%vacuum%'  or
-				query like '%analyze%'		
+				query like '%analyze%'
 			) ) as  result""" )
 
 		res = None
@@ -1143,13 +1143,13 @@ class GetMaintenanceTasksHandler(BaseAsyncHandlerNoParam):
 				where application_name <> '""" + application_name + """' and pid <> pg_backend_pid() and state = 'active' and ( 
 					query ilike '%create%index%' or 
 					query ilike '%alter%table%' or 
-					query ilike '%drop%table%' or	 
+					query ilike '%drop%table%' or 
 					query ilike '%truncate%' or 
 					query like '%COPY%'  or
-					query like '%reindex%'  or	
-					query like '%cluster%'  or		
+					query like '%reindex%'  or
+					query like '%cluster%'  or
 					query like '%vacuum%'  or
-					query like '%analyze%'		
+					query like '%analyze%'
 				)			
 				order by "query_age" desc""" ), [ "query_age", "xact_age", "state", "waiting", "datname", "usename", "application_name", "client_addr", "query", "pid" ], "Runned maintenance operations", ["query"] )			
 
@@ -1162,7 +1162,7 @@ application = tornado.web.Application([
 			('/getConnManagement', GetConnManagementHandler),
 			('/stopQuery', StopQueryHandler),
 			('/getServerProcesses', GetServerProcessesHandler),
-			('/getIOServerProcesses', GetIOServerProcessesHandler),			
+			('/getIOServerProcesses', GetIOServerProcessesHandler),
 			('/getOldConns', GetOldConnsHandler),
 
 			('/getLog', GetLogHandler),

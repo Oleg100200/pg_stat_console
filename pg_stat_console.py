@@ -77,8 +77,8 @@ for session_factory in session_factorys:
 	scoped_sessions.append( [ session_factory[0], scoped_session(session_factory[1]) ] )
 #=======================================================================================================
 users_dashboards = []
-for user_dashboard in config['users_dashboards']: 	
-	params = [] 	#[ param, duration ]	
+for user_dashboard in config['users_dashboards']: 
+	params = [] 	#[ param, duration ]
 	keys = read_conf_param_value( config['users_dashboards'][user_dashboard] ).split(';')
 	for key in keys:
 		tmp = key.split(',')[1]
@@ -437,7 +437,7 @@ class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 			lambda future: tornado.ioloop.IOLoop.instance().add_callback(
 				partial(callback, future)))
 			
-	@tornado.web.asynchronous						
+	@tornado.web.asynchronous
 	def post(self):
 		def callback(future):
 			if enable_exception_catching:
@@ -508,7 +508,7 @@ class LoginHandler(BaseAsyncHandlerNoParam):
 		global users_list
 
 		data = tornado.escape.json_decode(self.request.body) 
-		result = { "result": "fail", "user_hash": "none" }		
+		result = { "result": "fail", "user_hash": "none" }
 
 		user_hash = ""
 		user_name = ""
@@ -544,7 +544,7 @@ class UserHashHandler(BaseAsyncHandlerNoParam):
 			if user[ 1 ] == data["user_name"] and user[ 0 ] == data["user_hash"]:
 			   result[ "result" ] = "ok"
 		self.set_header('Content-Type', 'application/json')
-		return json.dumps(result, ensure_ascii=False).encode('utf8')		
+		return json.dumps(result, ensure_ascii=False).encode('utf8')
 	
 class GetCustomParamHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -557,7 +557,7 @@ class GetCustomParamHandler(BaseAsyncHandlerNoParam):
 			result[ "result" ] = "undefined param name"
 		
 		self.set_header('Content-Type', 'application/json')
-		return json.dumps(result, ensure_ascii=False).encode('utf8')		
+		return json.dumps(result, ensure_ascii=False).encode('utf8')
 #=======================================================================================================
 class Chart():
 	global color_map
@@ -612,7 +612,7 @@ class Chart():
 			report_type = "simple_tbl_stat"
 			
 		if 'stm_query' in fields:
-			report_type = "stm_query"			
+			report_type = "stm_query"
 			
 		graph_json = """""" 
 		
@@ -734,7 +734,7 @@ class Chart():
 								if 'total_read_blks_size_detail' in fields and 'duration_sec' in fields and 'io_read_time_sec' in fields:
 									detail = """  detail_1: \"""" + 'Loaded from disk: ' + str( d[ 'total_read_blks_size_detail' ] ) + """\"""" 
 									detail += """,  detail_2: \"""" + 'I/O read time: ' + str( d[ 'io_read_time_sec' ] ) + """ sec\"""" 
-									detail += """,  detail_3: \"""" + 'Duration: ' + str( d[ 'duration_sec' ] ) + """ sec\"""" 							
+									detail += """,  detail_3: \"""" + 'Duration: ' + str( d[ 'duration_sec' ] ) + """ sec\"""" 
 								blocks[ level_i ].append( '{ y: ' + str( d[ 2 ] ) + ',  label: "' + self.get_date_time_from_str( str( d[ 1 ] ) ) + '",' + detail + \
 								', query: ' + self.escapejs( self.remove_cred_data( str( d[ 'query' ] ) ) ).replace("\\n", "</br>") + ', explain: ' + self.escapejs( self.remove_cred_data( str( d[ 'plan' ] ) ) ).replace("\\n", "</br>") + '}' )	
 							#--------------------------------------------------------------------------------------------------------------------------------
@@ -750,7 +750,7 @@ class Chart():
 								#if 'stm_query' in fields:
 								#	detail = """  detail_1: \"""" + 'Loaded from disk: ' + str( d[ 'total_read_blks_size_detail' ] ) + """\"""" 
 								#	detail += """,  detail_2: \"""" + 'I/O read time: ' + str( d[ 'io_read_time_sec' ] ) + """ sec\"""" 
-								#	detail += """,  detail_3: \"""" + 'Duration: ' + str( d[ 'duration_sec' ] ) + """ sec\"""" 							
+								#	detail += """,  detail_3: \"""" + 'Duration: ' + str( d[ 'duration_sec' ] ) + """ sec\"""" 
 								blocks[ level_i ].append( '{ y: ' + str( d[ 2 ] ) + ',  label: "' + self.get_date_time_from_str( str( d[ 1 ] ) ) + '",' + detail + \
 								', stm_query: ' + self.escapejs( self.remove_cred_data( str( d[ 'stm_query' ] ) ) ).replace("\\n", "</br>") + '}' )	
 							#--------------------------------------------------------------------------------------------------------------------------------
@@ -804,7 +804,7 @@ class Chart():
 				chart_name += date[ 0 ]
 				chart_name += date[ 1 ]
 				
-			chart_name = "chartContainer_" +  hashlib.md5(chart_name.encode()).hexdigest()		
+			chart_name = "chartContainer_" +  hashlib.md5(chart_name.encode()).hexdigest()
 			html_report = html_report + str( self.make_stacked_chart( data_v[ 0 ], data_v[ 1 ], chart_name[:25] ) )
 			id_container = id_container + 1
 				
@@ -858,14 +858,14 @@ class Chart():
 				  fontSize: 16,
 				  fontFamily: "Arial"
 			  },  
-				axisX:{	  
+				axisX:{  
 				   labelFontSize: 12,
 				   labelAngle: -30,
 				   labelFontFamily: "Arial"
 				},
 				axisY:{
 					labelFontSize: 12
-				},			
+				},
 				data: [""";
 		
 		data_copy = []
@@ -881,7 +881,7 @@ class Chart():
 		for v in data:
 			data_copy.append( v )
 			if v[ 0 ] > lines_num:
-				lines_num = v[ 0 ]				
+				lines_num = v[ 0 ]
 			if v[3] not in lines_names:
 				lines_names.append(v[3])
 
@@ -897,7 +897,7 @@ class Chart():
 
 		if len( lines_names ) > 0:
 			if lines_names[0] in custom_graph_sort:
-				lines_names.sort(key=lambda x: custom_graph_sort.index(x))				
+				lines_names.sort(key=lambda x: custom_graph_sort.index(x))
 			else:
 				lines_names.sort(reverse=False)
 		else:
@@ -942,7 +942,7 @@ class Chart():
 				if block[0][0].find( '(' ) > 0:
 					if block[0][0].find( '(' + elem[0] + ')' ) > -1:
 						blocks_txt += """color: \"""" + elem[1] + """\","""
-				else:				
+				else:
 					if elem[0] == 'idle':   #exception param name: full compare
 						if block[0][0] == elem[0]:
 							blocks_txt += """color: \"""" + elem[1] + """\","""
@@ -1000,7 +1000,7 @@ class Chart():
 			id_container = id_container + 1
 				
 		html_report = html_report +  """} show_graph();"""
-		return html_report		
+		return html_report
 #=======================================================================================================
 class QueryMakerSimpleTblStat():
 	def generate_query( self, db, dt_a, dt_b, param ):
@@ -1030,7 +1030,7 @@ class GetReadStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], \
-					data[ "date_b" ], 'heap_blks_read_per_sec' ), data["node_name"] ), 'heap_blks_read_per_sec (' + db[1] + ')' ] )			
+					data[ "date_b" ], 'heap_blks_read_per_sec' ), data["node_name"] ), 'heap_blks_read_per_sec (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], \
 					data[ "date_b" ], 'idx_blks_read_per_sec' ), data["node_name"] ), 'idx_blks_read_per_sec (' + db[1] + ')' ] )
 				
@@ -1086,13 +1086,13 @@ class QueryMakerSimpleStat():
 			if unit == 'millisec_to_sec':
 				str_fld_calc = "val / 1000"
 			if unit == 'millisec_to_min':
-				str_fld_calc = "val / 1000 * 60"				
+				str_fld_calc = "val / 1000 * 60"
 			if unit == 'blocks_to_mb':
 				str_fld_calc = "(val * 8192 )/1048576"
 			if unit == 'bytes_to_kb':
 				str_fld_calc = "val / 1024"	
 			if unit == 'bytes_to_mb':
-				str_fld_calc = "val / 1048576"					
+				str_fld_calc = "val / 1048576"
 				
 		return [ """	
 			select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt )  AS graph_block, * 
@@ -1130,13 +1130,13 @@ class QueryMakerSimpleStat():
 			if unit == 'millisec_to_sec':
 				str_fld_calc = "val / 1000"
 			if unit == 'millisec_to_min':
-				str_fld_calc = "val / 1000 * 60"				
+				str_fld_calc = "val / 1000 * 60"
 			if unit == 'blocks_to_mb':
 				str_fld_calc = "(val * 8192 )/1048576"
 			if unit == 'bytes_to_kb':
-				str_fld_calc = "val / 1024"	
+				str_fld_calc = "val / 1024"
 			if unit == 'bytes_to_mb':
-				str_fld_calc = "val / 1048576"	
+				str_fld_calc = "val / 1048576"
 				
 		if device is not None:
 			return [ """	
@@ -1160,7 +1160,7 @@ class QueryMakerSimpleStat():
 							  inner join psc_devices d on d.id = s.device_id
 							  where d.device_name """ + self.param_generator( device ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
 								dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
-							group by param ) T""" ]	
+							group by param ) T""" ]
 		else:
 			return [ """	
 				select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt ) AS graph_block, * 
@@ -1181,9 +1181,9 @@ class QueryMakerSimpleStat():
 							  inner join psc_params p on p.id = s.param_id
 							  where p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
 								dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
-							group by param ) T""" ]		
+							group by param ) T""" ]
 							
-	def generate_query_os_stat_in_gb( self, dt_a, dt_b, device, param ):			
+	def generate_query_os_stat_in_gb( self, dt_a, dt_b, device, param ):
 		if device is not None:
 			return [ """	
 				select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt ) AS graph_block, * 
@@ -1206,7 +1206,7 @@ class QueryMakerSimpleStat():
 							  inner join psc_devices d on d.id = s.device_id
 							  where d.device_name """ + self.param_generator( device ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
 								dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
-							group by param ) T""" ]	
+							group by param ) T""" ]
 		else:
 			return [ """	
 				select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt ) AS graph_block, * 
@@ -1232,10 +1232,10 @@ class QueryMakerSimpleStat():
 class GetCPUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], None, [ "%user", "%nice", "%system", "%iowait", "%steal", "%idle" ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'CPU load, %', 'stackedArea' ] )
@@ -1245,7 +1245,7 @@ class GetCPUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
 			return ""		
@@ -1258,12 +1258,12 @@ class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 	
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'Memory usage, GB', 'stackedArea' ] )
 			
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetDiskUtilStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
 			return ""
@@ -1275,15 +1275,15 @@ class GetDiskUtilStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'Disk utilization (' + device[0] + '), %', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetDiskUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "disk_size_avail", "disk_size_used" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1292,15 +1292,15 @@ class GetDiskUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'Disk usage (' + device[0] + '), GB', 'stackedArea' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetWRQMRRQMStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "rrqm/s", "wrqm/s" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1309,15 +1309,15 @@ class GetWRQMRRQMStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'rrqm/s wrqm/s (' + device[0] + '), requests', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetWRStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "r/s", "w/s" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1326,15 +1326,15 @@ class GetWRStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'r/s w/s (' + device[0] + '), requests', 'stackedArea' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetRSecWSecStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "rMB/s", "wMB/s" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1343,15 +1343,15 @@ class GetRSecWSecStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'rMB/s wMB/s (' + device[0] + '), MBytes', 'stackedArea' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetAVGRQStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "avgrq-sz" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1360,15 +1360,15 @@ class GetAVGRQStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'avgrq-sz (' + device[0] + '), sectors', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetAVGQUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "avgqu-sz" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1377,15 +1377,15 @@ class GetAVGQUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'avgqu-sz (' + device[0] + '), requests', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetAWaitStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "await" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1394,15 +1394,15 @@ class GetAWaitStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'await (' + device[0] + '), milliseconds', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetNetworkTrafficStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "rx_bytes", "tx_bytes" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1411,15 +1411,15 @@ class GetNetworkTrafficStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpl
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'rx_bytes tx_bytes (' + device[0] + '), kBytes/sec', 'stackedArea' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetNetworkPacketsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "RX-OK", "TX-OK" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1428,15 +1428,15 @@ class GetNetworkPacketsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpl
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'RX-OK TX-OK (' + device[0] + '), packets', 'stackedColumn' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetNetworkErrorsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "RX-ERR", "RX-DRP", "RX-OVR", "TX-ERR", "TX-DRP", "TX-OVR" ] ), data["node_name"] )
 		for device in psc_devices:
@@ -1445,15 +1445,15 @@ class GetNetworkErrorsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimple
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'RX-ERR RX-DRP RX-OVR TX-ERR TX-DRP TX-OVR (' + device[0] + '), packets', 'stackedColumn' ] )
 
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 	
 class GetBlockHitDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		current_user_dbs = []
 		for db in self.current_user_dbs:
@@ -1463,15 +1463,15 @@ class GetBlockHitDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'blks_hit_per_sec' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_hit_per_sec', 'line' ] )
 		
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 			
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'checkpoints_timed', 'checkpoints_req' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
@@ -1489,15 +1489,15 @@ class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 			'maxwritten_clean, buffers_backend_fsync', 'stackedColumn' ] )
 		
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )			
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetBlockReadDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		current_user_dbs = []
 		for db in self.current_user_dbs:
@@ -1507,15 +1507,15 @@ class GetBlockReadDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'blks_read_per_sec' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_read_per_sec', 'line' ] )	
 		
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetTupWriteDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
@@ -1523,15 +1523,15 @@ class GetTupWriteDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'tup_inserted_per_sec, tup_updated_per_sec, tup_deleted_per_sec (' + db[1] + ')', 'line' ] )
 				
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetTupRetFetchDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
@@ -1539,15 +1539,15 @@ class GetTupRetFetchDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
 					'tup_returned_per_sec, tup_fetched_per_sec (' + db[1] + ')', 'line' ] )
 
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )	
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetTxDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		current_user_dbs = []
 		for db in self.current_user_dbs:
@@ -1565,10 +1565,10 @@ class GetTxDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetDeadlocksDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		current_user_dbs = []
 		for db in self.current_user_dbs:
@@ -1582,10 +1582,10 @@ class GetDeadlocksDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		for db in self.current_user_dbs:
 			if data["node_name"] == db[0]:
@@ -1598,16 +1598,16 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['idle in transaction','idle','active','waiting_conns'] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-				'idle in transaction, idle, active, waiting_conns (' + db[1] + ')', 'stackedArea' ] )		
+				'idle in transaction, idle, active, waiting_conns (' + db[1] + ')', 'stackedArea' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1615,10 +1615,10 @@ class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetLocksStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
@@ -1632,10 +1632,10 @@ class GetLocksStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 class GetWriteStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
@@ -1649,10 +1649,10 @@ class GetWriteStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 class GetTupStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 		
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
@@ -1665,10 +1665,10 @@ class GetTupStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 class GetIdxStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 		
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
@@ -1676,7 +1676,7 @@ class GetIdxStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), data["node_name"] ), 'idx_tup_read_per_sec (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), data["node_name"] ), 'idx_tup_fetch_per_sec (' + db[1] + ')' ] )			  
 
-		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] ) 	
+		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
@@ -1687,7 +1687,7 @@ class GetIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / fetched' ), data["node_name"] ), 'read / fetched (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / scans' ), data["node_name"] ), 'read / scans (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'fetched / scans' ), data["node_name"] ), 'fetched / scans (' + db[1] + ')' ] )
@@ -1696,8 +1696,8 @@ class GetIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 
 class GetQueryDurationsHandler(BaseAsyncHandlerNoParam,Chart):
 	def post_(self):
-		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data = tornado.escape.json_decode(self.request.body)
+		data_graph = []
 
 		query = """
 			select row_number() OVER(PARTITION BY T.dt_rounded ORDER BY T.dt_rounded ) AS graph_block, T.* 
@@ -1717,10 +1717,10 @@ class GetQueryDurationsHandler(BaseAsyncHandlerNoParam,Chart):
 
 			
 		if self.check_auth() == False:
-			return ""		
+			return ""
 
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Query durations in sec (' + db[1] + ')' ] )
 				
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -1728,7 +1728,7 @@ class GetQueryDurationsHandler(BaseAsyncHandlerNoParam,Chart):
 class GetQueryIODurationsHandler(BaseAsyncHandlerNoParam,Chart):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		query = """
 		select row_number() OVER(PARTITION BY T.dt_rounded ORDER BY T.dt_rounded ) AS graph_block, T.* 
@@ -1747,7 +1747,7 @@ class GetQueryIODurationsHandler(BaseAsyncHandlerNoParam,Chart):
 					) T order by T.dt_rounded asc, graph_block asc"""
 		
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
@@ -1758,7 +1758,7 @@ class GetQueryIODurationsHandler(BaseAsyncHandlerNoParam,Chart):
 class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		query = """
 		
@@ -1777,10 +1777,10 @@ class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 							) T order by T.dt_rounded asc, graph_block asc"""
 		
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blocks by queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -1808,15 +1808,15 @@ class StmStatQuery():
 class GetStmCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_calls')
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Calls by Queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -1824,15 +1824,15 @@ class GetStmCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 class GetStmTotalTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_total_time')
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Total time by queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -1840,15 +1840,15 @@ class GetStmTotalTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 class GetStmRowsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_rows')
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Rows by queries (' + db[1] + ')' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -1856,13 +1856,13 @@ class GetStmRowsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 class GetStmSharedBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_hit') % \
 					(db[1]), data["node_name"] ), 'Shared blks hit by queries (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_read') % \
@@ -1870,20 +1870,20 @@ class GetStmSharedBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuer
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_dirtied') % \
 					(db[1]), data["node_name"] ), 'Shared blks dirtied by queries (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_written') % \
-					(db[1]), data["node_name"] ), 'Shared blks written by queries (' + db[1] + ')' ] )					
+					(db[1]), data["node_name"] ), 'Shared blks written by queries (' + db[1] + ')' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetStmLocalBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_hit') % \
 					(db[1]), data["node_name"] ), 'Local blks hit by queries (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_read') % \
@@ -1898,13 +1898,13 @@ class GetStmLocalBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 class GetStmTempBlksReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_read') % \
 					(db[1]), data["node_name"] ), 'Temp blks read by queries (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_written') % \
@@ -1915,13 +1915,13 @@ class GetStmTempBlksReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,
 class GetStmBlkReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []	
+		data_graph = []
 
 		if self.check_auth() == False:
-			return ""		
+			return ""
 		
 		for db in self.current_user_dbs:
-			if db[0] == data["node_name"]:		
+			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_read_time') % \
 					(db[1]), data["node_name"] ), 'Blk read time by queries (' + db[1] + ')' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_write_time') % \
@@ -2061,7 +2061,7 @@ class GetActivityHistoryHandler(BaseAsyncHandlerNoParam):
 					  inner join psc_conn_states cs on cs.id = cn.conn_state
 					where sn.dt = '""" + params[ "date_s" ] + """'::timestamp with time zone """ + timezone_correct_time_forward + """""", params[ "node_name" ] )
 					
-			locks = self.make_query( 'sys_stat', """select 	
+			locks = self.make_query( 'sys_stat', """select 
 					tbls_w.tbl_name as waiting_table,
 					l.waiting_query, 
 					l.waiting_pid, 
@@ -2286,7 +2286,7 @@ class GetPgStatConsoleStatusHandler(BaseAsyncHandlerNoParam):
 		
 	def post_(self):
 		if self.check_auth() == False:
-			return "false"		
+			return "false"
 		result = False
 
 		data = tornado.escape.json_decode(self.request.body) 
@@ -2318,7 +2318,7 @@ class GetConsoleStatusReportHandler(GetPgStatConsoleStatusHandler):
 
 		for db in self.current_user_dbs:
 			if data["node_name"] == db[0]:
-				db_stat_status = self.check_stat_data_db( db[1], data["node_name"] )	
+				db_stat_status = self.check_stat_data_db( db[1], data["node_name"] )
 				databases.append( [ db[1], "yes" if db_stat_status else """<div class="pg_stat_console_alert_font">no</div>""" ] )
 
 		if len( databases ) > 0:
@@ -2472,7 +2472,7 @@ application = tornado.web.Application([
 			('/getAVGQUStat', GetAVGQUStatHandler),
 			('/getAWaitStat', GetAWaitStatHandler),
 			('/getNetworkTrafficStat', GetNetworkTrafficStatHandler),
-			('/getNetworkPacketsStat', GetNetworkPacketsStatHandler),			
+			('/getNetworkPacketsStat', GetNetworkPacketsStatHandler),
 			('/getNetworkErrorsStat', GetNetworkErrorsStatHandler),
 
 			('/getReadStat', GetReadStatHandler),
@@ -2526,7 +2526,7 @@ application = tornado.web.Application([
 			('/getConnManagement', GetConnManagementHandler),
 			('/stopQuery', StopQueryHandler),
 			('/getServerProcesses', GetServerProcessesHandler),
-			('/getIOServerProcesses', GetIOServerProcessesHandler),			
+			('/getIOServerProcesses', GetIOServerProcessesHandler),
 			('/getOldConns', GetOldConnsHandler),
 
 			('/getLog', GetLogHandler),

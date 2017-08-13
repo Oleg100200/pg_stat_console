@@ -110,6 +110,7 @@ bgwriter_lru_multiplier = 7.0
 
 stats_temp_directory = '/dev/shm/pg_stat_tmp'
 
+default_statistics_target = 1000
 statement_timeout = 3600000            			# in milliseconds, 1 hour
 lock_timeout = 600000                       # 10 mins
 ```
@@ -346,7 +347,7 @@ Then open the configuration files <code>conf/*.conf</code> and edit all sections
 You can install sevice files for all components of pg_stat_console:
 
 ```
-cd /home/pg_stat_console/units
+cd /home/pg_stat_console/unit
 chmod a+x install.sh
 ./install.sh
 
@@ -363,8 +364,8 @@ systemctl start pg_stat_console
 
 ### Configure pg_stat_statements on NodeX in all observed databases
 
-If observed DB has version 9.2 or 9.3 then use next patch:
+If the observed DB has version 9.2 or 9.3 then use next patch:
 
 ```
-psql -h localhost -d observed_db_X -U postgres -p 5432 -a -f /home/pg_stat_console/sql/patch_92_pg_stat_statements.sql
+psql -h localhost -d observed_db_X -U postgres -p 5432 -a -f /home/pg_stat_console/sql/patch_92_93_pg_stat_statements.sql
 ```

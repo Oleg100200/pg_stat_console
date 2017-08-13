@@ -325,7 +325,7 @@ function notice( msg, func )
 		onClose     : function(){    
 			if( typeof func !== 'undefined' )
 				func();
-		},											
+		},
 	});
 }
 
@@ -395,7 +395,7 @@ function progress_notice( msg )
 			}}		
 
 		},
-		html    : true										
+		html    : true
 	});
 }
 
@@ -405,7 +405,7 @@ function close_flavr_container()
 		if( $(this).text().length == 0 )
 			$(this).parent().parent().parent().parent().fadeOut( "slow", function() {
 				$(this).parent().parent().parent().parent().remove();
-			});			
+			});	
 	});
 }
 
@@ -597,7 +597,7 @@ function show_login_dialog(title_val, help_msg)
 			'<img height="80" width="345" src="img/logo.png" style=""/>'+
 			'<p>put your credentials</p>'+
 			'<form>' +
-			'   <div class="form-row">'+               
+			'   <div class="form-row">'+
 			'   </div>'+
 			'</form>' +
 			'<form class="flavr-form form-html">' +
@@ -610,7 +610,7 @@ function show_login_dialog(title_val, help_msg)
 			'       placeholder="Password" />' +
 			'   </div>' +
 			'<p></p>'
-			'</form>';                        
+			'</form>';
 		
 		new $.flavr({
 			title	: 'Welcome to ' + title_val + '!',
@@ -628,7 +628,7 @@ function show_login_dialog(title_val, help_msg)
 								animateClosing    : 'fadeOutDown',
 								html    : false,
 								closeOverlay : true,
-								closeEsc     : true		
+								closeEsc     : true
 							});
 						    return false;
 						} else { 
@@ -673,7 +673,7 @@ function show_login_dialog(title_val, help_msg)
 											closeEsc     : true,
 											onClose     : function(){    
 												call_login_dialog();
-											}											
+											}
 										});
 									}},
 								error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -688,9 +688,9 @@ function show_login_dialog(title_val, help_msg)
 											closeEsc     : true,
 											onClose     : function(){    
 												call_login_dialog();
-											},											
+											},
 										});
-									}								
+									}
 						});	
 							
 							return true;
@@ -705,7 +705,7 @@ function show_login_dialog(title_val, help_msg)
 								animateClosing    : 'fadeOutDown',
 								html    : true,
 								closeOverlay : true,
-								closeEsc     : true								
+								closeEsc     : true
 							});
 							return false;
 					}}					
@@ -844,7 +844,7 @@ function set_date_time_filter( last_hours )
 
 		$('.date-picker-wrapper').remove();
 		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);
 		$("#date_a").val(date_time_objs_v[0]);
 		$("#date_b").val(date_time_objs_v[1]);
 	}
@@ -880,14 +880,14 @@ function set_date_time_filter_compare_params( last_hours )
 		$('input[id^="date"]').unbind( "click" );
 		$('.date-picker-wrapper').remove();
 		
-		for (var i = 0; i < compare_dict.length; i++)	
+		for (var i = 0; i < compare_dict.length; i++)
 			$('select[id^="cmp_param_"]').append($("<option/>", {
 				value: compare_dict[i][0],
 				text: compare_dict[i][1]
 			}));
 		
 		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);
 		$("#date_a").val(date_time_objs_v[0]);
 		$("#date_b").val(date_time_objs_v[1]);
 	}
@@ -922,7 +922,7 @@ function set_date_time_filter_compare_single_params( last_hours )
 		date2_b.setHours(date2_b.getHours()-4);
 		
 		$("#date2_a").val(date2_a.toISOString().slice(0, 19).replace('T', ' '));
-		$("#date2_b").val(date2_b.toISOString().slice(0, 19).replace('T', ' '));		
+		$("#date2_b").val(date2_b.toISOString().slice(0, 19).replace('T', ' '));
 	}
 	else
 	{
@@ -941,14 +941,14 @@ function set_date_time_filter_compare_single_params( last_hours )
 			}));		
 		
 		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);		
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);	
 		$("#date_a").val(date_time_objs_v[0]);
 		$("#date_b").val(date_time_objs_v[1]);
 		
 		$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
-		$('#date2_b').dateRangePicker(date_time_objs2_v[2]);		
+		$('#date2_b').dateRangePicker(date_time_objs2_v[2]);
 		$("#date2_a").val(date_time_objs2_v[0]);
-		$("#date2_b").val(date_time_objs2_v[1]);	
+		$("#date2_b").val(date_time_objs2_v[1]);
 	}
 }		
 
@@ -976,7 +976,7 @@ function set_date_time_log_filter(last_hours)
 
 		$('.date-picker-wrapper').remove();
 		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);			
+		$('#date_b').dateRangePicker(date_time_objs_v[2]);
 		$("#date_a").val(date_time_objs_v[0]);
 		$("#date_b").val(date_time_objs_v[1]);
 	}
@@ -994,7 +994,7 @@ function set_old_conn_filter()
 			"	</div>"+
 		"		<div id=\"apply_filter_button\" style=\"margin-left:20px;display:inline-block;\" class=\"pg_stat_console_fonts pg_stat_console_button\">"+
 		"			Apply"+
-		"		</div>"+				
+		"		</div>"+
 			"</div>"+
 		"</div>" );
 	
@@ -1105,7 +1105,7 @@ function show_up_down_buttons()
 		} else
 		{
 			$(".pg_stat_console_step_up").fadeOut(800, function(){});
-			$(".pg_stat_console_step_down").fadeOut(800, function(){});		
+			$(".pg_stat_console_step_down").fadeOut(800, function(){});
 		}
 }
 
@@ -1128,44 +1128,44 @@ function init_settings()
 }
 
 jQuery.fn.sortElements = (function(){
+
+	var sort = [].sort;
  
-    var sort = [].sort;
+	return function(comparator, getSortable) {
  
-    return function(comparator, getSortable) {
+		getSortable = getSortable || function(){return this;};
  
-        getSortable = getSortable || function(){return this;};
+		var placements = this.map(function(){
  
-        var placements = this.map(function(){
+			var sortElement = getSortable.call(this),
+				parentNode = sortElement.parentNode,
+				nextSibling = parentNode.insertBefore(
+					document.createTextNode(''),
+					sortElement.nextSibling
+				);
  
-            var sortElement = getSortable.call(this),
-                parentNode = sortElement.parentNode,
-                nextSibling = parentNode.insertBefore(
-                    document.createTextNode(''),
-                    sortElement.nextSibling
-                );
+			return function() {
  
-            return function() {
+				if (parentNode === this) {
+					throw new Error(
+						"You can't sort elements if any one is a descendant of another."
+					);
+				}
  
-                if (parentNode === this) {
-                    throw new Error(
-                        "You can't sort elements if any one is a descendant of another."
-                    );
-                }
+				// Insert before flag:
+				parentNode.insertBefore(this, nextSibling);
+				// Remove flag:
+				parentNode.removeChild(nextSibling);
  
-                // Insert before flag:
-                parentNode.insertBefore(this, nextSibling);
-                // Remove flag:
-                parentNode.removeChild(nextSibling);
+			};
  
-            };
+		});
  
-        });
+		return sort.call(this, comparator).each(function(i){
+			placements[i].call(getSortable.call(this));
+		});
  
-        return sort.call(this, comparator).each(function(i){
-            placements[i].call(getSortable.call(this));
-        });
- 
-    };
+	};
  
 })();
 
@@ -1256,7 +1256,7 @@ function graph_post( method, date_a_v, date_b_v, func )
 						load_process.pop();
 						reset_up_down_buttons();
 						if( typeof func !== 'undefined' )
-							func();						
+							func();
 					},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 						load_process.pop();
@@ -1336,7 +1336,7 @@ function click_on_check_boxes_in_settings()
 	$(".conf_param").unbind( "click" );
 	$(".conf_param").each(function() {
 		$(this).click( function(){
-			set_user_config();				
+			set_user_config();
 		});
 	});
 	
@@ -1409,7 +1409,7 @@ function check_user_name_hash()
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 						if( textStatus !== "abort" ) show_error( textStatus, errorThrown, XMLHttpRequest.responseText );
 					}
-		});									
+		});
 	
 		
 	} else
@@ -1421,19 +1421,19 @@ function check_user_name_hash()
 function set_all_click_events()
 {
 	$(".pg_stat_console_step_up").click(function(){
-	    if( $(".scrollable_obj").length >= 2 )
+		if( $(".scrollable_obj").length >= 2 )
 		{		
 			if( table_num_viewed >= 2 )
 			{
 				table_num_viewed -= 1;
 				scroll_page_to_table_num( table_num_viewed );
 				if( table_num_viewed != $(".scrollable_obj").length )
-					$(".pg_stat_console_step_down").fadeIn(800, function(){});					
+					$(".pg_stat_console_step_down").fadeIn(800, function(){});
 			}		
 			if( table_num_viewed == 1 )
 			{
-				$(".pg_stat_console_step_up").fadeOut(800, function(){});	
-				$(".pg_stat_console_step_down").fadeIn(800, function(){});	
+				$(".pg_stat_console_step_up").fadeOut(800, function(){});
+				$(".pg_stat_console_step_down").fadeIn(800, function(){});
 			}
 			else
 				$(".pg_stat_console_step_up").fadeIn(800, function(){});
@@ -1441,14 +1441,14 @@ function set_all_click_events()
 	});	
 	
 	$(".pg_stat_console_step_down").click(function(){
-	    if( $(".scrollable_obj").length >= 2 )
+		if( $(".scrollable_obj").length >= 2 )
 		{		
 			if( table_num_viewed + 1 <= $(".scrollable_obj").length )
 			{
 				table_num_viewed += 1;
 				scroll_page_to_table_num( table_num_viewed );
 				if( table_num_viewed != 1 )
-					$(".pg_stat_console_step_up").fadeIn(800, function(){});				
+					$(".pg_stat_console_step_up").fadeIn(800, function(){});
 			}
 			if( table_num_viewed == $(".scrollable_obj").length )
 			{
@@ -1456,7 +1456,7 @@ function set_all_click_events()
 				$(".pg_stat_console_step_up").fadeIn(800, function(){});
 			}
 			else
-				$(".pg_stat_console_step_down").fadeIn(800, function(){});		
+				$(".pg_stat_console_step_down").fadeIn(800, function(){});
 		}
 	});
 	
@@ -1470,7 +1470,7 @@ function set_all_click_events()
 	
 	$('.pg_stat_console_menu_elem').each(function() {
 			$(this).click(function(){
-				reset_up_down_buttons();		
+				reset_up_down_buttons();
 
 				$( ".pg_stat_console_menu_elem" ).removeClass( "pg_stat_console_selected_elem_clicked" );
 				$(this).addClass( "pg_stat_console_selected_elem_clicked" );
@@ -1478,7 +1478,7 @@ function set_all_click_events()
 				$( "#" + $(this).parent().parent().parent().attr("parent_menu_id") ).addClass( "pg_stat_console_selected_elem_clicked" );
 				
 				all_xhr_abort();
-									
+
 			});
 	});		
 	
@@ -1548,17 +1548,17 @@ function set_all_click_events()
 																if( textStatus !== "abort" ) 
 																	show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); 
 															}
-												}) );											
+												}) );
 										},
 										error: function(XMLHttpRequest, textStatus, errorThrown) {
 												if( textStatus !== "abort" ) 
 													show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); 
 										}
-								});								
+								});
 							}
 							else
 								graph_post( data_dashboard[ i ][0], dates[0], dates[1], function(){redraw_dashboard();} );
-						}							
+						}
 					}
 					
 					if( data.length == 0)
@@ -1568,8 +1568,8 @@ function set_all_click_events()
 					} else
 					{
 						user_dashboard = data;
-						build_dashboard( user_dashboard );	
-					}					
+						build_dashboard( user_dashboard );
+					}
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 						if( textStatus !== "abort" ) show_error( textStatus, errorThrown, XMLHttpRequest.responseText );
@@ -1592,7 +1592,7 @@ function set_all_click_events()
 				data: JSON.stringify( {node_name: current_node_name, user_config: localStorage.getItem('user_config'), user_auth_data: localStorage.getItem('user_auth_data')} ),
 				success: function(data) {
 					init_work_space();
-					$( "#work_space" ).append( data );	
+					$( "#work_space" ).append( data );
 					reset_up_down_buttons();
 					load_process.pop();
 				},
@@ -1645,7 +1645,7 @@ function set_all_click_events()
 					$( "#work_space" ).append( data );
 					reset_up_down_buttons();
 					load_process.pop();
-					click_on_check_boxes_in_settings();				
+					click_on_check_boxes_in_settings();
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 						if( textStatus !== "abort" ) { show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); load_process.pop(); }
@@ -1675,11 +1675,11 @@ function set_all_click_events()
 			
 			for (var i = 0; i < dashboard_dict.length; i++)	
 				if( dashboard_dict[i][0] == $("#cmp_param_1").val() )
-					compare_dict.push( dashboard_dict[i] );		
+					compare_dict.push( dashboard_dict[i] );
 
-			for (var i = 0; i < dashboard_dict.length; i++)	
+			for (var i = 0; i < dashboard_dict.length; i++)
 				if( dashboard_dict[i][0] == $("#cmp_param_2").val() )
-					compare_dict.push( dashboard_dict[i] );	
+					compare_dict.push( dashboard_dict[i] );
 
 			
 			$( "#auto_refresh_div" ).fadeOut( "slow" );
@@ -1754,7 +1754,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getReadStat', $("#date_a").val(), $("#date_b").val() ) );
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	
 	$( "#sub_menu_block_hit_db" ).click(function() {
@@ -1774,7 +1774,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getBlockHitDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -1796,7 +1796,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getCPUStat', $("#date_a").val(), $("#date_b").val() ) );  
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_mem_usage" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1815,7 +1815,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getMemUsageStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_util" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1833,7 +1833,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getDiskUtilStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_usage" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1852,7 +1852,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getDiskUsageStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_wrqm_rrqm" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1871,7 +1871,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getWRQMRRQMStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_wr" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1889,7 +1889,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getWRStat', $("#date_a").val(), $("#date_b").val() ) );  
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_rsec_wsec" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1908,7 +1908,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getRSecWSecStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_avgrq" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1927,7 +1927,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getAVGRQStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_avgqu" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1946,7 +1946,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getAVGQUStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_disk_await" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1965,7 +1965,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getAWaitStat', $("#date_a").val(), $("#date_b").val() ) );
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_network_traffic" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -1984,7 +1984,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getNetworkTrafficStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	$( "#sub_menu_network_packets" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -2002,7 +2002,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getNetworkPacketsStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	$( "#sub_menu_network_errors" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -2020,7 +2020,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getNetworkErrorsStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	//------------------------------------------------------------------------------------
 	
@@ -2040,7 +2040,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getBgwriterStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 		
 	$( "#sub_menu_block_read_db" ).click(function() {
@@ -2060,7 +2060,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getBlockReadDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 
 	$( "#sub_menu_tup_write_db" ).click(function() {
@@ -2080,7 +2080,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getTupWriteDB', $("#date_a").val(), $("#date_b").val() )); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	$( "#sub_menu_tup_ret_fetch_db" ).click(function() {
@@ -2100,7 +2100,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getTupRetFetchDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	
@@ -2121,7 +2121,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getAutovacStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});			
 	
 	$( "#sub_menu_conns" ).click(function() {
@@ -2141,7 +2141,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getConnsStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});		
 
 	$( "#sub_menu_locks_db" ).click(function() {
@@ -2161,8 +2161,8 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getLocksStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
-	});			
+		$( "#apply_filter_button" ).click();
+	});	
 	
 	$( "#sub_menu_tx_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
@@ -2181,7 +2181,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getTxDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 
 	$( "#sub_menu_deadlocks_db" ).click(function() {
@@ -2201,7 +2201,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getDeadlocksDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	$( "#sub_menu_disk_write" ).click(function() {
@@ -2220,7 +2220,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getWriteStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	
 	
@@ -2240,7 +2240,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getTupStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 		
 	$( "#sub_menu_index_scans" ).click(function() {
@@ -2259,7 +2259,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getIdxStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	$( "#sub_menu_idx_quality" ).click(function() {
@@ -2278,7 +2278,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getIndexStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	$( "#sub_menu_timing_queries" ).click(function() {
@@ -2296,7 +2296,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getQueryDurations', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	
  	$('div[id^=sub_menu_stm_][id$=_by_queries]').click(function() {
@@ -2351,7 +2351,7 @@ function set_all_click_events()
 			current_xhr.push( graph_post( 'getQueryBlks', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});		
 	
 	
@@ -2669,7 +2669,7 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Common DB log");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2679,7 +2679,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 		
-		if( $('#time_len_g').length )         
+		if( $('#time_len_g').length )
 		{	
 			//duration
 			//duration_g = t/f
@@ -2749,14 +2749,14 @@ function set_all_click_events()
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		}
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 
 	$( "#sub_menu_log_errs" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Errors");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2796,14 +2796,14 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});
 	
 	$( "#sub_menu_log_fatals" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Fatal errors");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2813,7 +2813,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			if( check_dates_interval( $("#date_a").val(), $("#date_b").val(), 3 ) == false )
-				return;			
+				return;
 			load_process.push( true );
 			$( "#sub_space" ).empty();
 			current_xhr.push( $.ajax({ url: '/getLog',
@@ -2842,14 +2842,14 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 	
 	$( "#sub_menu_log_locked" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Locked queries");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2859,7 +2859,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			if( check_dates_interval( $("#date_a").val(), $("#date_b").val(), 3 ) == false )
-				return;			
+				return;
 			load_process.push( true );
 			$( "#sub_space" ).empty();
 			current_xhr.push( $.ajax({ url: '/getLog',
@@ -2887,14 +2887,14 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		});	
-		$( "#apply_filter_button" ).click();		
-	});		
+		$( "#apply_filter_button" ).click();
+	});
 	
 	$( "#sub_menu_log_gt_minute" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Queries longer than a minute");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2918,7 +2918,7 @@ function set_all_click_events()
 				duration_g_state = false;
 			
 			if( check_dates_interval( $("#date_a").val(), $("#date_b").val(), 3 ) == false )
-				return;			
+				return;
 			load_process.push( true );
 			$( "#sub_space" ).empty();
 			current_xhr.push( $.ajax({ url: '/getLog',
@@ -2947,14 +2947,14 @@ function set_all_click_events()
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		
 		});	
-		$( "#apply_filter_button" ).click();		
-	});		
+		$( "#apply_filter_button" ).click();
+	});	
 	
 	$( "#sub_menu_log_lt_minute" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Queries shorter than a minute");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -2978,7 +2978,7 @@ function set_all_click_events()
 				duration_g_state = false;
 			
 			if( check_dates_interval( $("#date_a").val(), $("#date_b").val(), 3 ) == false )
-				return;			
+				return;
 			load_process.push( true );
 			$( "#sub_space" ).empty();
 			current_xhr.push( $.ajax({ url: '/getLog',
@@ -2991,7 +2991,7 @@ function set_all_click_events()
 							$( "#sub_space" ).append( div_no_data );
 						else
 							$( "#sub_space" ).append( data );
-						reset_up_down_buttons();	
+						reset_up_down_buttons();
 					},
 					error: function(XMLHttpRequest, textStatus, errorThrown) {
 							load_process.pop();
@@ -3006,15 +3006,15 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>DB logs loading...</p></div>' );
 		
-		});	
-		$( "#apply_filter_button" ).click();		
-	});			
+		});
+		$( "#apply_filter_button" ).click();
+	});
 	
 	$( "#sub_menu_log_downloader" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Log downloader");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -3069,8 +3069,8 @@ function set_all_click_events()
 										}
 									}
 						}));
-						progress_notice( '<div style="font-size:25px;"><p>Packing log file...</p></div>' );									
-					});		
+						progress_notice( '<div style="font-size:25px;"><p>Packing log file...</p></div>' );
+					});
 				
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -3104,23 +3104,23 @@ function set_all_click_events()
 					$( "#sub_space" ).append( response );
 					
 					$(".date_link").unbind( "click" );
-					load_process.pop();				
+					load_process.pop();
 					apply_sort_tables();
-					history_click();	
+					history_click();
 				},
 				error: function(err) {
 					if( textStatus !== "abort" ) { show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); load_process.pop(); }
 				}
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>Connections history loading...</p></div>' );
-		});								
+		});
 	}	
 	
 	$( "#sub_menu_conn_snapshots" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Snapshots of connections and locks");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -3152,7 +3152,7 @@ function set_all_click_events()
 						}
 			});
 		});	
-		$( "#apply_filter_button" ).click();		
+		$( "#apply_filter_button" ).click();
 	});	
 
 
@@ -3176,23 +3176,23 @@ function set_all_click_events()
 				success: function(response) {
 					$( "#sub_space_2" ).empty();
 					$( "#sub_space_2" ).append( response );
-					load_process.pop();				
+					load_process.pop();
 					apply_sort_tables();
-					$( ".pg_stat_console_step_down" ).click();				
+					$( ".pg_stat_console_step_down" ).click();
 				},
 				error: function(err) {
 					if( textStatus !== "abort" ) { show_error( textStatus, errorThrown, XMLHttpRequest.responseText ); load_process.pop(); }
 				}
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>Snaphot loading...</p></div>' );
-		});								
+		});
 	}	
 	
 	$( "#sub_menu_conn_snapshots_ext" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Snapshots of connections and locks [extended]");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = false;
 		hide_autorefresh();
@@ -3204,7 +3204,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			if( check_dates_interval( $("#date_a").val(), $("#date_b").val(), 3 ) == false )
-				return;			
+				return;
 			load_process.push( true );
 			current_xhr.push( $.ajax({ url: '/getActivityHistoryExt',
 					type: 'post',
@@ -3214,8 +3214,8 @@ function set_all_click_events()
 						$( "#sub_space" ).empty();
 						$( "#sub_space" ).append( data );
 						$( "#sub_space_2" ).empty();
-						load_process.pop();				
-						apply_sort_tables();	
+						load_process.pop();
+						apply_sort_tables();
 						history_ext_click();
 					},
 					error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -3224,15 +3224,15 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>Connections history loading...</p></div>' , current_xhr )
 		});	
-		$( "#apply_filter_button" ).click();		
-	});		
+		$( "#apply_filter_button" ).click();
+	});
 	
 	
 	$( "#sub_menu_conn_old" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Old unused connections");
-		init_work_space();		
+		init_work_space();
 		selected_menu_elem.name = this.id;
 		selected_menu_elem.auto_refresh = true;
 		show_autorefresh();
@@ -3249,7 +3249,7 @@ function set_all_click_events()
 					success: function(data) {
 						$( "#sub_space" ).empty();
 						$( "#sub_space" ).append( data );
-						load_process.pop();				
+						load_process.pop();
 						apply_sort_tables();
 						apply_conn_man_buttons();
 					},
@@ -3259,8 +3259,8 @@ function set_all_click_events()
 			}));
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' , current_xhr )
 		});	
-		$( "#apply_filter_button" ).click();		
-	});			
+		$( "#apply_filter_button" ).click();
+	});
 	
 	function apply_conn_man_buttons()
 	{
@@ -3292,8 +3292,8 @@ function set_all_click_events()
 								$( "#sub_space" ).append( div_query_canceled );
 							}
 						}
-			}));								
-		});		
+			}));
+		});
 		$(".kill_connect").unbind( "click" );
 		$(".kill_connect").click(function(){
 			var pid_val = $(this).attr("link_val");
@@ -3322,8 +3322,8 @@ function set_all_click_events()
 								$( "#sub_space" ).append( div_query_canceled );
 							}
 						}
-			}));									
-		});		
+			}));
+		});
 	}
 	
 	$( "#sub_menu_conn_management" ).click(function() {
@@ -3464,23 +3464,23 @@ function set_all_mouseenter_events()
 {
 	$( "#menu" ).mouseenter(function( event ) {
 		hide_all_submenu();
-	});		
+	});
 
 	$( "#main_info" ).mouseenter(function( event ) {
-		hide_all_submenu();		
+		hide_all_submenu();
 	});	
 	
 	$( "#work_space" ).mouseenter(function( event ) {
-		hide_all_submenu();		
+		hide_all_submenu();
 	});	
 	
 	$( "#user_panel" ).mouseenter(function( event ) {
-		hide_all_submenu();		
-	});		
+		hide_all_submenu();
+	});
 
 	$( "#navigation_panel" ).mouseenter(function( event ) {
-		hide_all_submenu();		
-	});	
+		hide_all_submenu();
+	});
 	
 	$( "#menu_serv_load" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeIn( 150 );
@@ -3489,7 +3489,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
-	});	
+	});
 	$( "#menu_pg_load" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeIn( 150 );
@@ -3497,7 +3497,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
-	});	
+	});
 	$( "#menu_pg_queries" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
@@ -3505,7 +3505,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
-	});		
+	});
 	$( "#menu_typically_queries" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
@@ -3513,7 +3513,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeIn( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
-	});	
+	});
 	$( "#menu_logs" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
@@ -3521,7 +3521,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeIn( 150 );
 		$('#sub_menu_5').fadeOut( 150 );
-	});	
+	});
 	$( "#menu_conn_manage" ).mouseenter(function( event ) {
 		$('#sub_menu_1').fadeOut( 150 );
 		$('#sub_menu_2').fadeOut( 150 );
@@ -3529,7 +3529,7 @@ function set_all_mouseenter_events()
 		$('#sub_menu_3').fadeOut( 150 );
 		$('#sub_menu_4').fadeOut( 150 );
 		$('#sub_menu_5').fadeIn( 150 );
-	});				
+	});
 }
 
 function set_load_process()
@@ -3543,7 +3543,7 @@ function set_load_process()
 	if( load_process.length == 0 )
 		hide_progress();
 	else
-		show_progress();	
+		show_progress();
 }
 
 function set_auto_refresh()
@@ -3562,10 +3562,10 @@ function set_auto_refresh()
 	if( $("#auto_refresh").is(':checked') ) 
 		$("#auto_refresh_div").html("<input id=\"auto_refresh\" type=\"checkbox\" name=\"auto_refresh\" value=\"a1\" checked>Auto refresh (" + (auto_refresh_counter - 1 ).toString() + ")");
 	else
-		$("#auto_refresh_div").html("<input id=\"auto_refresh\" type=\"checkbox\" name=\"auto_refresh\" value=\"a1\">Auto refresh");		
+		$("#auto_refresh_div").html("<input id=\"auto_refresh\" type=\"checkbox\" name=\"auto_refresh\" value=\"a1\">Auto refresh");
 
 	
-	auto_refresh_counter -= 1;	
+	auto_refresh_counter -= 1;
 }
 
 function set_all_scroll_events()
@@ -3579,11 +3579,10 @@ function set_all_scroll_events()
 	}
 	$('#main_work_space').scroll( function(){show_scrollTop()} ); show_scrollTop();	
 
-	$('#main_work_space').scroll(function() {                  
+	$('#main_work_space').scroll(function() {
 		var currentScroll = $('#main_work_space').scrollTop(); 
-		$('.fix_div').css({                     
+		$('.fix_div').css({
 			"margin-top": -300 + currentScroll
-
 		});
 	});		
 }
@@ -3659,7 +3658,7 @@ function pg_stat_console_init()
 	get_refresh_interval();
 	get_current_user_type();
 	get_current_status();
-	get_current_db_status();	
+	get_current_db_status();
 	set_nodes();
 	
 	//configure all timers
