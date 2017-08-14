@@ -1,31 +1,49 @@
+#pg_stat_sys is main collector of statistics from the OS and DB
+
 [databases]
+#Section "databases" contains all observed databases on current node in pypostgresql format,
+
 test_dev = pq://app_user:passw@127.0.0.1:6432/test_dev
 
 [sys_stat]
+#Section "sys_stat" contains one required parameter: sys_stat
+#Port can be set to pgbouncer or directly to the database
+
 sys_stat = pq://app_user:passw@127.0.0.1:6432/sys_stat_dev
 
 [main]
-collect_pg_sys_stat = 1
-collect_pg_conn_snapshot = 1
-collect_os_stat = 1
+#This section contains main configuration parameters
 
-sleep_interval_pg_sys_stat = 300
-sleep_interval_pg_conn_snapshot = 300
-sleep_interval_os_stat = "34 10"		#default "34 10"
-sleep_interval_os_stat_if_iostat_not_working = 300
-sleep_interval_pg_single_db_sn = 10
-pg_single_db_sn_steps = 30
+collect_pg_sys_stat = 1			#collect statistic of DB
+collect_pg_conn_snapshot = 1	#collect snapshots of connections and locks
+collect_os_stat = 1				#collect statistic of OS
 
-sleep_interval_on_exception = 10
+sleep_interval_pg_sys_stat = 300		#sleep interval for make snapshots of DB statistic
+sleep_interval_pg_conn_snapshot = 300	#sleep interval for make snapshots of connections and locks
+sleep_interval_os_stat = "34 10"		#sleep interval for make snapshots of OS statistic
+										#default "34 10" = ~5 min (iostat -d -c -m -x 34 10), сheck this value 
+										#on your system or see the documentation https://linux.die.net/man/1/iostat
+										
+sleep_interval_os_stat_if_iostat_not_working = 300	#On some systems, the iostat does not start (for example, in containers), 
+										#but the execution delay is taken into account in the logic when collecting network device statistics
+										#Value of this parameter must be equal to sleep_interval_os_stat
+										
+sleep_interval_pg_single_db_sn = 10		#sleep interval for frequently observed metrics like autovacuum workers activity, locks, connection states
+pg_single_db_sn_steps = 30				#the number of measurements of a certain metric that will be aggregated into one value of this metric
+										#thus every "sleep_interval_pg_single_db_sn * pg_single_db_sn_steps / 60" minutes the result metric will be calculated
+										#with pre-aggregation of the values collected at intervals of sleep_interval_pg_single_db_sn
 
-application_name = pg_stat_sys
+sleep_interval_on_exception = 10		#sleep interval in case of an exception
 
-node_name = "test node"
-node_descr = "descr"
-node_host = "192.168.0.50"
+application_name = pg_stat_sys			#app name for displaying in pg_stat_activity and naming log file
 
-locks_limit_in_snapshot = 200
-top_rels_in_snapshot = 20
-top_stm_queries_in_snapshot = 20
+node_name = "test node"					#Name of the current node
+node_descr = "descr"					#Description of the current node
+node_host = "192.168.0.50"				#Hostname or IP of the current node
+										#value of this parameter is used to proxy the requests to pg_stat_monitor
 
-time_zone = Europe/Moscow
+locks_limit_in_snapshot = 200			#How many "locks by pairs" can be contained in the snapshot
+top_rels_in_snapshot = 20				#For each metric of DB (for example n_tup_upd_per_sec): how many relations can be contained in the top
+top_stm_queries_in_snapshot = 20		#For each metric of pg_stat_statements: how many queries can be contained in the top
+
+time_zone = Europe/Moscow				#value for query "SET timezone = '$1';"

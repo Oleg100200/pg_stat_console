@@ -8,7 +8,7 @@
 #see http://docs.sqlalchemy.org/en/latest/dialects/postgresql.html#module-sqlalchemy.dialects.postgresql.pypostgresql
 #Parameter "sys_stat_conn_str_direct" has pypostgresql format, 
 #example http://python.projects.pgfoundry.org/docs/1.1/driver.html#postgresql-open
-#Port can be set for pgbouncer or directly to the database
+#Port can be set to pgbouncer or directly to the database
 #If you use pgbouncer you must set "ignore_startup_parameters = client_min_messages" and "pool_mode = session" in pgbouncer.ini
 #Both parameters refers to one and the same base which is the centralized storage for collected statistics
 
