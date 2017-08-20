@@ -383,6 +383,7 @@ class CoreHandler():
 			logger.log( "node_name is Null in proxy_http_post, method_name = " + method_name, "Error" )
 			return ""
 		
+		err_msg = "pg_stat_monitor not allowed"		#NOTE: this value used in pg_stat_console.js
 		try:
 			monitor_host = self.get_pg_stat_monitor_host(params[ "node_name" ])
 			h = http.client.HTTPConnection(monitor_host, timeout=timeout_p)
@@ -409,9 +410,10 @@ class CoreHandler():
 			#ConnectionRefusedError: [Errno 111] Connection refused
 			if serr.errno == errno.ECONNREFUSED:
 				logger.log( "pg_stat_monitor not allowed, method_name = " + method_name, "Error" )
+				return err_msg
 		
 		logger.log( "pg_stat_monitor timeout " + str( timeout_p ) + " sec exceeded, method_name = " + method_name, "Error" )
-		return "pg_stat_monitor not allowed"
+		return err_msg
 		
 	def get_pg_version(self):
 		return self.proxy_http_post( 'getPGVersion', 3 )
