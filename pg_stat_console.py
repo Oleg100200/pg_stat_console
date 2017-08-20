@@ -397,8 +397,8 @@ class CoreHandler():
 
 			post_params["dbs"] = dbs
 
-			logger.log( "call proxy_http_post(" + method_name + "), node_name = " + params[ "node_name" ] + ", user = " + ( self.current_user[0][1] ) + " (" + \
-					( str( self.current_user[0][0] )[:8] ) + "), post_params = " + str( post_params["dbs"] ), "Info" )
+			logger.log( "call proxy_http_post(" + method_name + "), node_name = " + params[ "node_name" ] + ", monitor_host = " + monitor_host + ", user = " + \
+					( self.current_user[0][1] ) + " (" + ( str( self.current_user[0][0] )[:8] ) + "), post_params = " + str( post_params["dbs"] ), "Info" )
 
 			h.request( "POST", '/' + method_name, json.dumps(post_params, ensure_ascii=False).encode('utf8'), {'Content-Type': 'application/json'} )
 
@@ -410,10 +410,11 @@ class CoreHandler():
 			if serr.errno == errno.ECONNREFUSED:
 				logger.log( "pg_stat_monitor not allowed, method_name = " + method_name, "Error" )
 		
+		logger.log( "pg_stat_monitor timeout " + str( timeout_p ) + " sec exceeded, method_name = " + method_name, "Error" )
 		return "pg_stat_monitor not allowed"
 		
 	def get_pg_version(self):
-		return self.proxy_http_post( 'getPGVersion' )
+		return self.proxy_http_post( 'getPGVersion', 3 )
 		
 class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 	@tornado.web.asynchronous
@@ -472,7 +473,7 @@ class PgStatConsoleStaticFileHandler(tornado.web.StaticFileHandler):
 #=======================================================================================================
 class GetUptimeHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getUptime' )
+		return self.proxy_http_post( 'getUptime', 3 )
 		
 class GetRefreshIntervalHandler(BaseAsyncHandlerNoParam):
 	def get_(self):
@@ -1932,23 +1933,23 @@ class GetStmBlkReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmSt
 #=======================================================================================================
 class GetActivityHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getActivity' )
+		return self.proxy_http_post( 'getActivity', 3 )
 
 class GetLocksHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getLocks' )
+		return self.proxy_http_post( 'getLocks', 10 )
 
 class GetLocksPairsHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getLocksPairs' )
+		return self.proxy_http_post( 'getLocksPairs', 10 )
 
 class GetStatementsHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getStatements' )
+		return self.proxy_http_post( 'getStatements', 10 )
 
 class GetLongQueriesHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getLongQueries' )
+		return self.proxy_http_post( 'getLongQueries', 10 )
 		
 class GetTblSizesHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -1972,7 +1973,7 @@ class GetTableBloatHandler(BaseAsyncHandlerNoParam):
 
 class GetPGConfigHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getPGConfig' )
+		return self.proxy_http_post( 'getPGConfig', 3 )
 
 #=======================================================================================================
 class GetLogHandler(BaseAsyncHandlerNoParam):
@@ -1981,7 +1982,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 
 class GetListLogFilesHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getListLogFiles' )
+		return self.proxy_http_post( 'getListLogFiles', 3 )
 
 class DownloadLogFileHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
@@ -2126,7 +2127,7 @@ class GetActivityHistoryExtHandler(BaseAsyncHandlerNoParam):
 
 class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.proxy_http_post( 'getOldConns' )
+		return self.proxy_http_post( 'getOldConns', 3 )
 		
 class GetHistoryBySnIdHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
