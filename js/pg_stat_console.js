@@ -510,6 +510,7 @@ function get_current_node_info()
 							if( current_node_info.includes(node_classes[i]) )
 								$('.' + node_classes[i]).fadeIn( 250 );
 					}
+					get_uptime();
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 				}
@@ -589,6 +590,16 @@ function get_user_auth_data( param_p )
 				return user_auth_data[i].value;
 	}
 	return undefined;
+}
+
+function configure_menu_elem(id, auto_refresh = false)
+{
+		selected_menu_elem.name = id;
+		selected_menu_elem.auto_refresh = auto_refresh;
+		if( auto_refresh )
+			show_autorefresh();
+		else
+			hide_autorefresh();
 }
 
 function show_login_dialog(title_val, help_msg)
@@ -1489,9 +1500,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_start_dashboard" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		get_current_status();
 		get_current_node_info();
@@ -1559,7 +1568,8 @@ function set_all_click_events()
 							else
 								graph_post( data_dashboard[ i ][0], dates[0], dates[1], function(){redraw_dashboard();} );
 						}
-					}
+					
+					get_uptime();
 					
 					if( data.length == 0)
 					{
@@ -1580,9 +1590,7 @@ function set_all_click_events()
 
 	$( "#button_show_status" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		init_work_space();
 		get_current_status();
 		$("#nav_str").text( "Check console status");
@@ -1605,9 +1613,7 @@ function set_all_click_events()
 	
 	$( "#button_show_db_status" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		init_work_space();
 		get_current_db_status();
 		$("#nav_str").text( current_node_name + " -> " + "Database maintenance status" );
@@ -1630,9 +1636,7 @@ function set_all_click_events()
 	
 	$( "#button_settings" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		init_work_space();	
 		get_current_status();
 		$("#nav_str").text( "Settings");
@@ -1662,9 +1666,7 @@ function set_all_click_events()
 		set_date_time_filter_compare_params(4);
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		
 		$("#cmp_param_1").val("getCPUStat");
 		$("#cmp_param_2").val("getMemUsageStat");
@@ -1708,9 +1710,7 @@ function set_all_click_events()
 		set_date_time_filter_compare_single_params(4);
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		
 		$("#cmp_param").val("getCPUStat");
 
@@ -1740,11 +1740,9 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Disk read");
-		set_date_time_filter(4);
+		set_date_time_filter(6);
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 			
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
@@ -1760,12 +1758,10 @@ function set_all_click_events()
 	$( "#sub_menu_block_hit_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 			
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Block hit by databases");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1781,12 +1777,10 @@ function set_all_click_events()
 	$( "#sub_menu_cpu_usage" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> CPU");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1801,12 +1795,10 @@ function set_all_click_events()
 	$( "#sub_menu_mem_usage" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Memory usage");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1820,11 +1812,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_util" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
+		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Disk utilization");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1838,12 +1829,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_usage" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Disk usage");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1857,12 +1846,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_wrqm_rrqm" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 			
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Read/write requests merged per second");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1876,11 +1863,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_wr" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
+		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Read/Write requests per second");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1894,12 +1880,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_rsec_wsec" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Read/Write sectors from the device per second");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1913,12 +1897,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_avgrq" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> The average size of the requests");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1932,12 +1914,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_avgqu" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> The average queue length of the requests");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1951,12 +1931,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_await" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> The average time for I/O requestss");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1970,12 +1948,10 @@ function set_all_click_events()
 	$( "#sub_menu_network_traffic" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Network Traffic");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -1989,11 +1965,10 @@ function set_all_click_events()
 	$( "#sub_menu_network_packets" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
+		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Network Packets");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2007,11 +1982,10 @@ function set_all_click_events()
 	$( "#sub_menu_network_errors" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
+		
 		$("#nav_str").text( current_node_name + " -> " + "Hardware load -> Network Errors");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2027,11 +2001,10 @@ function set_all_click_events()
 	$( "#sub_menu_bgwriter_stat" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
+		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Bgwriter stat");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2046,12 +2019,10 @@ function set_all_click_events()
 	$( "#sub_menu_block_read_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Block read by databases");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2066,12 +2037,10 @@ function set_all_click_events()
 	$( "#sub_menu_tup_write_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Tuples write by databases");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2086,12 +2055,10 @@ function set_all_click_events()
 	$( "#sub_menu_tup_ret_fetch_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Tuples returned/fetched by databases");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2107,12 +2074,10 @@ function set_all_click_events()
 	$( "#sub_menu_autovac" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Autovacuum workers activity");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2127,12 +2092,10 @@ function set_all_click_events()
 	$( "#sub_menu_conns" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Connections");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2147,12 +2110,10 @@ function set_all_click_events()
 	$( "#sub_menu_locks_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Locks");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2167,12 +2128,10 @@ function set_all_click_events()
 	$( "#sub_menu_tx_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Transactions by databases");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 
@@ -2187,12 +2146,10 @@ function set_all_click_events()
 	$( "#sub_menu_deadlocks_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Deadlocks");
-		set_date_time_filter(24);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
@@ -2207,12 +2164,10 @@ function set_all_click_events()
 	$( "#sub_menu_disk_write" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Disk write");
-		set_date_time_filter(4);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#auto_refresh_div" ).fadeOut( "slow" );
@@ -2228,12 +2183,10 @@ function set_all_click_events()
 		
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Scans (seq and index) by tables");
-		set_date_time_filter(4);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#graph_space" ).empty();
@@ -2247,12 +2200,10 @@ function set_all_click_events()
 		
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Index scans");
-		set_date_time_filter(4);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#graph_space" ).empty();
@@ -2266,12 +2217,10 @@ function set_all_click_events()
 		
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Efficiency index scans");
-		set_date_time_filter(4);
+		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#graph_space" ).empty();
@@ -2284,9 +2233,7 @@ function set_all_click_events()
 	$( "#sub_menu_timing_queries" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Query durations");
 		set_date_time_filter(12);
@@ -2302,9 +2249,7 @@ function set_all_click_events()
  	$('div[id^=sub_menu_stm_][id$=_by_queries]').click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL queries -> " + $(this).text());
 		set_date_time_filter(12);
@@ -2320,9 +2265,7 @@ function set_all_click_events()
 	$( "#sub_menu_io_read" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> I/O Timings read by queries");
 		set_date_time_filter(12);
@@ -2339,9 +2282,7 @@ function set_all_click_events()
 		
 		$(".pg_stat_console_goto_top").click();
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		
 		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Blocks by queries");
 		set_date_time_filter(12);
@@ -2357,9 +2298,7 @@ function set_all_click_events()
 	
 	$( "#sub_menu_stat_activity" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		//hide_all_submenu();
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Connections pg_stat_activity");
 		load_process.push( true );
@@ -2380,9 +2319,7 @@ function set_all_click_events()
 	
 	$( "#sub_menu_locks" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		//hide_all_submenu();
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Locks" );
 		load_process.push( true );
@@ -2404,9 +2341,7 @@ function set_all_click_events()
 	
 	$( "#sub_menu_locks_by_pair" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		//hide_all_submenu();
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Lock by pairs");
 		load_process.push( true );
@@ -2430,9 +2365,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_stat_statements" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Query statistic pg_stat_statements");
 		load_process.push( true );
@@ -2453,9 +2386,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_long_queries" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Long queries");
 		load_process.push( true );
@@ -2476,9 +2407,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_table_sizes" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Table sizes");
 		load_process.push( true );
@@ -2507,9 +2436,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_unused_idxs" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, false );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Unused indexes");
 		load_process.push( true );
@@ -2539,9 +2466,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_idx_bloat" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Index Bloat");
 		load_process.push( true );
@@ -2571,9 +2496,7 @@ function set_all_click_events()
 	
 	$( "#sub_menu_tbl_bloat" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Table Bloat");
 		load_process.push( true );
@@ -2603,9 +2526,7 @@ function set_all_click_events()
 	
 	$( "#sub_menu_pg_config" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, false );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> PostgreSQL config");
 		load_process.push( true );
@@ -2635,9 +2556,7 @@ function set_all_click_events()
 
 	$( "#sub_menu_top_fetch" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		configure_menu_elem( this.id, true );
 		//
 		$("#nav_str").text( current_node_name + " -> " + "Typical queries -> Top index/seq tup fetched");
 		load_process.push( true );
@@ -2669,10 +2588,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Common DB log");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		set_date_time_log_filter(3);
 		$( "#work_space" ).append( sub_space );
 		
@@ -2756,11 +2673,9 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Errors");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
-		set_date_time_filter(4);
+		init_work_space();		
+		configure_menu_elem( this.id, true );
+		set_date_time_filter(6);
 		$( "#work_space" ).append( sub_space );
 		
 		$( "#apply_filter_button").unbind( "click" );
@@ -2803,11 +2718,9 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Fatal errors");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
-		set_date_time_filter(4);
+		init_work_space();		
+		configure_menu_elem( this.id, true );
+		set_date_time_filter(6);
 		$( "#work_space" ).append( sub_space );
 		
 		$( "#apply_filter_button").unbind( "click" );
@@ -2849,11 +2762,9 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Locked queries");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
-		set_date_time_filter(4);
+		init_work_space();		
+		configure_menu_elem( this.id, true );
+		set_date_time_filter(6);
 		$( "#work_space" ).append( sub_space );
 		
 		$( "#apply_filter_button").unbind( "click" );
@@ -2894,10 +2805,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Queries longer than a minute");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		set_date_time_log_filter(3);
 		$( "#work_space" ).append( sub_space );
 		
@@ -2954,10 +2863,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Queries shorter than a minute");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		set_date_time_log_filter(3);
 		$( "#work_space" ).append( sub_space );
 		
@@ -3014,10 +2921,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "DB Logs -> Log downloader");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, false );
 		
 		set_date_time_filter(8);
 		$( "#work_space" ).append( sub_space );
@@ -3120,10 +3025,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Snapshots of connections and locks");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		
 		set_date_time_filter(2);
 		$( "#work_space" ).append( sub_space );
@@ -3192,10 +3095,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Snapshots of connections and locks [extended]");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = false;
-		hide_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		
 		set_date_time_filter(2);
 		$( "#work_space" ).append( sub_space );
@@ -3232,10 +3133,8 @@ function set_all_click_events()
 		$(".pg_stat_console_goto_top").click();
 		
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Old unused connections");
-		init_work_space();
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		init_work_space();		
+		configure_menu_elem( this.id, true );
 		
 		set_old_conn_filter();
 		$( "#work_space" ).append( sub_space );
@@ -3332,9 +3231,7 @@ function set_all_click_events()
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Connection management");
 		init_work_space();	
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 
 		$( "#work_space" ).append( sub_space );
 		apply_sort_tables();
@@ -3364,9 +3261,7 @@ function set_all_click_events()
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Server processes (ps)");
 		init_work_space();	
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 
 		$( "#work_space" ).append( sub_space );
 		apply_sort_tables();
@@ -3394,9 +3289,7 @@ function set_all_click_events()
 		$("#nav_str").text( current_node_name + " -> " + "Connection management -> Server processes (iotop)");
 		init_work_space();	
 		
-		selected_menu_elem.name = this.id;
-		selected_menu_elem.auto_refresh = true;
-		show_autorefresh();
+		configure_menu_elem( this.id, true );
 
 		$( "#work_space" ).append( sub_space );
 		apply_sort_tables();
