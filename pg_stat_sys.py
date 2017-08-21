@@ -659,7 +659,7 @@ def pg_sys_stat_snapshot():
 
 				#====================================================================================================
 				query = conn[1].prepare( """
-				select * from ( select 'idx_scan_per_sec'::text, relid, relname, dt,
+				select * from ( select 'by_idx_scan_per_sec'::text, relid, relname, dt,
 				round( idx_scan_per_sec::numeric, 3) as idx_scan_per_sec 		
 				from (
 					select relid, relname, dt,
@@ -675,7 +675,7 @@ def pg_sys_stat_snapshot():
 				order by idx_scan_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
 				union
-				select * from ( select 'idx_tup_read_per_sec'::text, relid, relname, dt,
+				select * from ( select 'by_idx_tup_read_per_sec'::text, relid, relname, dt,
 				round( idx_tup_read_per_sec::numeric, 3) as idx_tup_read_per_sec 		
 				from (
 					select relid, relname, dt,
@@ -691,7 +691,7 @@ def pg_sys_stat_snapshot():
 				order by idx_tup_read_per_sec desc nulls last
 				limit """ + top_rels_in_snapshot + """ )T
 				union				
-				select * from ( select 'idx_tup_fetch_per_sec'::text, relid, relname, dt,
+				select * from ( select 'by_idx_tup_fetch_per_sec'::text, relid, relname, dt,
 				round( idx_tup_fetch_per_sec::numeric, 3) as idx_tup_fetch_per_sec 		
 				from (
 					select relid, relname, dt,

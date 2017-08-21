@@ -57,31 +57,32 @@ var dashboard_dict = [
 	['getNetworkTrafficStat','Network Traffic'],
 	['getNetworkPacketsStat','Network Packets'],
 	['getNetworkErrorsStat','Network Errors'],
-	['getReadStat','heap_blks_read_per_sec'],
-	['getWriteStat','_tup_per_sec'],
-	['getTupStat','tup_fetch_sum'], ['getTupStat','idx_tup_fetch_per_sec'], ['getTupStat','seq_tup_read_per_sec'],
-	['getIndexStat','reads / fetched'],['getIndexStat','reads / scans'],['getIndexStat','fetched / scans'],
-	['getQueryDurations','Query durations in sec'],
-	['getQueryIODurations','I/O Timings read by queries'],
-	['getQueryBlks','Blocks by queries'],
 	['getBgwriterStat','checkpoints_timed'],['getBgwriterStat','checkpoint_write_time'],['getBgwriterStat','buffers_checkpoint'],
 	['getBlockHitDB','blks_hit_per_sec'],
 	['getBlockReadDB','blks_read_per_sec'],
+	['getReadStat','heap_blks_read_per_sec'],
 	['getTupWriteDB','tup_inserted_per_sec'],
+	['getWriteStat','_tup_per_sec'],
 	['getTupRetFetchDB','tup_returned_per_sec'],
-	['getTxDB','xact_commit_per_sec'],
-	['getDeadlocksDB','deadlocks'],
+	['getTupStat','tup_fetch_sum'], ['getTupStat','idx_tup_fetch_per_sec'], ['getTupStat','seq_tup_read_per_sec'],
+	['getIdxStat','by_idx_scan_per_sec'],['getIdxStat','by_idx_tup_read_per_sec'],['getIdxStat','by_idx_tup_fetch_per_sec'],
+	['getEffIndexStat','reads / fetched'],['getEffIndexStat','reads / scans'],['getEffIndexStat','fetched / scans'],
 	['getAutovacStat','autovacuum_workers'],
 	['getConnsStat','conns'],
 	['getLocksStat','All locks'],
-	['getLog',''],
+	['getDeadlocksDB','deadlocks'],
+	['getTxDB','xact_commit_per_sec'],
+	['getQueryDurations','Query durations in sec'],
+	['getQueryIODurations','I/O Timings read by queries'],
+	['getQueryBlks','Blocks by queries'],
 	['getStmCallsByQueries','Calls by queries'],	
 	['getStmTotalTimeByQueries','Total time by queries'],
 	['getStmRowsByQueries','Rows by queries'],
 	['getStmSharedBlksByQueries','Shared blks by queries'],
 	['getStmLocalBlksByQueries','Local blks by queries'],
 	['getStmTempBlksReadWriteTimeByQueries','Temp blks read/write by queries'],
-	['getStmBlkReadWriteTimeByQueries','Blk read/write time by queries']
+	['getStmBlkReadWriteTimeByQueries','Blk read/write time by queries'],
+	['getLog','']
 ];
 
 var compare_dict = [
@@ -98,20 +99,21 @@ var compare_dict = [
 	['getNetworkTrafficStat','HW load -> Network Traffic'],
 	['getNetworkPacketsStat','HW load -> Network Packets'],
 	['getNetworkErrorsStat','HW load -> Network Errors'],
-	['getReadStat','PG load -> Blocks read by tables'],
-	['getWriteStat','PG load -> Tuples write by tables'],
-	['getTupStat','PG load -> Scans (seq and index) by tables'], 
-	['getIndexStat','PG load -> Efficiency index scans by tables'],
 	['getBgwriterStat','PG load -> Bgwriter stat'],
 	['getBlockHitDB','PG load -> Blocks hit by databases'],
 	['getBlockReadDB','PG load -> Blocks read by databases'],
+	['getReadStat','PG load -> Blocks read by tables'],
 	['getTupWriteDB','PG load -> Tuples write by databases'],
+	['getWriteStat','PG load -> Tuples write by tables'],
 	['getTupRetFetchDB','PG load -> Tuples returned/fetched by databases'],
-	['getTxDB','PG load -> Transactions by databases'],
-	['getDeadlocksDB','PG load -> Deadlocks'],
+	['getTupStat','PG load -> Scans (seq and index) by tables'], 
+	['getIdxStat','PG load -> Index scans'],
+	['getEffIndexStat','PG load -> Efficiency index scans by tables'],
 	['getAutovacStat','PG load -> Autovacuum workers activity'],
 	['getConnsStat','PG load -> Connections'],
 	['getLocksStat','PG load -> Locks'],
+	['getDeadlocksDB','PG load -> Deadlocks'],
+	['getTxDB','PG load -> Transactions by databases'],
 	['getQueryDurations','PG queries -> Query durations'],
 	['getQueryIODurations','PG queries -> I/O Timings read by queries'],
 	['getQueryBlks','PG queries -> Blocks by queries'],
@@ -1300,6 +1302,8 @@ function set_nodes()
 	}
 	
 	$('#nodes_select').empty();
+	nodes_res.sort();
+
 	for (var i = 0; i < nodes_res.length; i++)
 		$('#nodes_select').append($("<option></option>").attr("value",nodes_res[i]).text(nodes_res[i]));
 	
@@ -1568,6 +1572,7 @@ function set_all_click_events()
 							else
 								graph_post( data_dashboard[ i ][0], dates[0], dates[1], function(){redraw_dashboard();} );
 						}
+					}
 					
 					get_uptime();
 					
@@ -2224,7 +2229,7 @@ function set_all_click_events()
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			$( "#graph_space" ).empty();
-			current_xhr.push( graph_post( 'getIndexStat', $("#date_a").val(), $("#date_b").val() ) ); 
+			current_xhr.push( graph_post( 'getEffIndexStat', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
 		$( "#apply_filter_button" ).click();

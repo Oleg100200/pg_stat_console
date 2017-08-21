@@ -806,7 +806,7 @@ class Chart():
 			if date is not None and len(date) == 2:
 				chart_name += date[ 0 ]
 				chart_name += date[ 1 ]
-				
+
 			chart_name = "chartContainer_" +  hashlib.md5(chart_name.encode()).hexdigest()
 			html_report = html_report + str( self.make_stacked_chart( data_v[ 0 ], data_v[ 1 ], chart_name[:25] ) )
 			id_container = id_container + 1
@@ -1594,7 +1594,7 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if data["node_name"] == db[0]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['autovacuum_workers_total','autovacuum_workers_wraparound'] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), \
-					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound', 'stackedColumn' ] )
+					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound (' + db[1] + ')', 'stackedColumn' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1675,13 +1675,13 @@ class GetIdxStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_scan_per_sec' ), data["node_name"] ), 'idx_scan_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), data["node_name"] ), 'idx_tup_read_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), data["node_name"] ), 'idx_tup_fetch_per_sec (' + db[1] + ')' ] )			  
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_scan_per_sec' ), data["node_name"] ), 'by_idx_scan_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), data["node_name"] ), 'by_idx_tup_read_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), data["node_name"] ), 'by_idx_tup_fetch_per_sec (' + db[1] + ')' ] )			  
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
-class GetIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
+class GetEffIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body)
 		data_graph = []
@@ -2397,7 +2397,7 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 			return "false"
 		user_config = ""
 
-		nodes = self.make_query( 'sys_stat', """SELECT id, node_name FROM public.psc_nodes""" )
+		nodes = self.make_query( 'sys_stat', """SELECT id, node_name FROM public.psc_nodes ORDER BY node_name ASC""" )
 		unv = self.get_current_user_nodes_visibility()
 
 		for node in nodes:
@@ -2482,7 +2482,7 @@ application = tornado.web.Application([
 			('/getWriteStat', GetWriteStatHandler),
 			('/getTupStat', GetTupStatHandler),
 			('/getIdxStat', GetIdxStatHandler),
-			('/getIndexStat', GetIndexStatHandler),
+			('/getEffIndexStat', GetEffIndexStatHandler),
 			('/getQueryDurations', GetQueryDurationsHandler),
 			('/getQueryIODurations', GetQueryIODurationsHandler),
 			('/getQueryBlks', GetQueryBlksHandler),

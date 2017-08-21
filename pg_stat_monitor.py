@@ -199,10 +199,10 @@ class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 				lambda future: tornado.ioloop.IOLoop.instance().add_callback(
 					partial(callback, future)))
 		else:
-			logger.log( "Host " + incoming_host + " not alowed!" , "Error" )
+			logger.log( "Host " + incoming_host + " is rejected!" , "Error" )
 			self.clear()
 			self.set_status(400)
-			self.finish( "Host " + incoming_host + " not alowed!" )
+			self.finish( "Host " + incoming_host + " is rejected!" )
 			
 	@tornado.web.asynchronous
 	def post(self):
@@ -422,38 +422,61 @@ class GetTblSizesHandler(BaseAsyncHandlerNoParam):
 
 		for db in dbs_list:
 			if db in data["dbs"]:
-				html_report = html_report + make_html_report_with_head( self.make_query( db, """select T.nspname, T.relname, T.size, T.idxsize, T.total, T.n_live_tup, T.n_dead_tup, T.rel_oid, T.schema_oid from (
-				WITH pg_class_prep AS (
-						 SELECT c_1.relname,
-							c_1.relnamespace,
-							c_1.relkind,
-							c_1.oid,
-							s.n_live_tup,
-							s.n_dead_tup
-						   FROM pg_class c_1
-							 JOIN pg_stat_all_tables s ON c_1.oid = s.relid
-						  ORDER BY s.n_live_tup DESC
-						 LIMIT 500
-						)
-				 SELECT n.nspname,
-					c.relname,
-					c.relkind AS type,
-					pg_size_pretty(pg_table_size(c.oid::regclass)) AS size,
-					pg_size_pretty(pg_indexes_size(c.oid::regclass)) AS idxsize,
-					pg_size_pretty(pg_total_relation_size(c.oid::regclass)) AS total,
-					pg_table_size(c.oid::regclass) AS size_raw,
-					pg_indexes_size(c.oid::regclass) AS idxsize_raw,
-					pg_total_relation_size(c.oid::regclass) AS total_raw,
-					c.n_live_tup,
-					c.n_dead_tup,
-					c.oid AS rel_oid,
-					n.oid AS schema_oid,
-					c.relkind
-				   FROM pg_class_prep c
-					 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
-				  WHERE (n.nspname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND n.nspname !~ '^pg_toast'::text AND (c.relkind = ANY (ARRAY['r'::"char", 'i'::"char"]))
-				  ORDER BY pg_total_relation_size(c.oid::regclass) DESC
-				) T""" ), [ "nspname", "relname", "size", "idxsize", "total", "n_live_tup", "n_dead_tup", "rel_oid", "schema_oid" ], "Table sizes (" + db + ")", ["relname"] )
+				html_report = html_report + make_html_report_with_head( self.make_query( db, """
+				SELECT
+					T.nspname,
+					T.relname,
+					T.size,
+					T.idxs_size,
+					T.total,
+					T.total_raw,
+					T.n_live_tup,
+					T.n_dead_tup,
+					T.n_tup_ins,
+					T.n_tup_upd,
+					T.n_tup_hot_upd,
+					T.rel_oid,
+					T.schema_oid
+				FROM (
+					WITH pg_class_prep AS (
+							 SELECT c_1.relname,
+								c_1.relnamespace,
+								c_1.relkind,
+								c_1.oid,
+								s.n_live_tup,
+								s.n_dead_tup,
+								s.n_tup_ins,
+								s.n_tup_upd,
+								s.n_tup_hot_upd
+							   FROM pg_class c_1
+								 JOIN pg_stat_all_tables s ON c_1.oid = s.relid
+							  ORDER BY s.n_live_tup DESC
+							 LIMIT 500
+							)
+					 SELECT n.nspname,
+						c.relname,
+						c.relkind AS type,
+						pg_size_pretty(pg_table_size(c.oid::regclass)) AS size,
+						pg_table_size(c.oid::regclass) AS size_in_bytes,
+						pg_size_pretty(pg_indexes_size(c.oid::regclass)) AS idxs_size,
+						pg_size_pretty(pg_total_relation_size(c.oid::regclass)) AS total,
+						pg_table_size(c.oid::regclass) AS size_raw,
+						pg_indexes_size(c.oid::regclass) AS idxsize_raw,
+						pg_total_relation_size(c.oid::regclass) AS total_raw,
+						c.n_live_tup,
+						c.n_dead_tup,
+						c.n_tup_ins,
+						c.n_tup_upd,
+						c.n_tup_hot_upd,
+						c.oid AS rel_oid,
+						n.oid AS schema_oid,
+						c.relkind
+					   FROM pg_class_prep c
+						 LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+					  WHERE (n.nspname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND n.nspname !~ '^pg_toast'::text AND (c.relkind = ANY (ARRAY['r'::"char", 'i'::"char"]))
+					  ORDER BY pg_total_relation_size(c.oid::regclass) DESC
+				) T""" ), [ "nspname", "relname", "size", "idxs_size", "total", "total_in_bytes", "n_live_tup", "n_dead_tup", "n_tup_ins", "n_tup_upd", \
+					"n_tup_hot_upd", "rel_oid", "schema_oid" ], "Table sizes (" + db + ")", ["relname"] )
 					
 		return html_report
 
@@ -461,9 +484,8 @@ class GetIdxSeqTupFetchHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
 		html_report = ""
 
-			
 		data = tornado.escape.json_decode(self.request.body) 
-		
+
 		for db in dbs_list:
 			if db in data["dbs"]:	
 				html_report = html_report + make_html_report_with_head( self.make_query( db, \
@@ -488,7 +510,6 @@ class GetUnusedIdxsHandler(BaseAsyncHandlerNoParam):
 				
 		html_report = ""
 	
-		
 		data = tornado.escape.json_decode(self.request.body) 
 		
 		for db in dbs_list:
@@ -717,7 +738,7 @@ class GetTableBloatHandler(BaseAsyncHandlerNoParam):
 				expected_bytes, round(expected_bytes/(1024^2)::NUMERIC,3) as expected_mb,
 				round(bloat_bytes*100/table_bytes) as pct_bloat,
 				round(bloat_bytes/(1024::NUMERIC^2),2) as mb_bloat,
-				table_bytes, expected_bytes, est_rows
+				expected_bytes, est_rows
 			FROM table_estimates_plus
 		)
 		-- filter output for bloated tables
@@ -737,20 +758,36 @@ class GetTableBloatHandler(BaseAsyncHandlerNoParam):
 		ORDER BY pct_bloat DESC;"""
 
 		html_report = ""
-	
 		
 		data = tornado.escape.json_decode(self.request.body) 
 		
 		for db in dbs_list:
 			if db in data["dbs"]:
-				html_report = html_report + make_html_report_with_head( self.make_query( db, bloat_query ), [ "databasename","schemaname","tablename","can_estimate","est_rows","pct_bloat","mb_bloat","table_mb" ], "Table Bloat (" + db + ")", ["tablename"] )
+				html_report = html_report + make_html_report_with_head( self.make_query( db, bloat_query ), [ "databasename","schemaname",\
+					"tablename","can_estimate","est_rows","pct_bloat","mb_bloat","table_mb" ], "Table Bloat (" + db + ")", ["tablename"] )
 		return html_report		
 
 class GetPGConfigHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
 		return make_html_report_with_head( self.make_query( check_base, \
-			"""select name, setting as value, (case when unit = '8kB' then pg_size_pretty(setting::bigint * 1024 * 8) when unit = 'kB' and setting <> '-1' then pg_size_pretty(setting::bigint * 1024) else '' end) as pretty_value, unit, category, short_desc, vartype, boot_val 
-			from pg_settings order by category asc""" ), \
+			"""SELECT name,
+					setting AS value,
+					(
+						CASE
+						WHEN unit = '8kB' THEN 
+							pg_size_pretty(setting::bigint * 1024 * 8)
+						WHEN unit = 'kB' AND setting <> '-1' THEN 
+							pg_size_pretty(setting::bigint * 1024)
+						ELSE ''
+						END
+					) AS pretty_value,
+					unit,
+					category,
+					short_desc,
+					vartype,
+					boot_val
+				FROM pg_settings
+				ORDER BY category ASC""" ), \
 			[ "name", "value", "pretty_value", "unit", "category", "short_desc", "vartype", "boot_val" ], "Current cluster configuration", ["short_desc", "name"] )
 
 class GetPGVersionHandler(BaseAsyncHandlerNoParam):
@@ -982,60 +1019,118 @@ class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 		html_report = ""
 
 		if self.get_pg_version(check_base) == "9.6":
-			html_report = make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
-				age(clock_timestamp(), xact_start) AS "xact_age",
-				age(clock_timestamp(), backend_start) AS "backend_age", state, "wait_event_type","wait_event", datname, usename, application_name, client_addr, query,
-				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || pid::text || '</div>' ) as pid			 
-				from pg_stat_activity 
-				where clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
-				order by "query_age" desc""" ), [ "query_age", "xact_age", "backend_age", "state", "wait_event_type", "wait_event", "datname", "usename", "application_name" , "client_addr", "query", "pid" ], "All old unused connections", ["query"] )
+			html_report = make_html_report_with_head( self.make_query( check_base, """
+				SELECT age(clock_timestamp(), query_start) AS "query_age",
+					   age(clock_timestamp(), xact_start) AS "xact_age",
+					   age(clock_timestamp(), backend_start) AS "backend_age",
+					   state,
+					   "wait_event_type",
+					   "wait_event",
+					   datname,
+					   usename,
+					   application_name,
+					   client_addr,
+					   query,
+					   ('<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill conn ' || pid::text || '</div>') AS pid
+				FROM pg_stat_activity
+				WHERE clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
+				ORDER BY "query_age" DESC""" ), [ "query_age", "xact_age", "backend_age", "state", "wait_event_type", "wait_event", "datname", "usename", \
+					"application_name" , "client_addr", "query", "pid" ], "All old unused connections", ["query"] )
 		else:
-			html_report = make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
-				age(clock_timestamp(), xact_start) AS "xact_age",
-				age(clock_timestamp(), backend_start) AS "backend_age", state, waiting, datname, usename, application_name, client_addr, query,
-				( '<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || pid::text || '</div>' ) as pid			 
-				from pg_stat_activity 
-				where clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
-				order by "query_age" desc""" ), [ "query_age", "xact_age", "backend_age", "state", "waiting", "datname", "usename", "application_name" , "client_addr", "query", "pid" ], "All old unused connections", ["query"] )
+			html_report = make_html_report_with_head( self.make_query( check_base, """
+				SELECT age(clock_timestamp(), query_start) AS "query_age",
+					   age(clock_timestamp(), xact_start) AS "xact_age",
+					   age(clock_timestamp(), backend_start) AS "backend_age",
+					   state,
+					   waiting,
+					   datname,
+					   usename,
+					   application_name,
+					   client_addr,
+					   query,
+					   ('<div style="float:left;margin-top:10px;" link_val="' || pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill conn ' || pid::text || '</div>') AS pid
+				FROM pg_stat_activity
+				WHERE clock_timestamp()-query_start > interval '""" + params[ "conn_age" ] + """ minutes'
+				ORDER BY "query_age" DESC""" ), [ "query_age", "xact_age", "backend_age", "state", "waiting", "datname", "usename", "application_name" , \
+					"client_addr", "query", "pid" ], "All old unused connections", ["query"] )
 		
 		return html_report
 
 class GetConnManagementHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
 		if self.get_pg_version(check_base) == "9.6":
-			return make_html_report_with_head( self.make_query( check_base, """SELECT T."wait_event_type",T."wait_event",T.state,T.age, T.datname, T.usename, T.application_name, T.query, T.query_start, T.pid, T.pid2 
-			from ( select a."wait_event_type",a."wait_event",a.state, age(clock_timestamp(), a.query_start)::text AS age,
-				a.datname,
-				a.usename,
-				a.application_name,
-				substring(a.query from 0 for 400) as query,
-				--a.query,
-				a.query_start,
-				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query '  || a.pid::text ||  '</div>'
-				else a.pid::text end ) as pid,
-				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || a.pid::text || '</div>') as pid2,
-				age(clock_timestamp(), a.query_start) as age_sort
-			   FROM pg_stat_activity a
-			  WHERE a.pid <> pg_backend_pid()
-			  ORDER BY a.state asc, age_sort desc ) T""" ), [ "wait_event_type","wait_event", "state", "age", "datname", "usename", "app_name", "query", "query_start", "pid", "pid" ], "All connections", ["query"] )
+			return make_html_report_with_head( self.make_query( check_base, """
+			SELECT T."wait_event_type",
+				   T."wait_event",
+				   T.state,
+				   T.age,
+				   T.datname,
+				   T.usename,
+				   T.application_name,
+				   T.query,
+				   T.query_start,
+				   T.pid,
+				   T.pid2
+			FROM
+			  (
+				SELECT a."wait_event_type",
+					a."wait_event",
+					a.state,
+					age(clock_timestamp(), a.query_start)::text AS age,
+					a.datname,
+					a.usename,
+					a.application_name,
+					substring(a.query FROM 0 FOR 400) AS query, --a.query,
+					a.query_start,
+					(
+						CASE
+						WHEN a.state = 'active' OR a.state = 'idle in transaction' THEN 
+							'<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">cancel tx ' || a.pid::text || '</div>'
+						ELSE a.pid::text
+						END
+					) AS pid,
+					('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill conn ' || a.pid::text || '</div>') AS pid2,
+					age(clock_timestamp(), a.query_start) AS age_sort
+				FROM pg_stat_activity a
+				WHERE a.pid <> pg_backend_pid()
+				ORDER BY a.state ASC, age_sort DESC
+			   ) T""" ), [ "wait_event_type","wait_event", "state", "age", "datname", "usename", "app_name", "query", "query_start", "pid", "pid" ], "All connections", ["query"] )
 		else:
-			return make_html_report_with_head( self.make_query( check_base, """SELECT T.waiting,T.state,T.age, T.datname, T.usename, T.application_name, T.query, T.query_start, T.pid, T.pid2 
-			from ( select a.waiting,a.state, age(clock_timestamp(), a.query_start)::text AS age,
-				a.datname,
-				a.usename,
-				a.application_name,
-				substring(a.query from 0 for 400) as query,
-				--a.query,
-				a.query_start,
-				( case when a.state = 'active' then '<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">stop query '  || a.pid::text ||  '</div>'
-				else a.pid::text end ) as pid,
-				('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill connect ' || a.pid::text || '</div>') as pid2,
-				age(clock_timestamp(), a.query_start) as age_sort
-			   FROM pg_stat_activity a
-			  WHERE a.pid <> pg_backend_pid()
-			  ORDER BY a.state asc, age_sort desc ) T""" ), [ "waiting", "state", "age", "datname", "usename", "app_name", "query", "query_start", "pid", "pid" ], "All connections", ["query"] )
-		
-			  
+			return make_html_report_with_head( self.make_query( check_base, """
+				SELECT T.waiting,
+					   T.state,
+					   T.age,
+					   T.datname,
+					   T.usename,
+					   T.application_name,
+					   T.query,
+					   T.query_start,
+					   T.pid,
+					   T.pid2
+				FROM
+				  (
+					SELECT a.waiting,
+						a.state,
+						age(clock_timestamp(), a.query_start)::text AS age,
+						a.datname,
+						a.usename,
+						a.application_name,
+						substring(a.query FROM 0 FOR 400) AS query, --a.query,
+						a.query_start,
+						(
+							CASE
+							WHEN a.state = 'active' OR a.state = 'idle in transaction' THEN 
+								'<div style="float:left;" link_val="' || a.pid::text || '" class="stop_query pg_stat_console_fonts pg_stat_console_button">cancel tx ' || a.pid::text || '</div>'
+							ELSE a.pid::text
+							END
+						) AS pid,
+						('<div style="float:left;" link_val="' || a.pid::text || '" class="kill_connect pg_stat_console_fonts pg_stat_console_button">kill conn ' || a.pid::text || '</div>') AS pid2,
+						age(clock_timestamp(), a.query_start) AS age_sort
+					FROM pg_stat_activity a
+					WHERE a.pid <> pg_backend_pid()
+					ORDER BY a.state ASC, age_sort DESC
+				   ) T""" ), [ "waiting", "state", "age", "datname", "usename", "app_name", "query", "query_start", "pid", "pid" ], "All connections", ["query"] )
+
 class ProcessCommonFuncs():
 	def get_command_by_pid(self, pid):
 		cmd = subprocess.Popen("cat /proc/" + str( pid ) + "/cmdline",shell=True,stdout=subprocess.PIPE)
@@ -1135,7 +1230,8 @@ class GetMaintenanceTasksHandler(BaseAsyncHandlerNoParam):
 					query like '%vacuum%'  or
 					query like '%analyze%'		
 				)			
-				order by "query_age" desc""" ), [ "query_age", "xact_age", "state", "wait_event_type", "wait_event", "datname", "usename", "application_name", "client_addr", "query", "pid" ], "Runned maintenance operations", ["query"] )			
+				order by "query_age" desc""" ), [ "query_age", "xact_age", "state", "wait_event_type", "wait_event", "datname", "usename", \
+					"application_name", "client_addr", "query", "pid" ], "Runned maintenance operations", ["query"] )			
 		else:
 			return make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
 				age(clock_timestamp(), xact_start) AS "xact_age", state, waiting, datname, usename, application_name, client_addr, query, pid
@@ -1151,9 +1247,9 @@ class GetMaintenanceTasksHandler(BaseAsyncHandlerNoParam):
 					query like '%vacuum%'  or
 					query like '%analyze%'
 				)			
-				order by "query_age" desc""" ), [ "query_age", "xact_age", "state", "waiting", "datname", "usename", "application_name", "client_addr", "query", "pid" ], "Runned maintenance operations", ["query"] )			
+				order by "query_age" desc""" ), [ "query_age", "xact_age", "state", "waiting", "datname", "usename", "application_name", \
+					"client_addr", "query", "pid" ], "Runned maintenance operations", ["query"] )
 
-				
 application = tornado.web.Application([ 
 			(r"/(.*\.gz)", PgStatConsoleStaticFileHandler,{"path": current_dir }),  
 			('/getMaintenanceTasks', GetMaintenanceTasksHandler),
@@ -1188,4 +1284,3 @@ logger.log( "Application is ready to work! Port " + str(port), "Info" )
 logger.log( "Allowed hosts " + str( allow_host_list ), "Info" )
 
 IOLoop.instance().start()
-
