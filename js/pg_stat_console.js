@@ -32,6 +32,14 @@ CanvasJS.addColorSet("pscColors",
 	"#8058bc",
 	"#8a6aba"
 	]);
+	
+CanvasJS.addColorSet("pscColorsContrast",
+	[
+	"#0f357b",
+	"#8a6aba",
+	"#506ca5",
+	"#410f8c"
+	]);
 
 var div_id_to_method_dict = [
 	['sub_menu_stm_calls_by_queries', 'getStmCallsByQueries'],
@@ -505,12 +513,16 @@ function get_current_node_info()
 						}
 
 						for (var i = 0; i < node_classes.length; i++)
+						{
 							if( current_node_info.includes(node_classes[i]) == false )
-								$('.' + node_classes[i]).fadeOut( 250 );
+								$('.' + node_classes[i]).fadeTo( 250, 0.33 );
+						}
 						
 						for (var i = 0; i < node_classes.length; i++)
-							if( current_node_info.includes(node_classes[i]) )
-								$('.' + node_classes[i]).fadeIn( 250 );
+						{
+							if( ( current_node_info.includes(node_classes[i]) ) )
+								$('.' + node_classes[i]).fadeTo( 250, 1 );
+						}
 					}
 					get_uptime();
 				},

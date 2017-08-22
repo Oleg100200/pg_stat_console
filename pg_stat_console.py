@@ -411,8 +411,7 @@ class CoreHandler():
 			if serr.errno == errno.ECONNREFUSED:
 				logger.log( "pg_stat_monitor not allowed, method_name = " + method_name, "Error" )
 				return err_msg
-		
-		logger.log( "pg_stat_monitor timeout " + str( timeout_p ) + " sec exceeded, method_name = " + method_name, "Error" )
+
 		return err_msg
 		
 	def get_pg_version(self):
@@ -592,7 +591,7 @@ class Chart():
 			query_res = re.sub(r"host=\w+", '', query_res)
 		return str( query_res )
 		
-	def make_stacked_chart(self, data, graph_name, chart_name ):
+	def make_stacked_chart(self, data, graph_name, chart_name, color_set = 'pscColors' ):
 		#format data: [ [ block, datetime, value, ... ], ...] 	example:	[ [1,"2015-12-12 01:00:00+04",30668.2309999999998, ... ], ...]
 		fields = []
 		
@@ -655,7 +654,7 @@ class Chart():
 			$('<div id=\"""" + chart_name + """\" class="scrollable_obj" style="height: 600px; width: 100%;" chart-name=\"""" + graph_name + """\"> </div>').appendTo( $('#graph_space' ) );
 			var """ + chart_name + """ = new CanvasJS.Chart(\"""" + chart_name + """\",
 			{
-			  colorSet: "pscColors",
+			  colorSet: \"""" + color_set + """\",
 			  toolTip:{"""	
 
 		if report_type == "query_durations" or report_type == "query_blocks":
@@ -814,7 +813,7 @@ class Chart():
 		html_report = html_report +  """} show_graph();"""
 		return html_report		
 		
-	def make_line_chart(self, data, legend, graph_name, chart_name, graph_type ):
+	def make_line_chart(self, data, legend, graph_name, chart_name, graph_type, color_set = 'pscColors' ):
 		#format data: [ [ block, datetime, value, ... ], ...] 	example:	[ [1,"2015-12-12 01:00:00+04",30668.2309999999998, ... ], ...]
 		fields = []
 		
@@ -830,7 +829,7 @@ class Chart():
 			$('<div id=\"""" + chart_name + """\" class="scrollable_obj" style="height: 600px; width: 100%;" chart-name=\"""" + graph_name + """\"> </div>').appendTo( $('#graph_space' ) );
 			var """ + chart_name + """ = new CanvasJS.Chart(\"""" + chart_name + """\",
 			{
-			  colorSet: "pscColors",
+			  colorSet: \"""" + color_set + """\",
 			  toolTip:{"""	
 
 				
@@ -986,8 +985,8 @@ class Chart():
 			
 		graph_json = graph_json + blocks_txt + """]});""" + chart_name + """.render(); all_charts_on_page.push(""" + chart_name + """);"""
 		return graph_json	
-		
-	def make_line_report(self, data, date = None ):
+
+	def make_line_report(self, data, date = None, color_set = 'pscColors' ):
 		html_report = """function show_graph() { """ 
 			  
 		id_container = 1
@@ -999,7 +998,7 @@ class Chart():
 				chart_name += date[ 1 ]
 			
 			chart_name = "chartContainer_" +  hashlib.md5(chart_name.encode()).hexdigest()	
-			html_report = html_report + str( self.make_line_chart( data_v[ 0 ], data_v[ 1 ], data_v[ 2 ], chart_name[:25], data_v[ 3 ] ) )
+			html_report = html_report + str( self.make_line_chart( data_v[ 0 ], data_v[ 1 ], data_v[ 2 ], chart_name[:25], data_v[ 3 ], color_set ) )
 			id_container = id_container + 1
 				
 		html_report = html_report +  """} show_graph();"""
@@ -1596,7 +1595,7 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), \
 					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound (' + db[1] + ')', 'stackedColumn' ] )
 			
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]], 'pscColorsContrast' )
 		
 class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
@@ -2366,7 +2365,7 @@ class GetPgStatConsoleNodeInfoHandler(GetPgStatConsoleStatusHandler):
 		for row in result:
 			res.append( row[0] )
 			
-		if self.proxy_http_post( 'getUptime' ) != "pg_stat_monitor not allowed":
+		if self.proxy_http_post( 'getUptime', 3 ) != "pg_stat_monitor not allowed":
 			res.append( 'pg_stat_monitor' )
 
 		self.set_header('Content-Type', 'application/json')

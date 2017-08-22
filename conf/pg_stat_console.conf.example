@@ -27,8 +27,8 @@ enable_exception_catching = 1					#do disable this option to display full stack 
 application_name = pg_stat_console				#app name for displaying in pg_stat_activity and naming log file
 time_zone = Europe/Moscow						#value for query "SET timezone = '$1';"
 application_max_mem = 1200						#in MB, if the value of this variable is exceeded, the application will be shut down
-max_workers = 4									#number of workers for ThreadPoolExecutor
-db_pool_size = 3								#number of connection to database
+max_workers = 8									#number of workers for ThreadPoolExecutor
+db_pool_size = 8								#number of connection to database
 
 db_pool_recycle = 14400							#in seconds, this parameter prevents the pool from using a particular connection 
 												#that has passed a certain age http://docs.sqlalchemy.org/en/latest/core/pooling.html#setting-pool-recycle
