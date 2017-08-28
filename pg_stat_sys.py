@@ -66,7 +66,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_all_indexes_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE psc_data_all_indexes_t1
@@ -79,6 +79,7 @@ query_check_tables_all_dbs = """do $$
 		  idx_tup_fetch bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -88,7 +89,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_all_indexes_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN	  
 		CREATE UNLOGGED TABLE psc_data_all_indexes_t2
 		(
@@ -100,6 +101,7 @@ query_check_tables_all_dbs = """do $$
 		  idx_tup_fetch bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -109,7 +111,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_io_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN	  
 		CREATE UNLOGGED TABLE psc_data_io_t1
 		(
@@ -120,17 +122,17 @@ query_check_tables_all_dbs = """do $$
 		  idx_blks_read bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
-
 
 	IF not EXISTS (
 	 SELECT 1
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_io_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN	 
 		CREATE UNLOGGED TABLE psc_data_io_t2
 		(
@@ -141,6 +143,7 @@ query_check_tables_all_dbs = """do $$
 		  idx_blks_read bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -150,7 +153,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN	 
 		CREATE UNLOGGED TABLE psc_data_t1
 		(
@@ -167,6 +170,7 @@ query_check_tables_all_dbs = """do $$
 		  n_tup_hot_upd bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -176,7 +180,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_data_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN		  
 		CREATE UNLOGGED TABLE psc_data_t2
 		(
@@ -193,6 +197,7 @@ query_check_tables_all_dbs = """do $$
 		  n_tup_hot_upd bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -202,7 +207,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stm_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN	 
 		CREATE UNLOGGED TABLE psc_stm_t1
 		(
@@ -228,6 +233,7 @@ query_check_tables_all_dbs = """do $$
 		  blk_write_time double precision
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -237,7 +243,7 @@ query_check_tables_all_dbs = """do $$
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stm_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN		  
 		CREATE UNLOGGED TABLE psc_stm_t2
 		(
@@ -263,6 +269,7 @@ query_check_tables_all_dbs = """do $$
 		  blk_write_time double precision
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -330,7 +337,7 @@ query_check_tables_single_db = """
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stat_bgwriter_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE public.psc_stat_bgwriter_t2
@@ -348,6 +355,7 @@ query_check_tables_single_db = """
 		  buffers_backend_fsync bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -357,7 +365,7 @@ query_check_tables_single_db = """
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stat_bgwriter_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE public.psc_stat_bgwriter_t1
@@ -375,6 +383,7 @@ query_check_tables_single_db = """
 		  buffers_backend_fsync bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;	
@@ -384,7 +393,7 @@ query_check_tables_single_db = """
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stat_dbs_t1'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE public.psc_stat_dbs_t1
@@ -402,9 +411,14 @@ query_check_tables_single_db = """
 		  tup_inserted bigint,
 		  tup_updated bigint,
 		  tup_deleted bigint,
-		  deadlocks bigint
+		  deadlocks bigint,
+		  temp_files bigint,
+		  temp_bytes bigint,
+		  blk_read_time bigint,
+		  blk_write_time bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;	
@@ -414,7 +428,7 @@ query_check_tables_single_db = """
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stat_dbs_t2'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE public.psc_stat_dbs_t2
@@ -432,9 +446,14 @@ query_check_tables_single_db = """
 		  tup_inserted bigint,
 		  tup_updated bigint,
 		  tup_deleted bigint,
-		  deadlocks bigint
+		  deadlocks bigint,
+		  temp_files bigint,
+		  temp_bytes bigint,
+		  blk_read_time bigint,
+		  blk_write_time bigint
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;	
@@ -450,7 +469,7 @@ query_check_single_db = """
 	 FROM   pg_class c
 	 JOIN   pg_namespace n ON n.oid = c.relnamespace
 	 WHERE  c.relname = 'psc_stat_activity_raw'
-	 AND	n.nspname = 'public'
+	 AND	n.nspname = 'public' AND c.relkind = 'r'
 	 ) THEN
 
 		CREATE UNLOGGED TABLE public.psc_stat_activity_raw
@@ -461,6 +480,7 @@ query_check_single_db = """
 		  val numeric DEFAULT 0.0
 		)
 		WITH (
+		  FILLFACTOR=50,
 		  OIDS=FALSE
 		);
 	END IF;
@@ -482,9 +502,9 @@ query_single_db_t1 = """
 		INSERT INTO psc_stat_dbs_t1(
 				now, datid, datname, numbackends, xact_commit, xact_rollback, 
 				blks_read, blks_hit, tup_returned, tup_fetched, tup_inserted, 
-				tup_updated, tup_deleted, deadlocks)
+				tup_updated, tup_deleted, deadlocks, temp_files, temp_bytes, blk_read_time, blk_write_time)
 			select now(), datid, datname, numbackends, xact_commit, xact_rollback, blks_read, blks_hit, tup_returned, 
-				tup_fetched, tup_inserted, tup_updated, tup_deleted, deadlocks from pg_stat_database;
+				tup_fetched, tup_inserted, tup_updated, tup_deleted, deadlocks, temp_files, temp_bytes, blk_read_time, blk_write_time from pg_stat_database;
 	end$$;""";
 
 query_single_db_t2 = """
@@ -502,9 +522,9 @@ query_single_db_t2 = """
 		INSERT INTO psc_stat_dbs_t2(
 				now, datid, datname, numbackends, xact_commit, xact_rollback, 
 				blks_read, blks_hit, tup_returned, tup_fetched, tup_inserted, 
-				tup_updated, tup_deleted, deadlocks)
+				tup_updated, tup_deleted, deadlocks, temp_files, temp_bytes, blk_read_time, blk_write_time)
 			select now(), datid, datname, numbackends, xact_commit, xact_rollback, blks_read, blks_hit, tup_returned, 
-				tup_fetched, tup_inserted, tup_updated, tup_deleted, deadlocks from pg_stat_database;
+				tup_fetched, tup_inserted, tup_updated, tup_deleted, deadlocks, temp_files, temp_bytes, blk_read_time, blk_write_time from pg_stat_database;
 	end$$;""";
 
 query_single_db_sn = """
@@ -526,13 +546,61 @@ query_single_db_sn = """
 				where wait_event_type is not null and pid <> pg_backend_pid()
 			) T
 			group by T.datname, waiting;
+			
+			INSERT INTO psc_stat_activity_raw( datname, param, val )
+			select datname, 'longest_waiting' as longest_waiting, max( val ) from (
+				select datname,
+				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+				from pg_stat_activity 
+				where waiting = true and pid <> pg_backend_pid()
+				union all
+				select datname, 0 
+				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
+			) T
+			group by datname, longest_waiting;
 		else
 			INSERT INTO psc_stat_activity_raw( datname, param, val )
 			select datname, 'waiting_conns' as waiting, count(waiting) from pg_stat_activity
 			where waiting = true and pid <> pg_backend_pid()
 			group by datname, waiting;
+			
+			INSERT INTO psc_stat_activity_raw( datname, param, val )
+			select datname, 'longest_waiting' as longest_waiting, max( val ) from (
+				select datname, 
+				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+				from pg_stat_activity 
+				where wait_event_type is not null and pid <> pg_backend_pid()
+				union all
+				select datname, 0 
+				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
+			) T
+			group by datname, longest_waiting;
 		end if;
 
+		INSERT INTO psc_stat_activity_raw( datname, param, val )
+		select datname, 'longest_active' as longest_active, max( val ) from (
+			select datname, 
+			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+			from pg_stat_activity
+			where state='active' and pid <> pg_backend_pid()
+			union all
+			select datname, 0
+			from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
+		) T
+		group by datname, longest_active;
+		
+		INSERT INTO psc_stat_activity_raw( datname, param, val )
+		select datname, 'longest_idle_in_tx' as longest_idle_in_tx, max( val ) from (
+			select datname,
+			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+			from pg_stat_activity
+			where state='idle in transaction' and pid <> pg_backend_pid()
+			union all
+			select datname, 0
+			from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
+		) T
+		group by datname, longest_idle_in_tx;
+		
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
 		select d.datname, l.mode, count(l.mode) 
 		from pg_locks l
@@ -575,6 +643,8 @@ query_single_db_sn = """
 				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )		
 		) T
 		group by datname, autovacuum_workers;
+		
+		
 	end$$;""";
 
 #=======================================================================================================
@@ -1150,6 +1220,20 @@ def pg_sys_stat_snapshot():
 			#====================================================================================================
 
 			#====================================================================================================
+			#simple values
+			query = firs_node_db_conn.prepare( """
+				select 'xlog_segments', count(1) from pg_ls_dir('pg_xlog') limit 1
+				""" )
+			res_data = query()
+			
+			stm = sys_stat_db.prepare( """
+			INSERT INTO psc_common_stat( param_id, val) values( ( select psc_get_param( $1 ) ), $2 )""" )
+			with sys_stat_db.xact():			
+				for rec in res_data:
+					stm.first( rec[0], rec[1] )
+			#====================================================================================================
+			
+			#====================================================================================================
 			query = firs_node_db_conn.prepare( """select T.datname::text,'numbackends', round(numbackends/2::numeric, 3) 
 			from (
 				SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, T1.datid, T1.datname, 
@@ -1236,7 +1320,40 @@ def pg_sys_stat_snapshot():
 				(T2.deadlocks - T1.deadlocks) as deadlocks
 				from psc_stat_dbs_t1 T1
 				inner join psc_stat_dbs_t2 T2 on T1.datid = T2.datid
-			) T	""" )
+			) T	
+			union
+			select T.datname::text,'temp_files', temp_files
+			from (
+				SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, T1.datid, T1.datname, 
+				(T2.temp_files - T1.temp_files) as temp_files
+				from psc_stat_dbs_t1 T1
+				inner join psc_stat_dbs_t2 T2 on T1.datid = T2.datid
+			) T
+			union
+			select T.datname::text,'temp_bytes', temp_bytes
+			from (
+				SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, T1.datid, T1.datname, 
+				(T2.temp_bytes - T1.temp_bytes) as temp_bytes
+				from psc_stat_dbs_t1 T1
+				inner join psc_stat_dbs_t2 T2 on T1.datid = T2.datid
+			) T
+			union
+			select T.datname::text,'blk_read_time', blk_read_time
+			from (
+				SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, T1.datid, T1.datname, 
+				(T2.blk_read_time - T1.blk_read_time) as blk_read_time
+				from psc_stat_dbs_t1 T1
+				inner join psc_stat_dbs_t2 T2 on T1.datid = T2.datid
+			) T
+			union
+			select T.datname::text,'blk_write_time', blk_write_time
+			from (
+				SELECT ( extract(epoch from (T2.now-T1.now)) ) as seconds, T1.datid, T1.datname, 
+				(T2.blk_write_time - T1.blk_write_time) as blk_write_time
+				from psc_stat_dbs_t1 T1
+				inner join psc_stat_dbs_t2 T2 on T1.datid = T2.datid
+			) T""" )
+			
 			res_data = query()
 			
 			stm = sys_stat_db.prepare( """
@@ -1396,7 +1513,12 @@ def pg_single_db_sn():
 				time.sleep(sleep_interval_pg_single_db_sn)
 			
 			query = firs_node_db_conn.prepare( """
-				select datname, param, round(avg( val ), 3) 
+				select datname, param, 
+					case when param in ('longest_active', 'longest_idle_in_tx', 'longest_waiting') then
+						round(max( val ), 3)
+					else
+						round(avg( val ), 3)
+					end
 				from psc_stat_activity_raw
 				group by datname, param;""" )
 			res_data = query()

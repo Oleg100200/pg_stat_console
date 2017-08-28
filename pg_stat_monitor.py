@@ -603,11 +603,12 @@ class GetIndexBloatHandler(BaseAsyncHandlerNoParam):
 						/*wastedbytes as bloat_bytes,*/ pg_size_pretty(wastedbytes::bigint) as bloat_size,
 						/*totalbytes as index_bytes,*/ pg_size_pretty(totalbytes::bigint) as index_size,
 						/*table_bytes,*/ pg_size_pretty(table_bytes) as table_size,
-						index_scans, realbloat, def, conname
+						index_scans, round( realbloat, 3) realbloat, def, array_agg( conname )::text
 				FROM raw_bloat
 				WHERE ( realbloat > 30 and wastedbytes > 1000000 ) --and indisprimary = 'false' --and nspname = 'public'
+				GROUP BY schema_name, table_name, index_name, bloat_size, index_size, table_size, index_scans, realbloat, def
 				ORDER BY realbloat DESC;"""
-				
+		
 		html_report = ""
 		data = tornado.escape.json_decode(self.request.body) 
 		

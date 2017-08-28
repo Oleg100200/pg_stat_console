@@ -68,7 +68,9 @@ def make_html_report_with_head( data, columns, head_name, query_column=None ):
 		html_row = """<tr>""" + html_col_vals + """</tr>"""
 		html_rows = html_rows + html_row
 	
-	html_table = """<div class="report_table pg_stat_console_fonts_on_white scrollable_obj"><h2 style ="text-align: center;font-size: 16px;">""" + head_name + """</h2><table style="table-layout: fixed;word-wrap:break-word;" class="bordered tablesorter"><thead><tr>""" + html_columns + """</tr></thead>""" + html_rows + """</table></div>"""
+	html_table = """<div class="report_table pg_stat_console_fonts_on_white scrollable_obj"><h2 style ="text-align: center;font-size: 16px;">""" + \
+		head_name + """</h2><table style="table-layout: fixed;word-wrap:break-word;" class="bordered tablesorter"><thead><tr>""" + \
+		html_columns + """</tr></thead>""" + html_rows + """</table></div>"""
 
 	html_report = html_report + str( html_table )
 	return html_report
