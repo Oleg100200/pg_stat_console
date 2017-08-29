@@ -165,7 +165,19 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				[ "rrqm/s", get_color("orange") ], ["wrqm/s", get_color("brown") ], \
 				[ "r/s", get_color("orange") ], ["w/s", get_color("brown") ],\
 				[ "rsec/s", get_color("orange") ], ["wsec/s", get_color("brown") ],\
-
+				
+				[ "longest_waiting", get_color("dark blue") ], ["longest_active", get_color("green") ], ["longest_idle_in_tx", get_color("yellow") ], \
+				
+				[ "xlog_segments", get_color("green") ], \
+				
+				[ "blks_read_per_sec", get_color("orange") ], [ "blks_hit_per_sec", get_color("light green") ], \
+				
+				[ "autovacuum_workers_total", get_color("violet") ], [ "autovacuum_workers_wraparound", get_color("yellow") ], \
+				
+				[ "temp_files", get_color("light red") ], [ "temp_bytes", get_color("light brown") ], \
+				
+				[ "blk_read_time", get_color("orange") ], [ "blk_write_time", get_color("brown") ], \
+				
 				['tup_inserted_per_sec', get_color("dark blue") ], ['tup_updated_per_sec', get_color("pink") ], ['tup_deleted_per_sec', get_color("red") ],\
 				['tup_returned_per_sec', get_color("green") ], ['tup_fetched_per_sec', get_color("light green") ] ]
 	
@@ -1058,31 +1070,7 @@ class QueryMakerSimpleStat():
 				res_param = " = '" + param + "'"	
 		return res_param
 
-	def generate_query( self, db, dt_a, dt_b, param ):
-		return [ """	
-			select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt )  AS graph_block, * 
-					from 
-					(
-						SELECT 	(s.dt """ + timezone_correct_time_backward +""")::timestamp without time zone as dt, round( val, 3), d.db_name || ' (' || p.param_name || ')'
-						  FROM psc_dbs_stat s
-						  inner join psc_params p on p.id = s.param_id
-						  inner join psc_dbs d on d.id = s.db_id
-						  where d.db_name """ + self.param_generator( db ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
-							dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
-						order by s.dt asc,
-						s.val asc nulls last
-					) T order by T.dt asc""", 
-			"""
-			select T.param, 'Avg: ' || T.avg_v::text || ', Min: ' || T.min_v::text || ', Max: ' || T.max_v::text from (
-			SELECT d.db_name || ' (' || p.param_name || ')' as param, round( avg(val), 1) as avg_v, round( min(val), 1) as min_v, round( max(val), 1) as max_v
-						  FROM psc_dbs_stat s
-						  inner join psc_params p on p.id = s.param_id
-						  inner join psc_dbs d on d.id = s.db_id
-						  where d.db_name """ + self.param_generator( db ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
-							dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
-						group by param ) T""" ]
-				
-	def generate_query_common_stat( self, dt_a, dt_b, param, unit = None ):
+	def generate_val_str(self, unit):
 		str_fld_calc = "val"
 		if unit is not None:
 			if unit == 'millisec_to_sec':
@@ -1095,7 +1083,40 @@ class QueryMakerSimpleStat():
 				str_fld_calc = "val / 1024"	
 			if unit == 'bytes_to_mb':
 				str_fld_calc = "val / 1048576"
+			if unit == 'sec_to_min':
+				str_fld_calc = "val / 60"
+			if unit == 'sec_to_hour':
+				str_fld_calc = "val / 3600"
+		return str_fld_calc
+		
+	def generate_query( self, db, dt_a, dt_b, param, unit = None ):
+		str_fld_calc = self.generate_val_str(unit)
+		return [ """	
+			select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt )  AS graph_block, * 
+					from 
+					(
+						SELECT 	(s.dt """ + timezone_correct_time_backward +""")::timestamp without time zone as dt, round( """ + str_fld_calc + """, 3), d.db_name || ' (' || p.param_name || ')'
+						  FROM psc_dbs_stat s
+						  inner join psc_params p on p.id = s.param_id
+						  inner join psc_dbs d on d.id = s.db_id
+						  where d.db_name """ + self.param_generator( db ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
+							dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
+						order by s.dt asc,
+						s.val asc nulls last
+					) T order by T.dt asc""", 
+			"""
+			select T.param, 'Avg: ' || T.avg_v::text || ', Min: ' || T.min_v::text || ', Max: ' || T.max_v::text from (
+			SELECT d.db_name || ' (' || p.param_name || ')' as param, round( avg(""" + str_fld_calc + """), 1) as avg_v, round( min(""" + str_fld_calc + """), 1) as min_v, round( max(""" + str_fld_calc + """), 1) as max_v
+						  FROM psc_dbs_stat s
+						  inner join psc_params p on p.id = s.param_id
+						  inner join psc_dbs d on d.id = s.db_id
+						  where d.db_name """ + self.param_generator( db ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
+							dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
+						group by param ) T""" ]
 				
+	def generate_query_common_stat( self, dt_a, dt_b, param, unit = None ):
+		str_fld_calc = self.generate_val_str(unit)
+		
 		return [ """	
 			select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt )  AS graph_block, * 
 					from 
@@ -1127,19 +1148,8 @@ class QueryMakerSimpleStat():
 							group by d.device_name""" 	
 	
 	def generate_query_os_stat( self, dt_a, dt_b, device, param, unit = None ):
-		str_fld_calc = "val"
-		if unit is not None:
-			if unit == 'millisec_to_sec':
-				str_fld_calc = "val / 1000"
-			if unit == 'millisec_to_min':
-				str_fld_calc = "val / 1000 * 60"
-			if unit == 'blocks_to_mb':
-				str_fld_calc = "(val * 8192 )/1048576"
-			if unit == 'bytes_to_kb':
-				str_fld_calc = "val / 1024"
-			if unit == 'bytes_to_mb':
-				str_fld_calc = "val / 1048576"
-				
+		str_fld_calc = self.generate_val_str(unit)
+		
 		if device is not None:
 			return [ """	
 				select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt ) AS graph_block, * 
@@ -1448,24 +1458,6 @@ class GetNetworkErrorsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimple
 					'RX-ERR RX-DRP RX-OVR TX-ERR TX-DRP TX-OVR (' + device[0] + '), packets', 'stackedColumn' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
-	
-class GetBlockHitDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
-	def post_(self):
-		data = tornado.escape.json_decode(self.request.body) 
-		data_graph = []
-
-		if self.check_auth() == False:
-			return ""
-		
-		current_user_dbs = []
-		for db in self.current_user_dbs:
-			if data["node_name"] == db[0]:
-				current_user_dbs.append( db[1] )
-		
-		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'blks_hit_per_sec' )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_hit_per_sec', 'line' ] )
-		
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
 class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
@@ -1477,7 +1469,7 @@ class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'checkpoints_timed', 'checkpoints_req' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'checkpoints_timed, checkpoints_req', 'stackedColumn' ] )
+			'checkpoints_timed, checkpoints_req; times', 'stackedColumn' ] )
 
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'checkpoint_write_time', 'checkpoint_sync_time' ], 'millisec_to_sec' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
@@ -1489,11 +1481,15 @@ class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'maxwritten_clean', 'buffers_backend_fsync' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'maxwritten_clean, buffers_backend_fsync', 'stackedColumn' ] )
+			'maxwritten_clean, buffers_backend_fsync; times', 'stackedColumn' ] )
+		
+		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'xlog_segments' ] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+			'xlog_segments; total count', 'stackedColumn' ] )
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
-class GetBlockReadDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
+class GetBlockReadHitDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
 		data_graph = []
@@ -1506,11 +1502,49 @@ class GetBlockReadDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if data["node_name"] == db[0]:
 				current_user_dbs.append( db[1] )
 				
-		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'blks_read_per_sec' )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_read_per_sec', 'line' ] )	
+		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['blks_read_per_sec', 'blks_hit_per_sec'] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_read_per_sec, blks_hit_per_sec; blocks/sec', 'line' ] )	
+		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
+class GetTempFilesBytesDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []
+
+		if self.check_auth() == False:
+			return ""
+
+		current_user_dbs = []
+		for db in self.current_user_dbs:
+			if data["node_name"] == db[0]:
+				current_user_dbs.append( db[1] )
+				
+		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['temp_files'] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_files; num', 'line' ] )	
+		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['temp_bytes'] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_bytes; bytes', 'line' ] )	
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
+class GetBlockReadWriteTimeDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
+	def post_(self):
+		data = tornado.escape.json_decode(self.request.body) 
+		data_graph = []
+
+		if self.check_auth() == False:
+			return ""
+
+		current_user_dbs = []
+		for db in self.current_user_dbs:
+			if data["node_name"] == db[0]:
+				current_user_dbs.append( db[1] )
+				
+		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['blk_read_time', 'blk_write_time'] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blk_read_time, blk_write_time; total sec', 'line' ] )	
+		
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
+
 class GetTupWriteDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
@@ -1595,7 +1629,7 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), \
 					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound (' + db[1] + ')', 'stackedColumn' ] )
 			
-		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]], 'pscColorsContrast' )
+		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]], 'pscColorsContrast' )	#overridden by color_map
 		
 class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
@@ -1609,11 +1643,13 @@ class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['idle in transaction','idle','active','waiting_conns'] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-				'idle in transaction, idle, active, waiting_conns (' + db[1] + ')', 'stackedArea' ] )
-			
+					'idle in transaction, idle, active, waiting_conns (' + db[1] + ')', 'stackedArea' ] )
+				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['longest_idle_in_tx','longest_active', 'longest_waiting'], 'sec_to_min' )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+					'longest_idle_in_tx, longest_active, longest_waiting (' + db[1] + '); min', 'line' ] )
+		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
-	
 class GetLocksStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
@@ -2487,8 +2523,9 @@ application = tornado.web.Application([
 			('/getQueryBlks', GetQueryBlksHandler),
 
 			('/getBgwriterStat', GetBgwriterStatHandler ),
-			('/getBlockHitDB', GetBlockHitDBHandler),
-			('/getBlockReadDB', GetBlockReadDBHandler),
+			('/getBlockReadHitDB', GetBlockReadHitDBHandler),
+			('/getTempFilesBytesDB', GetTempFilesBytesDBHandler),
+			('/getBlockReadWriteTimeDB', GetBlockReadWriteTimeDBHandler),
 			('/getTupWriteDB', GetTupWriteDBHandler),
 			('/getTupRetFetchDB', GetTupRetFetchDBHandler),
 			('/getTxDB', GetTxDBHandler),

@@ -549,10 +549,10 @@ query_single_db_sn = """
 			
 			INSERT INTO psc_stat_activity_raw( datname, param, val )
 			select datname, 'longest_waiting' as longest_waiting, max( val ) from (
-				select datname,
-				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+				select datname, 
+				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric, 3 ) as val
 				from pg_stat_activity 
-				where waiting = true and pid <> pg_backend_pid()
+				where wait_event_type is not null and pid <> pg_backend_pid()
 				union all
 				select datname, 0 
 				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
@@ -566,10 +566,10 @@ query_single_db_sn = """
 			
 			INSERT INTO psc_stat_activity_raw( datname, param, val )
 			select datname, 'longest_waiting' as longest_waiting, max( val ) from (
-				select datname, 
-				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+				select datname,
+				round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric, 3 ) as val
 				from pg_stat_activity 
-				where wait_event_type is not null and pid <> pg_backend_pid()
+				where waiting = true and pid <> pg_backend_pid()
 				union all
 				select datname, 0 
 				from pg_database where datname not in ( 'template1', 'template0', 'postgres' )
@@ -580,7 +580,7 @@ query_single_db_sn = """
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
 		select datname, 'longest_active' as longest_active, max( val ) from (
 			select datname, 
-			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric, 3 ) as val
 			from pg_stat_activity
 			where state='active' and pid <> pg_backend_pid()
 			union all
@@ -592,7 +592,7 @@ query_single_db_sn = """
 		INSERT INTO psc_stat_activity_raw( datname, param, val )
 		select datname, 'longest_idle_in_tx' as longest_idle_in_tx, max( val ) from (
 			select datname,
-			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric/3600, 3 ) as val
+			round( coalesce(extract(epoch from age(now(), xact_start)), 0)::numeric, 3 ) as val
 			from pg_stat_activity
 			where state='idle in transaction' and pid <> pg_backend_pid()
 			union all

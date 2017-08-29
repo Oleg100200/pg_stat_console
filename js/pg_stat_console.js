@@ -65,9 +65,10 @@ var dashboard_dict = [
 	['getNetworkTrafficStat','Network Traffic'],
 	['getNetworkPacketsStat','Network Packets'],
 	['getNetworkErrorsStat','Network Errors'],
-	['getBgwriterStat','checkpoints_timed'],['getBgwriterStat','checkpoint_write_time'],['getBgwriterStat','buffers_checkpoint'],
-	['getBlockHitDB','blks_hit_per_sec'],
-	['getBlockReadDB','blks_read_per_sec'],
+	['getBgwriterStat','checkpoints_timed'],['getBgwriterStat','checkpoint_write_time'],['getBgwriterStat','buffers_checkpoint'],['getBgwriterStat','xlog_segments'],
+	['getBlockReadHitDB','blks_hit_per_sec'], ['getBlockReadHitDB','blks_read_per_sec'],
+	['getTempFilesBytesDB','temp_files'], ['getTempFilesBytesDB','temp_bytes'],
+	['getBlockReadWriteTimeDB','blk_read_time'], ['getBlockReadWriteTimeDB','blk_write_time'],
 	['getReadStat','heap_blks_read_per_sec'],
 	['getTupWriteDB','tup_inserted_per_sec'],
 	['getWriteStat','_tup_per_sec'],
@@ -108,8 +109,9 @@ var compare_dict = [
 	['getNetworkPacketsStat','HW load -> Network Packets'],
 	['getNetworkErrorsStat','HW load -> Network Errors'],
 	['getBgwriterStat','PG load -> Bgwriter stat'],
-	['getBlockHitDB','PG load -> Blocks hit by databases'],
-	['getBlockReadDB','PG load -> Blocks read by databases'],
+	['getBlockReadHitDB','PG load -> Blocks read/hit by databases'],
+	['getTempFilesBytesDB','PG load -> Temp files/bytes by databases'],
+	['getBlockReadWriteTimeDB','PG load -> Block read/write time by databases'],
 	['getReadStat','PG load -> Blocks read by tables'],
 	['getTupWriteDB','PG load -> Tuples write by databases'],
 	['getWriteStat','PG load -> Tuples write by tables'],
@@ -1437,8 +1439,6 @@ function check_user_name_hash()
 						if( textStatus !== "abort" ) show_error( textStatus, errorThrown, XMLHttpRequest.responseText );
 					}
 		});
-	
-		
 	} else
 	{
 		call_login_dialog();
@@ -1772,19 +1772,55 @@ function set_all_click_events()
 		$( "#apply_filter_button" ).click();
 	});
 	
-	$( "#sub_menu_block_hit_db" ).click(function() {
+	$( "#sub_menu_block_read_hit_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
 		configure_menu_elem( this.id, true );
 			
-		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Block hit by databases");
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Blocks read/hit by databases");
 		set_date_time_filter(6);
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
 			
 			$( "#auto_refresh_div" ).fadeOut( "slow" );
 			$( "#graph_space" ).empty();
-			current_xhr.push( graph_post( 'getBlockHitDB', $("#date_a").val(), $("#date_b").val() ) ); 
+			current_xhr.push( graph_post( 'getBlockReadHitDB', $("#date_a").val(), $("#date_b").val() ) ); 
+			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
+		});	
+		$( "#apply_filter_button" ).click();
+	});
+	
+	$( "#sub_menu_temp_files_bytes_db" ).click(function() {
+		$(".pg_stat_console_goto_top").click();
+		
+		configure_menu_elem( this.id, true );
+			
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Temp files/bytes by databases");
+		set_date_time_filter(6);
+		$( "#apply_filter_button").unbind( "click" );
+		$( "#apply_filter_button" ).click(function() {
+			
+			$( "#auto_refresh_div" ).fadeOut( "slow" );
+			$( "#graph_space" ).empty();
+			current_xhr.push( graph_post( 'getTempFilesBytesDB', $("#date_a").val(), $("#date_b").val() ) ); 
+			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
+		});	
+		$( "#apply_filter_button" ).click();
+	});
+	
+	$( "#sub_menu_block_read_write_time_db" ).click(function() {
+		$(".pg_stat_console_goto_top").click();
+		
+		configure_menu_elem( this.id, true );
+			
+		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Block read/write time by databases");
+		set_date_time_filter(6);
+		$( "#apply_filter_button").unbind( "click" );
+		$( "#apply_filter_button" ).click(function() {
+			
+			$( "#auto_refresh_div" ).fadeOut( "slow" );
+			$( "#graph_space" ).empty();
+			current_xhr.push( graph_post( 'getBlockReadWriteTimeDB', $("#date_a").val(), $("#date_b").val() ) ); 
 			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
 		});	
 		$( "#apply_filter_button" ).click();
@@ -2033,24 +2069,6 @@ function set_all_click_events()
 		$( "#apply_filter_button" ).click();
 	});
 		
-	$( "#sub_menu_block_read_db" ).click(function() {
-		$(".pg_stat_console_goto_top").click();
-		
-		configure_menu_elem( this.id, true );
-		
-		$("#nav_str").text( current_node_name + " -> " + "PostgreSQL load -> Block read by databases");
-		set_date_time_filter(6);
-		$( "#apply_filter_button").unbind( "click" );
-		$( "#apply_filter_button" ).click(function() {
-			
-			$( "#auto_refresh_div" ).fadeOut( "slow" );
-			$( "#graph_space" ).empty();
-			current_xhr.push( graph_post( 'getBlockReadDB', $("#date_a").val(), $("#date_b").val() ) ); 
-			progress_notice( '<div style="font-size:25px;"><p>Query executing...</p></div>' );
-		});	
-		$( "#apply_filter_button" ).click();
-	});	
-
 	$( "#sub_menu_tup_write_db" ).click(function() {
 		$(".pg_stat_console_goto_top").click();
 		
