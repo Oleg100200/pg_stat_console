@@ -234,7 +234,7 @@ var time_filter_compare_single_metric = "<div style=\"width: 100%;text-align: ce
   "<tr>" +
 	"<td style=\"width:70px;text-align:right;\">Metric</td>" +
     "<td style=\"text-align:left;\"><select class=\"pg_stat_console_control\" style=\"margin-left:10px;margin-right:10px;\" id=\"cmp_param\"></select></td>" +
-	"<td style=\"text-align:left;width:70px;\"><div id=\"apply_filter_button\" style=\"\" class=\"pg_stat_console_fonts pg_stat_console_button\">Apply</div></td>" +
+	"<td style=\"text-align:left;width:70px;\"><div id=\"apply_filter_button\" style=\"margin-right:10px;\" class=\"pg_stat_console_fonts pg_stat_console_button\">Apply</div></td>" +
    "</tr>" + 
 "</table></div>";
 
@@ -366,6 +366,11 @@ function check_dates_interval( date_a_v, date_b_v, days_num )
 	if( Date.daysBetween( new Date(date_a_v), new Date(date_b_v) ) >= days_num )
 	{
 		dlg_ok( "Error", "<p>Please enter interval less than " + days_num.toString() + " days!</p>" );
+		res = false;
+	}
+	if( new Date(date_b_v) <= new Date(date_a_v) )
+	{
+		dlg_ok( "Error", "<p>Start date must be less than end date!</p>" );
 		res = false;
 	}
 	return res;
@@ -632,6 +637,8 @@ function lock_dt()
 
 		dt_options.date_a = null;
 		dt_options.date_b = null;
+		dt_options.date1_a = null;
+		dt_options.date1_b = null;
 		dt_options.date2_a = null;
 		dt_options.date2_b = null;
 		
@@ -644,24 +651,25 @@ function lock_dt()
 		{
 			if( ( $("#date_a").length != 0 ) && ( $("#date_b").length != 0 ) &&
 				( $("#date2_a").length == 0 ) && ( $("#date2_b").length == 0 ) )
-			{
-				console.log( $("#date_a").val() );
-				
+			{		
 				if( $("#date_a").val().length != 0 && $("#date_b").val().length != 0 )
 				{
 					dt_options.date_a = $("#date_a").val();
 					dt_options.date_b = $("#date_b").val();
-					dt_options.date2_a = null;
-					dt_options.date2_b = null;
 				}
 			}
-			if( ( $("#date_a").length != 0 ) && ( $("#date_b").length != 0 ) &&
+			if( ( $("#date1_a").length != 0 ) && ( $("#date1_b").length != 0 ) &&
 				( $("#date2_a").length != 0 ) && ( $("#date2_b").length != 0 ) )
 			{
-				dt_options.date_a = $("#date_a").val();
-				dt_options.date_b = $("#date_b").val();
+				dt_options.date1_a = $("#date1_a").val();
+				dt_options.date1_b = $("#date1_b").val();
 				dt_options.date2_a = $("#date2_a").val();
-				dt_options.date2_b = $("#date2_b").val();	
+				dt_options.date2_b = $("#date2_b").val();
+				if( dt_options.date_a == null || dt_options.date_b == null )
+				{
+					dt_options.date_a = dt_options.date1_a;
+					dt_options.date_b = dt_options.date1_b;
+				}
 			}
 		}
 		
@@ -821,25 +829,17 @@ function make_dates_interval_str( last_hours )
 	return [ date_a0, date_b0 ]
 }
 
-function date_time_objs( last_hours, date_a_id_name, date_b_id_name, step_back_in_hours )
+function date_time_objs_ab( date_a, date_b, date_a_id_name, date_b_id_name, step_back_in_hours )
 {
 	var step_back = 0;
 	if( typeof step_back_in_hours !== 'undefined' )
 		step_back = step_back_in_hours;
 		
-	var date_a = new Date();
-	date_a.setTime( date_a.getTime() - date_a.getTimezoneOffset()*60*1000 );
-	date_a.setDate(date_a.getDate());
-	date_a.setHours(date_a.getHours() - last_hours - step_back );
-	
+	var date_a = new Date(date_a);
 	var date_a0 = date_a.toISOString().slice(0, 19).replace('T', ' ');
 		
-	var date_b = new Date();
-	date_b.setTime( date_b.getTime() - date_b.getTimezoneOffset()*60*1000 );
-	date_b.setDate(date_b.getDate());
-	date_b.setHours(date_b.getHours() - step_back );
+	var date_b = new Date(date_b);
 	var date_b0 = date_b.toISOString().slice(0, 19).replace('T', ' ');
-
 
 	var date_time_params = {
 		autoClose: false,
@@ -902,16 +902,42 @@ function date_time_objs( last_hours, date_a_id_name, date_b_id_name, step_back_i
 		}
 	};
 	return [date_a0,date_b0,date_time_params];
+}
+
+function date_time_objs( last_hours, date_a_id_name, date_b_id_name, step_back_in_hours )
+{
+	var step_back = 0;
+	if( typeof step_back_in_hours !== 'undefined' )
+		step_back = step_back_in_hours;
+		
+	var date_a = new Date();
+	date_a.setTime( date_a.getTime() - date_a.getTimezoneOffset()*60*1000 );
+	date_a.setDate(date_a.getDate());
+	date_a.setHours(date_a.getHours() - last_hours - step_back );
+	
+	var date_b = new Date();
+	date_b.setTime( date_b.getTime() - date_b.getTimezoneOffset()*60*1000 );
+	date_b.setDate(date_b.getDate());
+	date_b.setHours(date_b.getHours() - step_back );
+
+	return date_time_objs_ab( date_a, date_b, date_a_id_name, date_b_id_name, step_back_in_hours );
 }	
 
 function set_date_time_filter( last_hours )
 {
-	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
-		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	function full_init_work_space()
 	{
 		init_work_space();
 		$( "#work_space" ).append( time_filter );
+		$('.date-picker-wrapper').remove();
 		$('input[id^="date"]').unbind( "click" );
+	}
+	
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		full_init_work_space();
+		
 		$('input[id^="date"]').prop('disabled', true);
 		
 		$("#date_a").val(demo_dt_a);
@@ -921,17 +947,20 @@ function set_date_time_filter( last_hours )
 	{
 		if(dt_options.locked)
 		{
+			var date_time_objs_v = date_time_objs_ab( dt_options.date_a, dt_options.date_b, 'date_a', 'date_b' );
+			
+			full_init_work_space();
+			
+			$('#date_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date_b').dateRangePicker(date_time_objs_v[2]);
 			$("#date_a").val(dt_options.date_a);
 			$("#date_b").val(dt_options.date_b);
 		} else
 		{
 			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
-			init_work_space();
-			$( "#work_space" ).append( time_filter );
-						
-			$('input[id^="date"]').unbind( "click" );
-
-			$('.date-picker-wrapper').remove();
+			
+			full_init_work_space();
+			
 			$('#date_a').dateRangePicker(date_time_objs_v[2]);
 			$('#date_b').dateRangePicker(date_time_objs_v[2]);
 			$("#date_a").val(date_time_objs_v[0]);
@@ -941,30 +970,9 @@ function set_date_time_filter( last_hours )
 }
 
 function set_date_time_filter_compare_params( last_hours )
-{	
-	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
-		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+{
+	function full_init_work_space()
 	{
-		init_work_space();
-		$( "#work_space" ).append( time_filter_compare );
-		$('input[id^="date"]').unbind( "click" );
-		$('input[id^="date"]').prop('disabled', true);
-		
-		$('.date-picker-wrapper').remove();
-		
-		for (var i = 0; i < compare_dict.length; i++)	
-			$('select[id^="cmp_param_"]').append($("<option/>", {
-				value: compare_dict[i][0],
-				text: compare_dict[i][1]
-			}));
-		
-		$("#date_a").val(demo_dt_a);
-		$("#date_b").val(demo_dt_b);
-	}
-	else
-	{
-		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
-		
 		init_work_space();
 		$( "#work_space" ).append( time_filter_compare );
 		$('input[id^="date"]').unbind( "click" );
@@ -975,25 +983,50 @@ function set_date_time_filter_compare_params( last_hours )
 				value: compare_dict[i][0],
 				text: compare_dict[i][1]
 			}));
+	}
+	
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{	
+		full_init_work_space();
+		$('input[id^="date"]').prop('disabled', true);		
 		
-		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);
-		$("#date_a").val(date_time_objs_v[0]);
-		$("#date_b").val(date_time_objs_v[1]);
+		$("#date_a").val(demo_dt_a);
+		$("#date_b").val(demo_dt_b);
+	}
+	else
+	{
+		if(dt_options.locked)
+		{
+			var date_time_objs_v = date_time_objs_ab( dt_options.date_a, dt_options.date_b, 'date_a', 'date_b' );
+			
+			full_init_work_space();
+			
+			$('#date_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date_b').dateRangePicker(date_time_objs_v[2]);
+			$("#date_a").val(dt_options.date_a);
+			$("#date_b").val(dt_options.date_b);
+		} else
+		{
+			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
+			
+			full_init_work_space();
+			
+			$('#date_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date_b').dateRangePicker(date_time_objs_v[2]);
+			$("#date_a").val(date_time_objs_v[0]);
+			$("#date_b").val(date_time_objs_v[1]);
+		}
 	}
 }	
 
 function set_date_time_filter_compare_single_params( last_hours )
 {
-	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
-		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	function full_init_work_space()
 	{
 		init_work_space();
 		$( "#work_space" ).append( time_filter_compare_single_metric );
-
 		$('input[id^="date"]').unbind( "click" );
-		$('input[id^="date"]').prop('disabled', true);
-		
 		$('.date-picker-wrapper').remove();
 		
 		for (var i = 0; i < compare_dict.length; i++)
@@ -1001,6 +1034,14 @@ function set_date_time_filter_compare_single_params( last_hours )
 				value: compare_dict[i][0],
 				text: compare_dict[i][1]
 			}));
+	}
+	
+	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
+		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
+	{
+		full_init_work_space();
+		
+		$('input[id^="date"]').prop('disabled', true);		
 		
 		$("#date1_a").val(demo_dt_a);
 		$("#date1_b").val(demo_dt_b);
@@ -1016,40 +1057,58 @@ function set_date_time_filter_compare_single_params( last_hours )
 	}
 	else
 	{
-		var date_time_objs_v = date_time_objs( last_hours, 'date1_a', 'date1_b' );
-		var date_time_objs2_v = date_time_objs( last_hours, 'date2_a', 'date2_b', 24 );
-		
-		init_work_space();
-		$( "#work_space" ).append( time_filter_compare_single_metric );	
-		$('input[id^="date"]').unbind( "click" );
-		$('.date-picker-wrapper').remove();
-		
-		for (var i = 0; i < compare_dict.length; i++)
-			$('select[id^="cmp_param"]').append($("<option/>", {
-				value: compare_dict[i][0],
-				text: compare_dict[i][1]
-			}));		
-		
-		$('#date1_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date1_b').dateRangePicker(date_time_objs_v[2]);	
-		$("#date1_a").val(date_time_objs_v[0]);
-		$("#date1_b").val(date_time_objs_v[1]);
-		
-		$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
-		$('#date2_b').dateRangePicker(date_time_objs2_v[2]);
-		$("#date2_a").val(date_time_objs2_v[0]);
-		$("#date2_b").val(date_time_objs2_v[1]);
+		if(dt_options.locked)
+		{
+			var date_time_objs_v = date_time_objs_ab( dt_options.date1_a, dt_options.date1_b, 'date1_a', 'date1_b' );
+			var date_time_objs2_v = date_time_objs_ab( dt_options.date2_a, dt_options.date2_b, 'date2_a', 'date2_b' );
+			
+			full_init_work_space();
+			
+			$('#date1_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date1_b').dateRangePicker(date_time_objs_v[2]);
+			$("#date1_a").val(dt_options.date_a);
+			$("#date1_b").val(dt_options.date_b);
+			
+			$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
+			$('#date2_b').dateRangePicker(date_time_objs2_v[2]);
+			$("#date2_a").val(dt_options.date_a);
+			$("#date2_b").val(dt_options.date_b);		
+			
+		} else
+		{
+			var date_time_objs_v = date_time_objs( last_hours, 'date1_a', 'date1_b' );
+			var date_time_objs2_v = date_time_objs( last_hours, 'date2_a', 'date2_b', 24 );
+			
+			full_init_work_space();		
+			
+			$('#date1_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date1_b').dateRangePicker(date_time_objs_v[2]);	
+			$("#date1_a").val(date_time_objs_v[0]);
+			$("#date1_b").val(date_time_objs_v[1]);
+			
+			$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
+			$('#date2_b').dateRangePicker(date_time_objs2_v[2]);
+			$("#date2_a").val(date_time_objs2_v[0]);
+			$("#date2_b").val(date_time_objs2_v[1]);
+		}
 	}
 }		
 
 function set_date_time_log_filter(last_hours)
 {
+	function full_init_work_space()
+	{
+		init_work_space();
+		$( "#work_space" ).append( time_filter_logs );	
+		$('input[id^="date"]').unbind( "click" );
+		$('.date-picker-wrapper').remove();
+	}
+	
 	if( demo_dt_a !== "" && demo_dt_a !== 'undefined param name' &&
 		demo_dt_b !== "" && demo_dt_b !== 'undefined param name' )
 	{
-		init_work_space();
-		$( "#work_space" ).append( time_filter_logs );
-		$('input[id^="date"]').unbind( "click" );
+		full_init_work_space();
+		
 		$('input[id^="date"]').prop('disabled', true);
 		
 		$("#date_a").val(demo_dt_a);
@@ -1057,18 +1116,27 @@ function set_date_time_log_filter(last_hours)
 	}
 	else
 	{
-		var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
+		if(dt_options.locked)
+		{
+			var date_time_objs_v = date_time_objs_ab( dt_options.date_a, dt_options.date_b, 'date_a', 'date_b' );
+			
+			full_init_work_space();
+			
+			$('#date_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date_b').dateRangePicker(date_time_objs_v[2]);
+			$("#date_a").val(dt_options.date_a);
+			$("#date_b").val(dt_options.date_b);
+		} else
+		{
+			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
 
-		init_work_space();
-		$( "#work_space" ).append( time_filter_logs );	
+			full_init_work_space();
 
-		$('input[id^="date"]').unbind( "click" );
-
-		$('.date-picker-wrapper').remove();
-		$('#date_a').dateRangePicker(date_time_objs_v[2]);
-		$('#date_b').dateRangePicker(date_time_objs_v[2]);
-		$("#date_a").val(date_time_objs_v[0]);
-		$("#date_b").val(date_time_objs_v[1]);
+			$('#date_a').dateRangePicker(date_time_objs_v[2]);
+			$('#date_b').dateRangePicker(date_time_objs_v[2]);
+			$("#date_a").val(date_time_objs_v[0]);
+			$("#date_b").val(date_time_objs_v[1]);
+		}
 	}
 }	
 
