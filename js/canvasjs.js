@@ -1491,14 +1491,15 @@
 		if (button.getAttribute("state") !== state) {
 
 			button.setAttribute("state", state);
-			button.setAttribute("class", "pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button");
+			button.setAttribute("class", "pg_stat_console_fonts pg_stat_console_menu_elem pg_stat_console_button hint--top hint--info hint--rounded");
 			//button.setAttribute("type", 'button');
 			button.style.position = "relative";
 			button.style.margin = "0px 3px 0px 3px";
 			button.style.padding = "5px 6px 2px 6px";
 			button.style.top = "-4px";
 			button.style.cssFloat = "left";
-			button.setAttribute("title", chart._cultureInfo[state + "Text"]);
+			//button.setAttribute("title", chart._cultureInfo[state + "Text"]);
+			button.setAttribute("aria-label", chart._cultureInfo[state + "Text"]);
 			button.innerHTML = "<img style='height:16px;' src='" + Images[state].image + "' alt='" + chart._cultureInfo[state + "Text"] + "' />";
 		}
 	}

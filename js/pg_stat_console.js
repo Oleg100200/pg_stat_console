@@ -629,6 +629,32 @@ function configure_menu_elem(id, auto_refresh = false, show_lock_dt_button = fal
 			hide_lock_dt();
 }
 
+function get_dt_values_for_lock_dt()
+{
+	if( ( $("#date_a").length != 0 ) && ( $("#date_b").length != 0 ) &&
+		( $("#date2_a").length == 0 ) && ( $("#date2_b").length == 0 ) )
+	{		
+		if( $("#date_a").val().length != 0 && $("#date_b").val().length != 0 )
+		{
+			dt_options.date_a = $("#date_a").val();
+			dt_options.date_b = $("#date_b").val();
+		}
+	}
+	if( ( $("#date1_a").length != 0 ) && ( $("#date1_b").length != 0 ) &&
+		( $("#date2_a").length != 0 ) && ( $("#date2_b").length != 0 ) )
+	{
+		dt_options.date1_a = $("#date1_a").val();
+		dt_options.date1_b = $("#date1_b").val();
+		dt_options.date2_a = $("#date2_a").val();
+		dt_options.date2_b = $("#date2_b").val();
+		if( dt_options.date_a == null || dt_options.date_b == null )
+		{
+			dt_options.date_a = dt_options.date1_a;
+			dt_options.date_b = dt_options.date1_b;
+		}
+	}
+}
+
 function lock_dt()
 {
 	if( dt_options.locked )
@@ -646,37 +672,10 @@ function lock_dt()
 	} else
 	{
 		dt_options.locked = true;
-
-		function get_dt_values()
-		{
-			if( ( $("#date_a").length != 0 ) && ( $("#date_b").length != 0 ) &&
-				( $("#date2_a").length == 0 ) && ( $("#date2_b").length == 0 ) )
-			{		
-				if( $("#date_a").val().length != 0 && $("#date_b").val().length != 0 )
-				{
-					dt_options.date_a = $("#date_a").val();
-					dt_options.date_b = $("#date_b").val();
-				}
-			}
-			if( ( $("#date1_a").length != 0 ) && ( $("#date1_b").length != 0 ) &&
-				( $("#date2_a").length != 0 ) && ( $("#date2_b").length != 0 ) )
-			{
-				dt_options.date1_a = $("#date1_a").val();
-				dt_options.date1_b = $("#date1_b").val();
-				dt_options.date2_a = $("#date2_a").val();
-				dt_options.date2_b = $("#date2_b").val();
-				if( dt_options.date_a == null || dt_options.date_b == null )
-				{
-					dt_options.date_a = dt_options.date1_a;
-					dt_options.date_b = dt_options.date1_b;
-				}
-			}
-		}
-		
-		get_dt_values();
+		get_dt_values_for_lock_dt();
 		
 		$('input[id^=date_],input[type="range"]').change(function() {
-			get_dt_values();
+			get_dt_values_for_lock_dt();
 		});
 		$( "#button_lock_dt" ).text("Unlock DT");
 	}
@@ -955,6 +954,10 @@ function set_date_time_filter( last_hours )
 			$('#date_b').dateRangePicker(date_time_objs_v[2]);
 			$("#date_a").val(dt_options.date_a);
 			$("#date_b").val(dt_options.date_b);
+			
+			$('input[id^=date_],input[type="range"]').change(function() {
+				get_dt_values_for_lock_dt();
+			});
 		} else
 		{
 			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
@@ -1006,6 +1009,10 @@ function set_date_time_filter_compare_params( last_hours )
 			$('#date_b').dateRangePicker(date_time_objs_v[2]);
 			$("#date_a").val(dt_options.date_a);
 			$("#date_b").val(dt_options.date_b);
+			
+			$('input[id^=date_],input[type="range"]').change(function() {
+				get_dt_values_for_lock_dt();
+			});
 		} else
 		{
 			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
@@ -1072,8 +1079,12 @@ function set_date_time_filter_compare_single_params( last_hours )
 			$('#date2_a').dateRangePicker(date_time_objs2_v[2]);
 			$('#date2_b').dateRangePicker(date_time_objs2_v[2]);
 			$("#date2_a").val(dt_options.date_a);
-			$("#date2_b").val(dt_options.date_b);		
-			
+			$("#date2_b").val(dt_options.date_b);
+
+			$('input[id^=date_],input[type="range"]').change(function() {
+				get_dt_values_for_lock_dt();
+			});
+
 		} else
 		{
 			var date_time_objs_v = date_time_objs( last_hours, 'date1_a', 'date1_b' );
@@ -1126,6 +1137,10 @@ function set_date_time_log_filter(last_hours)
 			$('#date_b').dateRangePicker(date_time_objs_v[2]);
 			$("#date_a").val(dt_options.date_a);
 			$("#date_b").val(dt_options.date_b);
+			
+			$('input[id^=date_],input[type="range"]').change(function() {
+				get_dt_values_for_lock_dt();
+			});
 		} else
 		{
 			var date_time_objs_v = date_time_objs( last_hours, 'date_a', 'date_b' );
