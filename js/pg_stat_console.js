@@ -738,7 +738,7 @@ function show_login_dialog(title_val, help_msg)
 												'<p>"You miss 100% of the shots you don’t take" (Wayne Gretzky)</p>',
 												'<p>"It is not the strongest of the species that survives, nor</p><p>the most intelligent, but the one most responsive to change" (Charles Darwin)</p>',
 												'<p>"Build your own dreams, or someone else will hire you to</p><p>build theirs" (Farrah Gray)</p>',
-												'<p>"Success is the result of perfection, hard work, learning from failure, loyalty, and persistence" (Colin Powell)</p>',
+												'<p>"Success is the result of perfection, hard work, learning </p><p>from failure, loyalty, and persistence" (Colin Powell)</p>',
 												'<p>"There are no shortcuts to any place worth</p><p>going" (Helen Keller)</p>'];
 
 										var user_name = $('#login_fld').val();
