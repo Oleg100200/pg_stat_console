@@ -96,12 +96,24 @@
 				<div id="sub_menu_disk_util" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Disk utilization</div>
 				<div id="sub_menu_disk_usage" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Disk usage</div>
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
-				<div id="sub_menu_disk_wrqm_rrqm" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Read/write req merged per sec</div>
-				<div id="sub_menu_disk_wr" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Read/Write req per sec</div>
-				<div id="sub_menu_disk_rsec_wsec" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Read/Write MBytes per sec</div>
-				<div id="sub_menu_disk_avgrq" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Avg size request</div>
-				<div id="sub_menu_disk_avgqu" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Avg queue lenght of requests</div>
-				<div id="sub_menu_disk_await" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Avg time for I/O requests</div>
+				<div id="sub_menu_disk_wrqm_rrqm" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The number of read/write requests merged per second that were queued to the device">Read/write req merged per sec</div>
+					
+				<div id="sub_menu_disk_wr" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The number of read/write requests that were issued to the device per second">Read/Write req per sec</div>
+					
+				<div id="sub_menu_disk_rsec_wsec" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The number of megabytes read/write from the device per second">Read/Write MBytes per sec</div>
+					
+				<div id="sub_menu_disk_avgrq" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The average size (in sectors) of the requests that were issued to the device">Avg size request</div>
+					
+				<div id="sub_menu_disk_avgqu" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The average queue length of the requests that were issued to the device">Avg queue lenght of requests</div>
+					
+				<div id="sub_menu_disk_await" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi hint--right hint--info hint--rounded hint--large" 
+					aria-label="The average time (in milliseconds) for I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them">Avg time for I/O requests</div>
+				
 				<div id="" class="pg_stat_console_menu_elem_inactive "></div>
 				<div id="sub_menu_network_traffic" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Network Traffic</div>
 				<div id="sub_menu_network_packets" class="node_class_psc_os_stat pg_stat_console_menu_elem pg_stat_console_ani_mi">Network Packets</div>				

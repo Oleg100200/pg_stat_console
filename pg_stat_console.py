@@ -1044,9 +1044,9 @@ class GetReadStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], \
-					data[ "date_b" ], 'heap_blks_read_per_sec' ), data["node_name"] ), 'heap_blks_read_per_sec (' + db[1] + ')' ] )
+					data[ "date_b" ], 'heap_blks_read_per_sec' ), data["node_name"] ), 'heap_blks_read_per_sec (' + db[1] + ') [ blocks per second ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], \
-					data[ "date_b" ], 'idx_blks_read_per_sec' ), data["node_name"] ), 'idx_blks_read_per_sec (' + db[1] + ')' ] )
+					data[ "date_b" ], 'idx_blks_read_per_sec' ), data["node_name"] ), 'idx_blks_read_per_sec (' + db[1] + ')  [ blocks per second ]' ] )
 				
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1201,18 +1201,20 @@ class QueryMakerSimpleStat():
 				select row_number() OVER(PARTITION BY T.dt ORDER BY T.dt ) AS graph_block, * 
 						from 
 						(
-							SELECT 	(psc_round_minutes(s.dt, 5) """ + timezone_correct_time_backward +""")::timestamp without time zone as dt, round( val * 0.000000954, 3), d.device_name || ' (' || p.param_name || ')'
-							  FROM psc_os_stat s
-							  inner join psc_params p on p.id = s.param_id
-							  inner join psc_devices d on d.id = s.device_id
-							  where d.device_name """ + self.param_generator( device ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
+							SELECT 	(psc_round_minutes(s.dt, 5) """ + timezone_correct_time_backward +""")::timestamp without time zone as dt, 
+								round( val * 0.000000954, 3), d.device_name || ' (' || p.param_name || ')'
+								FROM psc_os_stat s
+								inner join psc_params p on p.id = s.param_id
+								inner join psc_devices d on d.id = s.device_id
+								where d.device_name """ + self.param_generator( device ) + """ and p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
 								dt < '""" + dt_b + """'::timestamp """ + timezone_correct_time_forward + """ 
 							order by s.dt asc,
 							s.val asc nulls last
 						) T order by T.dt asc""", 
 				"""
 				select T.param, 'Avg: ' || T.avg_v::text || ', Min: ' || T.min_v::text || ', Max: ' || T.max_v::text from (
-				SELECT d.device_name || ' (' || p.param_name || ')' as param, ( select pg_size_pretty( round( avg(val), 1)::bigint * 1024 ) ) as avg_v, ( select pg_size_pretty( round( min(val), 1)::bigint * 1024 ) ) as min_v, ( select pg_size_pretty( round( max(val), 1)::bigint * 1024 ) ) as max_v
+				SELECT d.device_name || ' (' || p.param_name || ')' as param, ( select pg_size_pretty( round( avg(val), 1)::bigint * 1024 ) ) as avg_v, 
+					( select pg_size_pretty( round( min(val), 1)::bigint * 1024 ) ) as min_v, ( select pg_size_pretty( round( max(val), 1)::bigint * 1024 ) ) as max_v
 							  FROM psc_os_stat s
 							  inner join psc_params p on p.id = s.param_id
 							  inner join psc_devices d on d.id = s.device_id
@@ -1234,7 +1236,10 @@ class QueryMakerSimpleStat():
 						) T order by T.dt asc""", 
 				"""
 				select T.param, 'Avg: ' || T.avg_v::text || ', Min: ' || T.min_v::text || ', Max: ' || T.max_v::text from (
-				SELECT p.param_name as param, ( select pg_size_pretty( round( avg(val), 1)::bigint * 1024 ) ) as avg_v, ( select pg_size_pretty( round( min(val), 1)::bigint * 1024 ) ) as min_v, ( select pg_size_pretty( round( max(val), 1)::bigint * 1024 ) ) as max_v
+				SELECT p.param_name as param, 
+					( select pg_size_pretty( round( avg(val), 1)::bigint * 1024 ) ) as avg_v, 
+					( select pg_size_pretty( round( min(val), 1)::bigint * 1024 ) ) as min_v, 
+					( select pg_size_pretty( round( max(val), 1)::bigint * 1024 ) ) as max_v
 							  FROM psc_os_stat s
 							  inner join psc_params p on p.id = s.param_id
 							  where p.param_name """ + self.param_generator( param ) + """ and dt >= '""" + dt_a + """'::timestamp """ + timezone_correct_time_forward +""" and 
@@ -1250,7 +1255,7 @@ class GetCPUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			return ""
 
 		queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], None, [ "%user", "%nice", "%system", "%iowait", "%steal", "%idle" ] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'CPU load, %', 'stackedArea' ] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'CPU load [ % ]', 'stackedArea' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1268,7 +1273,7 @@ class GetMemUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		#AppMem + PageTables + Buffers + Shmem + Active(file) + Inactive(file) + Slab  + MemFree = MemTotal
 		#Cached = Shmem + Active(file) + Inactive(file)
 	
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'Memory usage, GB', 'stackedArea' ] )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'Memory usage [ GB ]', 'stackedArea' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1285,7 +1290,7 @@ class GetDiskUtilStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "%util" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'Disk utilization (' + device[0] + '), %', 'line' ] )
+					'Disk utilization (' + device[0] + ') [ % ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1302,7 +1307,7 @@ class GetDiskUsageStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat_in_gb( data[ "date_a" ], data[ "date_b" ], device[0], [ "disk_size_avail", "disk_size_used" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'Disk usage (' + device[0] + '), GB', 'stackedArea' ] )
+					'Disk usage (' + device[0] + ') [ GB ]', 'stackedArea' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1319,7 +1324,7 @@ class GetWRQMRRQMStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "rrqm/s", "wrqm/s" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'rrqm/s wrqm/s (' + device[0] + '), requests', 'line' ] )
+					'rrqm/s wrqm/s (' + device[0] + ') [ requests per second ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1336,7 +1341,7 @@ class GetWRStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "r/s", "w/s" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'r/s w/s (' + device[0] + '), requests', 'stackedArea' ] )
+					'r/s w/s (' + device[0] + ') [ requests per second ]', 'stackedArea' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1353,7 +1358,7 @@ class GetRSecWSecStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "rMB/s", "wMB/s" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'rMB/s wMB/s (' + device[0] + '), MBytes', 'stackedArea' ] )
+					'rMB/s wMB/s (' + device[0] + ') [ MBytes per second ]', 'stackedArea' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1370,7 +1375,7 @@ class GetAVGRQStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "avgrq-sz" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'avgrq-sz (' + device[0] + '), sectors', 'line' ] )
+					'avgrq-sz (' + device[0] + ') [ avg sectors ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1387,7 +1392,7 @@ class GetAVGQUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "avgqu-sz" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'avgqu-sz (' + device[0] + '), requests', 'line' ] )
+					'avgqu-sz (' + device[0] + ') [ avg queue length ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1404,7 +1409,7 @@ class GetAWaitStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "await" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'await (' + device[0] + '), milliseconds', 'line' ] )
+					'await (' + device[0] + ') [ avg milliseconds ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1421,7 +1426,7 @@ class GetNetworkTrafficStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpl
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "rx_bytes", "tx_bytes" ], 'bytes_to_kb' )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'rx_bytes tx_bytes (' + device[0] + '), kBytes/sec', 'stackedArea' ] )
+					'rx_bytes tx_bytes (' + device[0] + ') [ kBytes per second ]', 'stackedArea' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1438,7 +1443,7 @@ class GetNetworkPacketsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpl
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "RX-OK", "TX-OK" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'RX-OK TX-OK (' + device[0] + '), packets', 'stackedColumn' ] )
+					'RX-OK TX-OK (' + device[0] + ') [ packets per measuring step ]', 'stackedColumn' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1455,7 +1460,7 @@ class GetNetworkErrorsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimple
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
 				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "RX-ERR", "RX-DRP", "RX-OVR", "TX-ERR", "TX-DRP", "TX-OVR" ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'RX-ERR RX-DRP RX-OVR TX-ERR TX-DRP TX-OVR (' + device[0] + '), packets', 'stackedColumn' ] )
+					'RX-ERR RX-DRP RX-OVR TX-ERR TX-DRP TX-OVR (' + device[0] + ') [ packets per measuring step ]', 'stackedColumn' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1469,23 +1474,23 @@ class GetBgwriterStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 			
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'checkpoints_timed', 'checkpoints_req' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'checkpoints_timed, checkpoints_req; times', 'stackedColumn' ] )
+			'checkpoints_timed, checkpoints_req [ times per measuring step ]', 'stackedColumn' ] )
 
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'checkpoint_write_time', 'checkpoint_sync_time' ], 'millisec_to_sec' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'checkpoint_write_time, checkpoint_sync_time; sec', 'stackedColumn' ] )
+			'checkpoint_write_time, checkpoint_sync_time [ seconds per measuring step ]', 'stackedColumn' ] )
 		
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'buffers_checkpoint', 'buffers_clean', 'buffers_backend', 'buffers_alloc' ], 'blocks_to_mb' )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'buffers_checkpoint, buffers_clean, buffers_backend, buffers_alloc; MB', 'stackedArea' ] )
+			'buffers_checkpoint, buffers_clean, buffers_backend, buffers_alloc [ MBytes per measuring step ]', 'stackedArea' ] )
 		
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'maxwritten_clean', 'buffers_backend_fsync' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'maxwritten_clean, buffers_backend_fsync; times', 'stackedColumn' ] )
+			'maxwritten_clean, buffers_backend_fsync [ times per measuring step ]', 'stackedColumn' ] )
 		
 		queries = self.generate_query_common_stat( data[ "date_a" ], data[ "date_b" ], [ 'xlog_segments' ] )
 		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-			'xlog_segments; total count', 'stackedColumn' ] )
+			'xlog_segments [ total segments ]', 'stackedColumn' ] )
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1503,7 +1508,8 @@ class GetBlockReadHitDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleSta
 				current_user_dbs.append( db[1] )
 				
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['blks_read_per_sec', 'blks_hit_per_sec'] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blks_read_per_sec, blks_hit_per_sec; blocks/sec', 'line' ] )	
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+			'blks_read_per_sec, blks_hit_per_sec [ blocks per second ]', 'line' ] )	
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1521,9 +1527,9 @@ class GetTempFilesBytesDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleS
 				current_user_dbs.append( db[1] )
 				
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['temp_files'] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_files; num', 'line' ] )	
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_files [ total files ]', 'line' ] )	
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['temp_bytes'] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_bytes; bytes', 'line' ] )	
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'temp_bytes [ total bytes ]', 'line' ] )	
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1541,7 +1547,8 @@ class GetBlockReadWriteTimeDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSim
 				current_user_dbs.append( db[1] )
 				
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], ['blk_read_time', 'blk_write_time'] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'blk_read_time, blk_write_time; total sec', 'line' ] )	
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+			'blk_read_time, blk_write_time [ total time per measuring step ]', 'line' ] )	
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1557,7 +1564,7 @@ class GetTupWriteDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['tup_inserted_per_sec', 'tup_updated_per_sec', 'tup_deleted_per_sec' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'tup_inserted_per_sec, tup_updated_per_sec, tup_deleted_per_sec (' + db[1] + ')', 'line' ] )
+					'tup_inserted_per_sec, tup_updated_per_sec, tup_deleted_per_sec (' + db[1] + ') [ tuples per second ]', 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1573,7 +1580,7 @@ class GetTupRetFetchDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['tup_returned_per_sec', 'tup_fetched_per_sec' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'tup_returned_per_sec, tup_fetched_per_sec (' + db[1] + ')', 'line' ] )
+					'tup_returned_per_sec, tup_fetched_per_sec (' + db[1] + ') [ tuples per second ]', 'line' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1594,7 +1601,7 @@ class GetTxDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], [ 'xact_commit_per_sec', 'xact_rollback_per_sec' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'xact_commit_per_sec, xact_rollback_per_sec (' + db[1] + ')', 'stackedArea' ] )
+					'xact_commit_per_sec, xact_rollback_per_sec (' + db[1] + ') [ xacts per second ]', 'stackedArea' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 		
@@ -1612,7 +1619,7 @@ class GetDeadlocksDBHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				current_user_dbs.append( db[1] )
 			
 		queries = self.generate_query( current_user_dbs, data[ "date_a" ], data[ "date_b" ], 'deadlocks' )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'deadlocks', 'line' ] )		
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'deadlocks [ total locks per measuring step ]', 'line' ] )		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
@@ -1627,7 +1634,7 @@ class GetAutovacStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if data["node_name"] == db[0]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['autovacuum_workers_total','autovacuum_workers_wraparound'] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), \
-					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound (' + db[1] + ')', 'stackedColumn' ] )
+					self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'autovacuum_workers_total, autovacuum_workers_wraparound (' + db[1] + ') [ avg workers per measuring step ]', 'stackedColumn' ] )
 			
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]], 'pscColorsContrast' )	#overridden by color_map
 		
@@ -1643,10 +1650,10 @@ class GetConnsStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 			if db[0] == data["node_name"]:
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['idle in transaction','idle','active','waiting_conns'] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'idle in transaction, idle, active, waiting_conns (' + db[1] + ')', 'stackedArea' ] )
+					'idle in transaction, idle, active, waiting_conns (' + db[1] + ') [ avg count per measuring step ]', 'stackedArea' ] )
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], ['longest_idle_in_tx','longest_active', 'longest_waiting'], 'sec_to_min' )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'longest_idle_in_tx, longest_active, longest_waiting (' + db[1] + '); min', 'line' ] )
+					'longest_idle_in_tx, longest_active, longest_waiting (' + db[1] + ') [ minutes ]', 'line' ] )
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1663,7 +1670,8 @@ class GetLocksStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 				queries = self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], \
 					[ 'AccessShareLock', 'RowExclusiveLock', 'ExclusiveLock', 'ShareRowExclusiveLock', 'RowShareLock', 'ShareLock', \
 					'AccessExclusiveLock', 'RowShareUpdateExclusiveLock' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'All locks (' + db[1] + ')', 'stackedArea' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
+					'All locks (' + db[1] + ') [ avg locks per measuring step ]', 'stackedArea' ] )
 		
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1677,10 +1685,14 @@ class GetWriteStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat)
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_ins_per_sec' ), data["node_name"] ), 'n_tup_ins_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_upd_per_sec' ), data["node_name"] ), 'n_tup_upd_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_hot_upd_per_sec' ), data["node_name"] ), 'n_tup_hot_upd_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_del_sec' ), data["node_name"] ), 'n_tup_del_per_sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_ins_per_sec' ), \
+					data["node_name"] ), 'n_tup_ins_per_sec (' + db[1] + ') [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_upd_per_sec' ), \
+					data["node_name"] ), 'n_tup_upd_per_sec (' + db[1] + ')  [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_hot_upd_per_sec' ), \
+					data["node_name"] ), 'n_tup_hot_upd_per_sec (' + db[1] + ')  [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'n_tup_del_sec' ), \
+					data["node_name"] ), 'n_tup_del_per_sec (' + db[1] + ')  [ tuples per second ]' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1694,9 +1706,12 @@ class GetTupStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'tup_fetch_sum' ), data["node_name"] ), 'tup_fetch_sum (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'idx_tup_fetch_per_sec' ), data["node_name"] ), 'idx_tup_fetch_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'seq_tup_read_per_sec' ), data["node_name"] ), 'seq_tup_read_per_sec (' + db[1] + ')' ] )			  
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'tup_fetch_sum' ), \
+					data["node_name"] ), 'tup_fetch_sum (' + db[1] + ') [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'idx_tup_fetch_per_sec' ), \
+					data["node_name"] ), 'idx_tup_fetch_per_sec (' + db[1] + ') [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'seq_tup_read_per_sec' ), \
+					data["node_name"] ), 'seq_tup_read_per_sec (' + db[1] + ') [ tuples per second ]' ] )			  
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] ) 
 	
@@ -1710,9 +1725,12 @@ class GetIdxStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblStat):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_scan_per_sec' ), data["node_name"] ), 'by_idx_scan_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), data["node_name"] ), 'by_idx_tup_read_per_sec (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), data["node_name"] ), 'by_idx_tup_fetch_per_sec (' + db[1] + ')' ] )			  
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_scan_per_sec' ), \
+					data["node_name"] ), 'by_idx_scan_per_sec (' + db[1] + ') [ scans per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_read_per_sec' ), \
+					data["node_name"] ), 'by_idx_tup_read_per_sec (' + db[1] + ') [ tuples per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'by_idx_tup_fetch_per_sec' ), \
+					data["node_name"] ), 'by_idx_tup_fetch_per_sec (' + db[1] + ') [ tuples per second ]' ] )			  
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1726,9 +1744,12 @@ class GetEffIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblSt
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / fetched' ), data["node_name"] ), 'read / fetched (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / scans' ), data["node_name"] ), 'read / scans (' + db[1] + ')' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'fetched / scans' ), data["node_name"] ), 'fetched / scans (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / fetched' ), \
+					data["node_name"] ), 'read / fetched (' + db[1] + ') [ ratio per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / scans' ), \
+					data["node_name"] ), 'read / scans (' + db[1] + ') [ ratio per second ]' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'fetched / scans' ), \
+					data["node_name"] ), 'fetched / scans (' + db[1] + ') [ ratio per second ]' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1759,7 +1780,7 @@ class GetQueryDurationsHandler(BaseAsyncHandlerNoParam,Chart):
 
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Query durations in sec (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Query durations in sec (' + db[1] + ') [ seconds ]' ] )
 				
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1789,7 +1810,7 @@ class GetQueryIODurationsHandler(BaseAsyncHandlerNoParam,Chart):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:	
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'I/O Timings read by queries (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'I/O Timings read by queries (' + db[1] + ') [ seconds ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1819,7 +1840,7 @@ class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blocks by queries (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Blocks by queries (' + db[1] + ') [ total blocks ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 #=======================================================================================================
@@ -1855,7 +1876,7 @@ class GetStmCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Calls by Queries (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Calls by Queries (' + db[1] + ') [ times ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1871,7 +1892,7 @@ class GetStmTotalTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Total time by queries (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Total time by queries (' + db[1] + ') [ seconds ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1887,7 +1908,7 @@ class GetStmRowsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Rows by queries (' + db[1] + ')' ] )
+				data_graph.append( [ self.make_query( 'sys_stat', query % (db[1]), data["node_name"] ), 'Rows by queries (' + db[1] + ') [ rows per measuring step ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1902,13 +1923,13 @@ class GetStmSharedBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuer
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_hit') % \
-					(db[1]), data["node_name"] ), 'Shared blks hit by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Shared blks hit by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_read') % \
-					(db[1]), data["node_name"] ), 'Shared blks read by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Shared blks read by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_dirtied') % \
-					(db[1]), data["node_name"] ), 'Shared blks dirtied by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Shared blks dirtied by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_shared_blks_written') % \
-					(db[1]), data["node_name"] ), 'Shared blks written by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Shared blks written by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1923,13 +1944,13 @@ class GetStmLocalBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_hit') % \
-					(db[1]), data["node_name"] ), 'Local blks hit by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Local blks hit by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_read') % \
-					(db[1]), data["node_name"] ), 'Local blks read by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Local blks read by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_dirtied') % \
-					(db[1]), data["node_name"] ), 'Local blks dirtied by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Local blks dirtied by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_local_blks_written') % \
-					(db[1]), data["node_name"] ), 'Local blks written by queries (' + db[1] + ')' ] )	
+					(db[1]), data["node_name"] ), 'Local blks written by queries (' + db[1] + ') [ blocks per measuring step ]' ] )	
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1944,9 +1965,9 @@ class GetStmTempBlksReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_read') % \
-					(db[1]), data["node_name"] ), 'Temp blks read by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Temp blks read by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_temp_blks_written') % \
-					(db[1]), data["node_name"] ), 'Temp blks written by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Temp blks written by queries (' + db[1] + ') [ blocks per measuring step ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1961,9 +1982,9 @@ class GetStmBlkReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmSt
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_read_time') % \
-					(db[1]), data["node_name"] ), 'Blk read time by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Blk read time by queries (' + db[1] + ') [ seconds ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_write_time') % \
-					(db[1]), data["node_name"] ), 'Blk write time by queries (' + db[1] + ')' ] )
+					(db[1]), data["node_name"] ), 'Blk write time by queries (' + db[1] + ') [ seconds ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -2183,7 +2204,8 @@ class GetHistoryBySnIdHandler(BaseAsyncHandlerNoParam):
 					  inner join psc_conn_states cs on cs.id = cn.conn_state
 					  inner join psc_wait_names wn on wn.id = cn."wait_event"
 					  inner join psc_wait_types wt on wt.id = cn."wait_event_type"
-					where sn_id = """ + params[ "sn_id" ], params[ "node_name" ] ),  [ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "wait_event_type", "wait_event", "query" ], "Connections", ["query"] )
+					where sn_id = """ + params[ "sn_id" ], params[ "node_name" ] ), \
+					[ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "wait_event_type", "wait_event", "query" ], "Connections", ["query"] )
 		else:
 			html_report = make_html_report_with_head( self.make_query( 'sys_stat', """SELECT db.db_name, an.app_name, usr.user_name, cs.state_name, cn.pid, cn.client_addr,
 					cn.query_start """ + timezone_correct_time_backward +""", age(sn.dt,cn.query_start) as age, 
@@ -2194,7 +2216,8 @@ class GetHistoryBySnIdHandler(BaseAsyncHandlerNoParam):
 					  inner join psc_users usr on usr.id = cn.user_id
 					  inner join psc_app_names an on an.id = cn.app_name
 					  inner join psc_conn_states cs on cs.id = cn.conn_state
-					where sn_id = """ + params[ "sn_id" ], params[ "node_name" ] ),  [ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "waiting", "query" ], "Connections", ["query"] )
+					where sn_id = """ + params[ "sn_id" ], params[ "node_name" ] ), \
+					[ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "waiting", "query" ], "Connections", ["query"] )
 		
 		html_report = html_report + make_html_report_with_head( self.make_query( 'sys_stat', """select 	
 					tbls_w.tbl_name as waiting_table,
@@ -2213,7 +2236,8 @@ class GetHistoryBySnIdHandler(BaseAsyncHandlerNoParam):
 					inner join psc_tbls tbls_w on l.waiting_table_id = tbls_w.id
 					inner join psc_tbls tbls_a on l.other_table_id = tbls_a.id
 					inner join psc_dbs d on l.waiting_db_id = d.id
-			where sn.id = """ + params[ "sn_id" ], params[ "node_name" ] ), [ "waiting_table", "waiting_query", "waiting_pid", "lock_mode", "lock_type", "other_table", "other_query", "other_pid", "db_name" ], "Locks", ["other_query","waiting_query"] )
+				where sn.id = """ + params[ "sn_id" ], params[ "node_name" ] ), \
+				[ "waiting_table", "waiting_query", "waiting_pid", "lock_mode", "lock_type", "other_table", "other_query", "other_pid", "db_name" ], "Locks", ["other_query","waiting_query"] )
 
 		return html_report
 
@@ -2442,7 +2466,8 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 			psc_devices = []
 			result = self.make_query( 'sys_stat', """SELECT device_name, device_type FROM psc_devices;""", node['node_name'] )
 			for row in result:
-				psc_devices.append( [ row['device_name'], row['device_type'], '<input class="conf_param" type="checkbox" param_name="' + row['device_name'] + '" node_name="' +  node['node_name'] + '" param_type="device_in_report" value="a1">Yes</input>' ] )	
+				psc_devices.append( [ row['device_name'], row['device_type'], '<input class="conf_param" type="checkbox" param_name="' + row['device_name'] + '" node_name="' + \
+					node['node_name'] + '" param_type="device_in_report" value="a1">Yes</input>' ] )	
 
 			result = self.make_query( 'sys_stat', """SELECT db_name FROM psc_dbs where db_name not in ('postgres', 'template0', 'template1');""", node['node_name'] )
 			for row in result:

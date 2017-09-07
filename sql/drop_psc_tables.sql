@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS public.psc_data_all_indexes_t1;
+DROP TABLE IF EXISTS public.psc_data_all_indexes_t2;
+DROP TABLE IF EXISTS public.psc_data_io_t1;
+DROP TABLE IF EXISTS public.psc_data_io_t2;
+DROP TABLE IF EXISTS public.psc_data_t1;
+DROP TABLE IF EXISTS public.psc_data_t2;
+DROP TABLE IF EXISTS public.psc_stm_t1;
+DROP TABLE IF EXISTS public.psc_stm_t2;
+DROP TABLE IF EXISTS public.psc_stat_bgwriter_t2;
+DROP TABLE IF EXISTS public.psc_stat_bgwriter_t1;
+DROP TABLE IF EXISTS public.psc_stat_dbs_t1;
+DROP TABLE IF EXISTS public.psc_stat_dbs_t2;
+DROP TABLE IF EXISTS public.psc_stat_activity_raw;

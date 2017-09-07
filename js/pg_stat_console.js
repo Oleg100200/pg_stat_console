@@ -334,7 +334,7 @@ function notice( msg, func )
 		animateClosing    : 'fadeOut',
 		buttons : {},
 		html    : true,
-		autoclose: true, timeout: 2500,
+		autoclose: true, timeout: 3500,
 		onClose     : function(){    
 			if( typeof func !== 'undefined' )
 				func();
@@ -731,14 +731,15 @@ function show_login_dialog(title_val, help_msg)
 									if( data["result"] === 'ok' )
 									{
 										var msg_num = getRandomInt(0, 7);
-										var welcome_msgs = [ '<p>Time is money</p>',
-												'<p>Better late than never</p>',
-												'<p>You\'re here! The day just got better.</p>',
-												'<p>If you snooze, you lose</p>',
-												'<p>There\'s no smoke without fire</p>',
-												'<p>Strike while the iron is hot</p>',
-												'<p>Many hands make light work</p>',
-												'<p>Where there\'s a will, there\'s a way</p>'];
+										var welcome_msgs = [ 
+												'<p>"Design is not just what it looks like and feels like.</p><p>Design is how it works" (Steve Jobs)</p>',
+												'<p>"Genius is one percent inspiration, ninety-nine percent </p><p>perspiration" (Thomas Edison)</p>',
+												'<p>"Success consists of going from failure to failure without </p><p>loss of enthusiasm" (Winston Churchill)</p>',
+												'<p>"You miss 100% of the shots you don’t take" (Wayne Gretzky)</p>',
+												'<p>"It is not the strongest of the species that survives, nor</p><p>the most intelligent, but the one most responsive to change" (Charles Darwin)</p>',
+												'<p>"Build your own dreams, or someone else will hire you to</p><p>build theirs" (Farrah Gray)</p>',
+												'<p>"Success is the result of perfection, hard work, learning from failure, loyalty, and persistence" (Colin Powell)</p>',
+												'<p>"There are no shortcuts to any place worth</p><p>going" (Helen Keller)</p>'];
 
 										var user_name = $('#login_fld').val();
 	

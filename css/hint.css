@@ -63,9 +63,8 @@
     background: #383838;
     color: white;
     padding: 8px 10px;
-    font-size: 12px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    line-height: 12px;
+    font-size: 13px;
+    font-family: Arial;
     white-space: nowrap; }
   [class*="hint--"][aria-label]:after {
     content: attr(aria-label); }
@@ -383,7 +382,7 @@
 	 */ }
   [class*="hint--"]:after {
     text-shadow: 0 -1px 0px black;
-    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3); }
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3); }
 
 /**
  * source: hint-color-types.scss

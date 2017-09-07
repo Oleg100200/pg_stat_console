@@ -1753,8 +1753,8 @@ def make_iostat_data():
 		network_vals_diff.append( diff_param_by_device( device, 'TX-ERR', network_vals ) )
 		network_vals_diff.append( diff_param_by_device( device, 'TX-DRP', network_vals ) )		
 		network_vals_diff.append( diff_param_by_device( device, 'TX-OVR', network_vals ) )		
-		network_vals_diff.append( diff_param_per_sec_by_device( device, 'rx_bytes', network_vals, 300 ) )
-		network_vals_diff.append( diff_param_per_sec_by_device( device, 'tx_bytes', network_vals, 300 ) )
+		network_vals_diff.append( diff_param_per_sec_by_device( device, 'rx_bytes', network_vals, sleep_interval_os_stat_if_iostat_not_working ) )	#must be equal to iostat delay
+		network_vals_diff.append( diff_param_per_sec_by_device( device, 'tx_bytes', network_vals, sleep_interval_os_stat_if_iostat_not_working ) )
 		
 	for device in hdd_devices:
 		io_vals_avg.append( avg_param_by_device( device, 'rrqm/s', io_vals ) )
@@ -1773,7 +1773,8 @@ def make_iostat_data():
 
 def make_stat_mem_data():	
 	result = []
-	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e "Active(file):" -e "Inactive(file):" -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
+	cmd = subprocess.Popen('cat /proc/meminfo | grep -e MemTotal: -e MemFree: -e "Active(file):" -e "Inactive(file):"' + \
+		' -e Buffers: -e Dirty: -e Shmem: -e Slab: -e PageTables: -e SwapFree: -e SwapTotal: -e Cached: -e SwapCached: -e VmallocUsed: -e Inactive:',shell=True,stdout=subprocess.PIPE)
 	list_begin = False
 	for line in cmd.stdout:
 		columns = line.decode('utf8').split()
