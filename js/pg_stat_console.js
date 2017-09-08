@@ -48,7 +48,7 @@ var div_id_to_method_dict = [
 	['sub_menu_stm_rows_by_queries', 'getStmRowsByQueries'],
 	['sub_menu_stm_shared_blks_by_queries', 'getStmSharedBlksByQueries'],
 	['sub_menu_stm_local_blks_by_queries', 'getStmLocalBlksByQueries'],
-	['sub_menu_stm_temp_blks_read_write_by_queries', 'getStmTempBlksReadWriteTimeByQueries'],
+	['sub_menu_stm_temp_blks_read_write_by_queries', 'getStmTempBlksReadWriteByQueries'],
 	['sub_menu_stm_blk_read_write_time_by_queries', 'getStmBlkReadWriteTimeByQueries']
 ];
 
@@ -90,7 +90,7 @@ var dashboard_dict = [
 	['getStmRowsByQueries','Rows by queries'],
 	['getStmSharedBlksByQueries','Shared blks by queries'],
 	['getStmLocalBlksByQueries','Local blks by queries'],
-	['getStmTempBlksReadWriteTimeByQueries','Temp blks read/write by queries'],
+	['getStmTempBlksReadWriteByQueries','Temp blks read/write by queries'],
 	['getStmBlkReadWriteTimeByQueries','Blk read/write time by queries'],
 	['getLog','']
 ];
@@ -133,7 +133,7 @@ var compare_dict = [
 	['getStmRowsByQueries','PG queries -> Rows by queries'],
 	['getStmSharedBlksByQueries','PG queries -> Shared blks by queries'],
 	['getStmLocalBlksByQueries','PG queries -> Local blks by queries'],
-	['getStmTempBlksReadWriteTimeByQueries','PG queries -> Temp blks read/write by queries'],
+	['getStmTempBlksReadWriteByQueries','PG queries -> Temp blks read/write by queries'],
 	['getStmBlkReadWriteTimeByQueries','PG queries -> Blk read/write time by queries']
 ];
 

@@ -1745,11 +1745,11 @@ class GetEffIndexStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleTblSt
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / fetched' ), \
-					data["node_name"] ), 'read / fetched (' + db[1] + ') [ ratio per second ]' ] )
+					data["node_name"] ), 'read / fetched (' + db[1] + ') [ ratio ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'reads / scans' ), \
-					data["node_name"] ), 'read / scans (' + db[1] + ') [ ratio per second ]' ] )
+					data["node_name"] ), 'read / scans (' + db[1] + ') [ ratio ]' ] )
 				data_graph.append( [ self.make_query( 'sys_stat', self.generate_query( db[1], data[ "date_a" ], data[ "date_b" ], 'fetched / scans' ), \
-					data["node_name"] ), 'fetched / scans (' + db[1] + ') [ ratio per second ]' ] )
+					data["node_name"] ), 'fetched / scans (' + db[1] + ') [ ratio ]' ] )
 
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1844,15 +1844,16 @@ class GetQueryBlksHandler(BaseAsyncHandlerNoParam,Chart):
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 #=======================================================================================================
-class StmStatQuery():
-	def query(self, timezone_correct_time_backward, timezone_correct_time_forward, date_a, date_b, metric):
+class StmStatQuery(QueryMakerSimpleStat):
+	def query(self, timezone_correct_time_backward, timezone_correct_time_forward, date_a, date_b, metric, unit = None):
+		str_fld_calc = self.generate_val_str(unit)
 		return """
 		select row_number() OVER(PARTITION BY T.dt_rounded ORDER BY T.dt_rounded ) AS graph_block, T.* 
 							from 
 							(
 								select 
 									( s.dt """ + timezone_correct_time_backward +""" )::timestamp without time zone as dt_rounded, 
-									round(s.val, 3), 
+									round(""" + str_fld_calc + """, 3), 
 									s.id, q.query_text as stm_query
 									FROM psc_stm_stat s
 									inner join psc_stm_queries q on q.id = s.query_id
@@ -1862,7 +1863,6 @@ class StmStatQuery():
 										dt < '""" + date_b + """'::timestamp """ + timezone_correct_time_forward +""" and d.db_name = '%s'
 									order by dt_rounded asc, val asc
 							) T order by T.dt_rounded asc, graph_block asc"""
-
 
 class GetStmCallsByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
@@ -1885,7 +1885,7 @@ class GetStmTotalTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 		data = tornado.escape.json_decode(self.request.body) 
 		data_graph = []
 
-		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_total_time')
+		query = self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_total_time', 'millisec_to_sec')
 
 		if self.check_auth() == False:
 			return ""
@@ -1954,7 +1954,7 @@ class GetStmLocalBlksByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
-class GetStmTempBlksReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
+class GetStmTempBlksReadWriteByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmStatQuery):
 	def post_(self):
 		data = tornado.escape.json_decode(self.request.body) 
 		data_graph = []
@@ -1981,9 +1981,9 @@ class GetStmBlkReadWriteTimeByQueriesHandler(BaseAsyncHandlerNoParam,Chart,StmSt
 		
 		for db in self.current_user_dbs:
 			if db[0] == data["node_name"]:
-				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_read_time') % \
+				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_read_time', 'millisec_to_sec') % \
 					(db[1]), data["node_name"] ), 'Blk read time by queries (' + db[1] + ') [ seconds ]' ] )
-				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_write_time') % \
+				data_graph.append( [ self.make_query( 'sys_stat', self.query(timezone_correct_time_backward, timezone_correct_time_forward, data["date_a" ], data["date_b" ], 'stm_blk_write_time', 'millisec_to_sec') % \
 					(db[1]), data["node_name"] ), 'Blk write time by queries (' + db[1] + ') [ seconds ]' ] )
 		
 		return self.make_stacked_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
@@ -2579,7 +2579,7 @@ application = tornado.web.Application([
 			
 			('/getStmSharedBlksByQueries', GetStmSharedBlksByQueriesHandler),
 			('/getStmLocalBlksByQueries', GetStmLocalBlksByQueriesHandler),
-			('/getStmTempBlksReadWriteTimeByQueries', GetStmTempBlksReadWriteTimeByQueriesHandler),
+			('/getStmTempBlksReadWriteByQueries', GetStmTempBlksReadWriteByQueriesHandler),
 			('/getStmBlkReadWriteTimeByQueries', GetStmBlkReadWriteTimeByQueriesHandler),
 
 			#===================================================================
