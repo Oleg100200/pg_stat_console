@@ -2048,7 +2048,8 @@ class DownloadLogFileHandler(BaseAsyncHandlerNoParam):
 		file_name = self.proxy_http_post( 'downloadLogFile' )
 		if file_name == 'No enougth rights':
 			return file_name
-		log_file = "http://" + self.get_pg_stat_monitor_host(params[ "node_name" ]) + self.proxy_http_post( 'downloadLogFile' )
+
+		log_file = "http://" + self.get_pg_stat_monitor_host(params[ "node_name" ]) + file_name
 		new_name = os.path.basename(log_file)
 		new_name = "f_" + new_name
 		urllib.request.urlretrieve( log_file, current_dir + 'download/' + new_name )
@@ -2464,7 +2465,8 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 				continue
 			databases = []
 			psc_devices = []
-			result = self.make_query( 'sys_stat', """SELECT device_name, device_type FROM psc_devices;""", node['node_name'] )
+			print( '--------------------------->' + str( node['node_name'] ) )
+			result =  self.make_query( 'sys_stat', """SELECT device_name, device_type FROM psc_devices;""", node['node_name'] )
 			for row in result:
 				psc_devices.append( [ row['device_name'], row['device_type'], '<input class="conf_param" type="checkbox" param_name="' + row['device_name'] + '" node_name="' + \
 					node['node_name'] + '" param_type="device_in_report" value="a1">Yes</input>' ] )	

@@ -3147,14 +3147,19 @@ function set_all_click_events()
 								success: function(data) {
 									if( data === "No enougth rights" )
 										dlg_ok( "Fail", " <p>No enougth rights</p>", function() { load_process.pop();} );
-									else {
+									else 
+									{
 										load_process.pop();
 										
 										var link = document.createElement("a");
-											var url = window.location.href.split( '/' );
-											link.download = url[0] + "//" + url[2] + data;
-											link.href = url[0] + "//" + url[2] + data;
-											link.click();
+										link.id = "download_link";
+										var url = window.location.href.split( '/' );
+										link.download = data;
+										link.href = url[0] + "//" + url[2] + data;
+										document.body.appendChild(link);
+										console.log( link.href );
+										link.click();
+										document.body.removeChild(document.getElementById("download_link"));
 										reset_up_down_buttons();
 									}
 								},
