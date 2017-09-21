@@ -3157,7 +3157,6 @@ function set_all_click_events()
 										link.download = data;
 										link.href = url[0] + "//" + url[2] + data;
 										document.body.appendChild(link);
-										console.log( link.href );
 										link.click();
 										document.body.removeChild(document.getElementById("download_link"));
 										reset_up_down_buttons();
