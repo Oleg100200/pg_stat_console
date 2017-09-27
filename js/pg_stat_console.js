@@ -19,6 +19,9 @@ var progress_hidden = true;
 var demo_dt_a = "";
 var demo_dt_b = "";
 var dt_options = { locked: false, date_a:null, date_b:null, date1_a:null, date1_b:null, date2_a:null, date2_b:null };
+var cmp_param_val = "getCPUStat";
+var cmp_param_1_val = "getCPUStat";
+var cmp_param_2_val = "getMemUsageStat";
 
 CanvasJS.addColorSet("pscColors",
 	[
@@ -1843,10 +1846,10 @@ function set_all_click_events()
 		set_date_time_filter_compare_params(4);
 		$( "#work_space" ).append( "<div style=\"width: 100%; margin: 0 auto;height:40px;text-align: center;\"></div><div id=\"graph_space\" style=\"\"></div>" );		
 		
-		configure_menu_elem( this.id, false );
+		configure_menu_elem( this.id, false, true );
 		
-		$("#cmp_param_1").val("getCPUStat");
-		$("#cmp_param_2").val("getMemUsageStat");
+		$("#cmp_param_1").val(cmp_param_1_val);
+		$("#cmp_param_2").val(cmp_param_2_val);
 		
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
@@ -1875,8 +1878,8 @@ function set_all_click_events()
 					graph_post( $("#cmp_param_2").val(), $("#date_a").val(), $("#date_b").val(), function() { sort_charts_by_dict( dashboard_dict, compare_dict ); } );
 				}
 			}
-		});	
-		
+		});
+		$( "#apply_filter_button" ).click();	
 	});
 	
 	$( "#sub_menu_compare_single,#sub_menu_compare_single_2,#sub_menu_compare_single_2_2" ).click(function() {
@@ -1889,7 +1892,7 @@ function set_all_click_events()
 		
 		configure_menu_elem( this.id, false, true );
 		
-		$("#cmp_param").val("getCPUStat");
+		$("#cmp_param").val(cmp_param_val);
 
 		$( "#apply_filter_button").unbind( "click" );
 		$( "#apply_filter_button" ).click(function() {
@@ -1910,7 +1913,8 @@ function set_all_click_events()
 						graph_post( $("#cmp_param").val(), $("#date2_a").val(), $("#date2_b").val() ); 
 						});
 			}
-		});			
+		});
+		$( "#apply_filter_button" ).click();		
 	});	
 	
 	$( "#sub_menu_disk_read" ).click(function() {
@@ -3523,6 +3527,16 @@ function set_all_click_events()
 	});
 
 	$( "#button_refresh" ).click(function() {
+		if( selected_menu_elem.name.indexOf( "sub_menu_compare_single" ) > -1 )
+		{
+			cmp_param_val = $("#cmp_param").val();
+		} else
+		if( selected_menu_elem.name.indexOf( "sub_menu_compare" ) > -1 )
+		{
+			cmp_param_1_val = $("#cmp_param_1").val();
+			cmp_param_2_val = $("#cmp_param_2").val();
+		}
+
 		$( "#" + selected_menu_elem.name ).click();
 	});
 	
