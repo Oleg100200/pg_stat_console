@@ -63,14 +63,14 @@ On observed nodes you should to allow <code>8889</code> port.
 ### PostgreSQL installation (Main Node)
 
 ```
-yum install http://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
-yum install -y postgresql96-server postgresql96-contrib
-systemctl enable postgresql-9.6
+yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm
+yum install -y postgresql10-server postgresql10-contrib
+systemctl enable postgresql-10
 
 mkdir /home/db_main_node
 chown postgres /home/db_main_node
 su - postgres
-/usr/pgsql-9.6/bin/initdb -D /home/db_main_node -E 'UTF-8'
+/usr/pgsql-10/bin/initdb -D /home/db_main_node -E 'UTF-8'
 
 firewall-cmd --zone=public --add-port=5432/tcp --permanent
 firewall-cmd --reload
@@ -135,10 +135,10 @@ mkdir /dev/shm/pg_stat_tmp
 chown postgres /dev/shm/pg_stat_tmp
 ```
 
-In <code>/usr/lib/systemd/system/postgresql-9.6.service</code> replace:
+In <code>/usr/lib/systemd/system/postgresql-10.service</code> replace:
 
 ```
-Environment=PGDATA=/var/lib/pgsql/9.6/data/ 
+Environment=PGDATA=/var/lib/pgsql/10/data/ 
 ```
 
 to:
@@ -151,14 +151,14 @@ and then:
 
 ```
 systemctl daemon-reload
-systemctl restart postgresql-9.6
+systemctl restart postgresql-10
 ```
 
 Configure DB:
 
 ```
 su - postgres
-/usr/pgsql-9.6/bin/psql -d postgres -p 5432
+/usr/pgsql-10/bin/psql -d postgres -p 5432
 alter user postgres with password 'postgres';
 CREATE ROLE app_user LOGIN password 'app_user' superuser;
 
@@ -187,7 +187,7 @@ host    all             app_user        0.0.0.0/0               md5
 ### Restore sys_stat database on Main Node
 
 ```
-/usr/pgsql-9.6/bin/psql -h localhost -d sys_stat -U postgres -p 5432 -a -f /home/pg_stat_console/sql/sys_stat.backup
+/usr/pgsql-10/bin/psql -h localhost -d sys_stat -U postgres -p 5432 -a -f /home/pg_stat_console/sql/sys_stat.backup
 ```
 
 ### pgbouncer configuration on Main Node
