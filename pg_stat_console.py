@@ -16,6 +16,7 @@ import locale
 from operator import itemgetter
 import json
 import urllib.parse
+from distutils.version import LooseVersion
 
 import tornado.web
 from tornado.ioloop import IOLoop
@@ -165,6 +166,7 @@ color_map = [ 	['%user', get_color("dark blue")], ['%system', get_color("green")
 				[ "rrqm/s", get_color("orange") ], ["wrqm/s", get_color("brown") ], \
 				[ "r/s", get_color("orange") ], ["w/s", get_color("brown") ],\
 				[ "rsec/s", get_color("orange") ], ["wsec/s", get_color("brown") ],\
+				[ "rMB/s", get_color("orange") ], ["wMB/s", get_color("brown") ],\
 				
 				[ "longest_waiting", get_color("dark blue") ], ["longest_active", get_color("green") ], ["longest_idle_in_tx", get_color("yellow") ], \
 				
@@ -427,7 +429,7 @@ class CoreHandler():
 		return err_msg
 		
 	def get_pg_version(self):
-		return self.proxy_http_post( 'getPGVersion', 3 )
+		return LooseVersion( self.proxy_http_post( 'getPGVersion', 3 ) )
 		
 class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 	@tornado.web.asynchronous
@@ -2068,7 +2070,7 @@ def make_activity_report( date_a, date_b, dates, date_s, psc_conns, locks, pg_ve
 			html_report = html_report + """<div class="date_link hvr-shutter-out-horizontal pg_stat_console_date_link" key_id=\"""" + str(date[0]) + """\">""" + str(date[1]) + """</div>"""
 	html_report = html_report + """</div>""";   
 	
-	if pg_vers == "9.6":
+	if pg_vers >= LooseVersion("9.6"):
 		html_report = html_report + make_html_report_with_head( psc_conns, [ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "wait_event_type", "wait_event", "query" ], "Connections", ["query"] )
 	else:
 		html_report = html_report + make_html_report_with_head( psc_conns, [ "db_name", "app_name", "user_name", "state_name", "pid", "client_addr", "query_start", "age", "waiting", "query" ], "Connections", ["query"] )
@@ -2096,7 +2098,7 @@ class GetActivityHistoryHandler(BaseAsyncHandlerNoParam):
 		if 'date_s' in params:
 			date_s = params[ "date_s" ]
 
-			if self.get_pg_version() == "9.6":
+			if self.get_pg_version() >= LooseVersion("9.6"):
 				psc_conns = self.make_query( 'sys_stat', """SELECT db.db_name, an.app_name, usr.user_name, cs.state_name, cn.pid, cn.client_addr,
 					cn.query_start """ + timezone_correct_time_backward +""", age(sn.dt,cn.query_start) as age, 
 					wt."wait_type", wn."wait_name", cn.query
@@ -2147,7 +2149,7 @@ class GetActivityHistoryExtHandler(BaseAsyncHandlerNoParam):
 		params = tornado.escape.json_decode(self.request.body) 
 		html_report = ""
 		
-		if self.get_pg_version() == "9.6":
+		if self.get_pg_version() >= LooseVersion("9.6"):
 				html_report = make_html_report_with_head( self.make_query( 'sys_stat', """select
 					(sn.dt """ + timezone_correct_time_backward +""")::text,
 					sum(case when wait_event_type is not null and cs.state_name = 'active' then 1 else 0 end) as active_waiting_count,
@@ -2193,7 +2195,7 @@ class GetHistoryBySnIdHandler(BaseAsyncHandlerNoParam):
 		params = tornado.escape.json_decode(self.request.body) 
 		html_report = ""
 		
-		if self.get_pg_version() == "9.6":
+		if self.get_pg_version() >= LooseVersion("9.6"):
 			html_report = make_html_report_with_head( self.make_query( 'sys_stat', """SELECT db.db_name, an.app_name, usr.user_name, cs.state_name, cn.pid, cn.client_addr,
 					cn.query_start """ + timezone_correct_time_backward +""", age(sn.dt,cn.query_start) as age, 
 					wt."wait_type", wn."wait_name", cn.query

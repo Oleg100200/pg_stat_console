@@ -18,6 +18,7 @@ import locale
 from operator import itemgetter
 import json
 import urllib.parse
+from distutils.version import LooseVersion
 
 import tornado.web
 from tornado.ioloop import IOLoop
@@ -160,20 +161,7 @@ class CoreHandler():
 			logger.log( "stop_query = " + str( stop_query( self.db_pid ) ), "Info" )
 			
 	def get_pg_version(self, db):
-		pg_version_res = self.make_query( db, """select case 
-			when position( '9.6.' in version() ) > 0 then '9.6' 
-			when position( '9.5.' in version() ) > 0 then '9.5' 
-			when position( '9.4.' in version() ) > 0 then '9.4' 
-			when position( '9.3.' in version() ) > 0 then '9.3' 
-			when position( '9.2.' in version() ) > 0 then '9.2' 
-			when position( '9.1.' in version() ) > 0 then '9.1'
-			else 'unknown'
-			end""" )
-		
-		pg_version = ""
-		for v in pg_version_res:
-			pg_version = v[0]
-		return pg_version
+		return LooseVersion( next( v[0] for v in self.make_query( db, """SHOW server_version""" ) ) )
 
 class BaseAsyncHandlerNoParam(tornado.web.RequestHandler, CoreHandler):
 	@tornado.web.asynchronous
@@ -246,7 +234,7 @@ class GetUptimeHandler(BaseAsyncHandlerNoParam):
 #=======================================================================================================
 class GetActivityHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		if self.get_pg_version(check_base) == "9.6":
+		if self.get_pg_version(check_base) >= LooseVersion("9.6"):
 			return make_html_report_with_head( self.make_query( check_base, """select datname, cnt from (
 				select datname, count(1) as cnt from pg_stat_activity
 				group by datname
@@ -793,7 +781,7 @@ class GetPGConfigHandler(BaseAsyncHandlerNoParam):
 
 class GetPGVersionHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		return self.get_pg_version(check_base)
+		return str( self.get_pg_version(check_base) )
 
 #=======================================================================================================
 class GetLogHandler(BaseAsyncHandlerNoParam):
@@ -1019,7 +1007,7 @@ class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 		
 		html_report = ""
 
-		if self.get_pg_version(check_base) == "9.6":
+		if self.get_pg_version(check_base) >= LooseVersion("9.6"):
 			html_report = make_html_report_with_head( self.make_query( check_base, """
 				SELECT age(clock_timestamp(), query_start) AS "query_age",
 					   age(clock_timestamp(), xact_start) AS "xact_age",
@@ -1059,7 +1047,7 @@ class GetOldConnsHandler(BaseAsyncHandlerNoParam):
 
 class GetConnManagementHandler(BaseAsyncHandlerNoParam):
 	def post_(self):
-		if self.get_pg_version(check_base) == "9.6":
+		if self.get_pg_version(check_base) >= LooseVersion("9.6"):
 			return make_html_report_with_head( self.make_query( check_base, """
 			SELECT T."wait_event_type",
 				   T."wait_event",
@@ -1216,7 +1204,7 @@ class GetMaintenanceStatusHandler(BaseAsyncHandlerNoParam):
 
 class GetMaintenanceTasksHandler(BaseAsyncHandlerNoParam):   
 	def post_(self):
-		if self.get_pg_version(check_base) == "9.6":
+		if self.get_pg_version(check_base) >= LooseVersion("9.6"):
 			return make_html_report_with_head( self.make_query( check_base, """select age(clock_timestamp(), query_start) AS "query_age", 
 				age(clock_timestamp(), xact_start) AS "xact_age", state, wait_event_type, wait_event, datname, usename, application_name, client_addr, query, pid
 				from pg_stat_activity 

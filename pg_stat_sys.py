@@ -9,6 +9,7 @@ import time
 import configparser 
 import locale
 import subprocess
+from distutils.version import LooseVersion
 from pgstatlogger import PSCLogger
 from pgstatcommon.pg_stat_common import *
 #=======================================================================================================
@@ -535,7 +536,7 @@ query_single_db_sn = """
 		where pid <> pg_backend_pid()
 		group by datname, state;
 
-		if position( '9.6.' in version() ) > 0 then
+		if (SELECT current_setting('server_version_num'))::bigint >= 90600 then
 			INSERT INTO psc_stat_activity_raw( datname, param, val )
 			select T.datname, 'waiting_conns' as waiting_p, count(waiting) from (
 				select datname, 
@@ -658,19 +659,10 @@ def init_sys_stat( conn ):
 def init_sys_stat_node( conn ):
 	conn.execute( """set application_name = '""" + application_name + """'""" )
 	conn.execute( """select public.psc_init_node('""" + node_name + """', '""" + node_descr + """', '""" + node_host + """')""" )
-	
-def check_pg_version( conn ):
-	query = conn.prepare( """select case 
-		when position( '9.6.' in version() ) > 0 then '9.6' 
-		when position( '9.5.' in version() ) > 0 then '9.5' 
-		when position( '9.4.' in version() ) > 0 then '9.4' 
-		when position( '9.3.' in version() ) > 0 then '9.3' 
-		when position( '9.2.' in version() ) > 0 then '9.2' 
-		when position( '9.1.' in version() ) > 0 then '9.1'
-		else 'unknown'
-		end""" )
-	shm_name_res = query()
-	return str( shm_name_res[0][0] )
+
+def get_pg_version( conn ):
+	query = conn.prepare( """SHOW server_version""" )
+	return LooseVersion( next( v[0] for v in query() ) )
 
 def pg_sys_stat_snapshot():
 	all_conns = []
@@ -1222,7 +1214,8 @@ def pg_sys_stat_snapshot():
 			#====================================================================================================
 			#simple values
 			query = firs_node_db_conn.prepare( """
-				select 'xlog_segments', count(1) from pg_ls_dir('pg_xlog') limit 1
+				select 'xlog_segments', count(1) from pg_ls_dir('""" + \
+					( 'pg_wal' if get_pg_version(firs_node_db_conn) >= LooseVersion("10") else 'pg_xlog' ) + """') limit 1
 				""" )
 			res_data = query()
 			
@@ -1394,15 +1387,13 @@ def pg_conn_snapshot():
 			firs_node_db_conn = postgresql.open( firs_node_db[1] )
 			firs_node_db_conn.execute( """set application_name = '""" + application_name + """'""" )
 
-			pg_version = check_pg_version( firs_node_db_conn )
-
 			sn_id = 0
 			query = sys_stat_db.prepare( """INSERT INTO psc_snapshots(dt) VALUES (now()) returning id""" )
 			sn_id_res = query()
 			sn_id = sn_id_res[0][0]
 			
 			#====================================================================================================
-			if pg_version == '9.6':
+			if get_pg_version(firs_node_db_conn) >= LooseVersion("9.6"):
 				query = firs_node_db_conn.prepare( """
 					select datname::text, usename::text, application_name, state::text, pid::bigint, client_addr, 
 					client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, query 
