@@ -1417,7 +1417,7 @@ def pg_conn_snapshot():
 						(select psc_get_conn_state($5)), $6, $7, $8, $9, $10, $11, $12, (select psc_get_wait_type($13)), (select psc_get_wait_name($14)), $15 )""" )	
 				with sys_stat_db.xact():			
 					for rec in res_data:
-						stm.first( sn_id, str( rec[0] ), str( rec[1] ), str( rec[2] ), str( rec[3] ), rec[4], str( rec[5] ), 
+						stm.first( sn_id, str( rec[0] ), str( rec[1] ), str( rec[2] ), str( rec[3] ), rec[4], '127.0.0.1' if rec[5] is None else rec[5], 
 							rec[6], rec[7], rec[8], rec[9], rec[10], rec[11], rec[12], rec[13] )
 			else:
 				query = firs_node_db_conn.prepare( """
@@ -1434,7 +1434,7 @@ def pg_conn_snapshot():
 						(select psc_get_conn_state($5)), $6, $7, $8, $9, $10, $11, $12, $13, $14 )""" )
 				with sys_stat_db.xact():			
 					for rec in res_data:
-						stm.first( sn_id, str( rec[0] ), str( rec[1] ), str( rec[2] ), str( rec[3] ), rec[4], str( rec[5] ), 
+						stm.first( sn_id, str( rec[0] ), str( rec[1] ), str( rec[2] ), str( rec[3] ), rec[4], '127.0.0.1' if rec[5] is None else rec[5], 
 							rec[6], rec[7], rec[8], rec[9], rec[10], rec[11], rec[12] )
 			#====================================================================================================
 
