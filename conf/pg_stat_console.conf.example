@@ -12,8 +12,8 @@
 #If you use pgbouncer you must set "ignore_startup_parameters = client_min_messages" and "pool_mode = session" in pgbouncer.ini
 #Both parameters refers to one and the same base which is the centralized storage for collected statistics
 
-sys_stat = postgresql+pypostgresql://app_user:passw@127.0.0.1:6432/sys_stat_dev
-sys_stat_conn_str_direct = pq://app_user:passw@127.0.0.1:6432/sys_stat_dev
+sys_stat = postgresql+pypostgresql://DB_USER:DB_PASSW@DB_HOST:DB_PORT/DB_NAME
+sys_stat_conn_str_direct = pq://DB_USER:DB_PASSW@DB_HOST:DB_PORT/DB_NAME
 
 [main]
 #This section contains main configuration parameters
@@ -52,7 +52,7 @@ help_msg = <p>admin phone</p>						#show message on click "help" button
 #This section contains users and passwords in format: user = password
 
 demo = password
-admin = password
+admin = PSC_ADMIN_PASSW
 viewer = password
 
 [users_rights]

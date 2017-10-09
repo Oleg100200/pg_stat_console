@@ -3519,7 +3519,7 @@ function set_all_click_events()
 		$(".pg_stat_console_step_up").fadeOut(200, function(){});
 		$(".pg_stat_console_goto_top").fadeOut(200, function(){});
 
-		localStorage.removeItem('user_config');
+		//localStorage.removeItem('user_config');
 		localStorage.removeItem('user_auth_data');
 		
 		hide_common_div();
