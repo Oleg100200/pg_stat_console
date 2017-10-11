@@ -18,7 +18,7 @@ sys_stat_conn_str_direct = pq://DB_USER:DB_PASSW@DB_HOST:DB_PORT/DB_NAME
 [main]
 #This section contains main configuration parameters
 
-port = 8888										#port for access to web interface from browser
+port = PSC_PORT										#port for access to web interface from browser
 
 pg_stat_monitor_port = 8889						#port for access to API of distributed monitors (pg_stat_monitor), 
 												#host are desribed in "public.psc_nodes.node_host" and is specific for each node

@@ -89,7 +89,9 @@ fi
 
 if [ -z "$db_passw" ]; then
 	echo -n "Enter DB user password and press [ENTER] (default app_user):"
-	read db_passw
+	stty -echo
+	read db_passw; echo
+	stty echo
 
 	if [ -z "$db_passw" ]; then
 		db_passw="app_user"
@@ -99,16 +101,28 @@ fi
 
 if [ -z "$psc_admin_passw" ]; then
 	echo -n "Enter pg_stat_console admin password and press [ENTER] (default admin):"
-	read psc_admin_passw
-
+	stty -echo
+	read psc_admin_passw; echo
+	stty echo
+	
 	if [ -z "$psc_admin_passw" ]; then
 		psc_admin_passw="admin"
-		echo "pg_stat_console admin passwor is empty, using '$psc_admin_passw'"
+		echo "pg_stat_console admin password is empty, using '$psc_admin_passw'"
+	fi
+fi
+
+if [ -z "$psc_port" ]; then
+	echo -n "Enter pg_stat_console port and press [ENTER] (default 8880):"
+	read psc_port
+	
+	if [ -z "$psc_port" ]; then
+		psc_port="8880"
+		echo "pg_stat_console port is empty, using '$psc_port'"
 	fi
 fi
 
 PSC_PATH=$PWD
-NEW_CONF=$PSC_PATH/conf/pg_stat_console.conf
+NEW_CONF=$PSC_PATH/conf/pg_stat_console_new.conf
 cp $PSC_PATH/conf/pg_stat_console.conf.example $NEW_CONF
 
 sed -i "s|DB_HOST|$db_host|g" $NEW_CONF
@@ -117,4 +131,4 @@ sed -i "s|DB_NAME|$db_name|g" $NEW_CONF
 sed -i "s|DB_USER|$db_user|g" $NEW_CONF
 sed -i "s|DB_PASSW|$db_passw|g" $NEW_CONF
 sed -i "s|PSC_ADMIN_PASSW|$psc_admin_passw|g" $NEW_CONF
-
+sed -i "s|PSC_PORT|$psc_port|g" $NEW_CONF
