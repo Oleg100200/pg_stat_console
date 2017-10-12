@@ -2,7 +2,7 @@
 
 PYTHON='/usr/local/bin/python3.6' 
 PSC_PATH_INSTALL=$PWD
-PSC_PATH="$(dirname "$PSC_PATH_INSTALL")"
+PSC_PATH=$PSC_PATH_INSTALL
 
 cd unit
 for f in pg_stat_*; do if [[ -f "$f" ]]; then
@@ -17,6 +17,6 @@ for f in pg_stat_*; do if [[ -f "$f" ]]; then
 	fi
 fi; done
 
+cd ..
 systemctl daemon-reload
-
 echo -e "\nsystemctl has been reloaded"
