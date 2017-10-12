@@ -347,9 +347,9 @@ Then open the configuration files <code>conf/*.conf</code> and edit all sections
 You can install sevice files for all components of pg_stat_console:
 
 ```
-cd /home/pg_stat_console/unit
-chmod a+x install.sh
-./install.sh
+cd /home/pg_stat_console/
+chmod a+x unit/install.sh
+./unit/install.sh
 
 systemctl enable pg_stat_sys
 systemctl enable pg_stat_monitor
