@@ -20,12 +20,12 @@ sys_stat_conn_str_direct = pq://DB_USER:DB_PASSW@DB_HOST:DB_PORT/DB_NAME
 
 port = PSC_PORT										#port for access to web interface from browser
 
-pg_stat_monitor_port = 8889						#port for access to API of distributed monitors (pg_stat_monitor), 
+pg_stat_monitor_port = PSC_MONITOR_PORT			#port for access to API of distributed monitors (pg_stat_monitor), 
 												#host are desribed in "public.psc_nodes.node_host" and is specific for each node
 												
 enable_exception_catching = 1					#do disable this option to display full stack trace when exception happens
 application_name = pg_stat_console				#app name for displaying in pg_stat_activity and naming log file
-time_zone = Europe/Moscow						#value for query "SET timezone = '$1';"
+time_zone = PSC_TIME_ZONE						#value for query "SET timezone = '$1';"
 application_max_mem = 1200						#in MB, if the value of this variable is exceeded, the application will be shut down
 max_workers = 8									#number of workers for ThreadPoolExecutor
 db_pool_size = 8								#number of connection to database
