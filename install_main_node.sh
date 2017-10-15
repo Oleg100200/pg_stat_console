@@ -207,7 +207,7 @@ if [ -z "$psc_monitor_port" ]; then
 fi
 
 PSC_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-NEW_CONF=$PSC_PATH/conf/pg_stat_console_new.conf
+NEW_CONF=$PSC_PATH/conf/pg_stat_console.conf
 cp $PSC_PATH/conf/pg_stat_console.conf.example $NEW_CONF
 
 sed -i "s|DB_HOST|$db_host|g" $NEW_CONF
