@@ -1,6 +1,27 @@
 #!/bin/sh
 
-: '
+show_help()
+{
+	echo
+	echo "---------------------------------------------------"
+	echo "Parameters"
+	echo "---------------------------------------------------"
+	echo "--db-host 	- database host"
+	echo "--db-port 	- database port"
+	echo "--db-name 	- name of database"
+	echo "--db-user 	- database user"
+	echo "--db-passw 	- database user password"
+	echo
+	echo "--psc-admin-passw 	- pg_stat_console admin password (other users you can edit in '[users]' section of 'conf/pg_stat_console.conf')"
+	echo "--psc-port 		- pg_stat_console web GUI port"
+	echo "--psc-time-zone 	- current timezone"
+	echo "--psc-monitor-port 	- pg_stat_monitor port"
+	echo
+	echo "--psc-create-db/psc-no-create-db 	- create database if not exists or not"
+	echo "--psc-install/psc-no-install 		- install pg_stat_console services (all) or not"
+	echo "--psc-run/psc-no-run 			- run pg_stat_console service (web GUI) or not"
+
+	echo '
 ---------------------------------------------------
 Usage
 ---------------------------------------------------
@@ -18,23 +39,6 @@ chmod +x install_main_node.sh
 
 ./install_main_node.sh --psc-no-create-db --psc-no-install --psc-no-run
 '
-
-show_help()
-{
-	echo "---------------------------------------------------"
-	echo "--db-host - DB host"
-	echo "--db-port - "
-	echo "--db-name - "
-	echo "--db-user - "
-	echo "--db-passw - "
-	echo "--psc-admin-passw - "
-	echo "--psc-port - "
-	echo "--psc-time-zone - "
-	echo "--psc-monitor-port - "
-	echo "--psc-create-db/psc-no-create-db - "
-	echo "--psc-install/psc-no-install - "
-	echo "--psc-run/psc-no-run - "
-	echo "---------------------------------------------------"
 }
 
 while [ "$1" != "" ]; do
@@ -202,7 +206,7 @@ if [ -z "$psc_monitor_port" ]; then
 	fi
 fi
 
-PSC_PATH=$PWD
+PSC_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 NEW_CONF=$PSC_PATH/conf/pg_stat_console_new.conf
 cp $PSC_PATH/conf/pg_stat_console.conf.example $NEW_CONF
 
@@ -281,7 +285,7 @@ is_istalled=0
 
 install()
 {
-	echo "Installing pg_stat_console services..."
+	echo -e "\nInstalling pg_stat_console services...\n"
 	source $PSC_PATH/unit/install.sh
 	is_istalled=1
 }
@@ -308,7 +312,12 @@ run()
 	if (( $is_istalled == 0 )) ; then
 		install
 	fi
-	systemctl restart pg_stat_console
+	
+	if [[ $(ps --no-headers -o comm 1) == "systemd" ]]; then
+		systemctl restart pg_stat_console
+	else
+		service pg_stat_console restart
+	fi
 }
 
 if [ -z "$psc_run" ]; then
