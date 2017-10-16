@@ -285,7 +285,8 @@ is_istalled=0
 
 install()
 {
-	echo -e "\nInstalling pg_stat_console services...\n"
+	echo -e "\nInstalling pg_stat_console service...\n"
+	services=(pg_stat_console.service)
 	source $PSC_PATH/unit/install.sh
 	is_istalled=1
 }
