@@ -18,7 +18,7 @@ show_help()
 	echo "--psc-monitor-port 	- pg_stat_monitor port"
 	echo
 	echo "--psc-create-db/psc-no-create-db 	- create database if not exists or not"
-	echo "--psc-install/psc-no-install 		- install pg_stat_console services (all) or not"
+	echo "--psc-install/psc-no-install 		- install pg_stat_console service or not"
 	echo "--psc-run/psc-no-run 			- run pg_stat_console service (web GUI) or not"
 
 	echo '
@@ -191,7 +191,7 @@ if [ -z "$psc_time_zone" ]; then
 	
 	if [ -z "$psc_time_zone" ]; then
 		psc_time_zone="Europe/Moscow"
-		echo "pg_stat_console port is empty, using '$psc_time_zone'"
+		echo "Timezone is empty, using '$psc_time_zone'"
 	fi
 fi
 
@@ -202,7 +202,7 @@ if [ -z "$psc_monitor_port" ]; then
 	
 	if [ -z "$psc_monitor_port" ]; then
 		psc_monitor_port="8889"
-		echo "pg_stat_console port is empty, using '$psc_monitor_port'"
+		echo "pg_stat_monitor port is empty, using '$psc_monitor_port'"
 	fi
 fi
 
@@ -275,7 +275,7 @@ then
 			esac
 		done
 	else
-		if (( $psc_create_db == 1 )) ; then
+		if [ $psc_create_db == 1 ] ; then
 			create_db
 		fi
 	fi
@@ -302,7 +302,7 @@ if [ -z "$psc_install" ]; then
 		esac
 	done
 else
-	if (( $psc_install == 1 )) ; then
+	if [ $psc_install == 1 ] ; then
 		install
 	fi
 fi
@@ -310,7 +310,7 @@ fi
 run()
 {
 	echo "Start pg_stat_console service..."
-	if (( $is_istalled == 0 )) ; then
+	if [ $is_istalled == 0 ] ; then
 		install
 	fi
 	
@@ -332,7 +332,7 @@ if [ -z "$psc_run" ]; then
 		esac
 	done
 else
-	if (( $psc_run == 1 )) ; then
+	if [ $psc_run == 1 ] ; then
 		run
 	fi
 fi

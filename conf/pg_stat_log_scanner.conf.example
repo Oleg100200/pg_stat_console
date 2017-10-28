@@ -1,18 +1,18 @@
 [sys_stat]
-sys_stat = pq://user:password@127.0.0.1:5432/sys_stat
+sys_stat = pq://MAIN_DB_USER:MAIN_DB_PASSW@MAIN_DB_HOST:MAIN_DB_PORT/MAIN_DB_NAME
 
 [main]
 sleep_interval = 1200
-preload_logs_interval = 0		#in hours
+preload_logs_interval = 24		#in hours
 
 application_name = pg_stat_log_scanner
 
-node_name = "test node"
-node_descr = "descr"
-node_host = "192.168.0.50"
+node_name = PSC_NODE_NAME
+node_descr = PSC_NODE_DESCR
+node_host = PSC_NODE_HOST
 
-time_zone = Europe/Moscow
+time_zone = PSC_TIME_ZONE
 
-pg_log_dir = /var/log/pg_log
-pg_log_line_max_len = 1100
+pg_log_dir = PSC_PG_LOG_DIR
+pg_log_line_max_len = 3000
 pg_log_file_extension = csv
