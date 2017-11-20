@@ -30,6 +30,7 @@ show_help()
 	echo "--no-pg-stat-log-scanner 		- disable pg_stat_log_scanner"	
 	echo "--psc-pg-log-dir 		- pg_log directory for pg_stat_log_scanner and pg_stat_monitor"
 	echo
+	echo "--pg-configure/pg-no-configure						- path to postgresql.conf for configuring"	
 	echo "--psc-install/psc-no-install 						- install pg_stat_console services (all) or not"
 	echo "--pg-stat-monitor-run/pg-stat-monitor-no-run 				- run pg_stat_monitor service or not"
 	echo "--pg-stat-sys-run/pg-stat-sys-no-run 					- run pg_stat_sys service or not"
@@ -137,6 +138,12 @@ while [ "$1" != "" ]; do
 		--psc-pg-log-dir)
 			psc_pg_log_dir=$VALUE
 			;;
+		--pg-configure)
+			pg_configure=$VALUE
+			;;
+		--pg-no-configure)
+			pg_configure=0
+			;;	
 		--psc-install)
 			psc_install=1
 			;;
@@ -464,6 +471,24 @@ if [ -z "$psc_install" ]; then
 else
 	if [ $psc_install == 1 ] ; then
 		install
+	fi
+fi
+
+source $PSC_PATH/pg_conf.sh
+
+if [ -z "$pg_configure" ]; then
+	echo
+	echo -n "Configure observed PostgreSQL instance?"
+	echo
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) run_pg_configure; break;;
+			No ) break;;
+		esac
+	done
+else
+	if [[ !($pg_configure == 0) ]] ; then
+		run_pg_configure
 	fi
 fi
 
