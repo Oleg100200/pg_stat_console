@@ -1,9 +1,5 @@
 run_pg_configure()
 {
-	cp $pg_config ${pg_config}.$(date '+%Y%m%d_%H%M%S')
-	mapfile -t source_config < $pg_config
-	new_config=()
-
 	tune_core_params=()
 
 	tune_core_params+=("shared_buffers = 1GB")
@@ -69,12 +65,31 @@ run_pg_configure()
 	tune_core_params+=("track_io_timing = on")
 	tune_core_params+=("track_functions = pl")
 	tune_core_params+=("track_activity_query_size = 2048")
+
+	mapfile -t source_config < $pg_config
 	
+	matches_count=0
+	for line in "${source_config[@]}"
+	do
+		for tune_core_param in "${tune_core_params[@]}"
+		do
+			if [[ $line == $tune_core_param ]]; then
+				matches_count+=1
+			fi
+			if [[ $matches_count -ge 5 ]]; then
+				echo -e ${pg_config} 'already configured'
+				echo
+				return
+			fi
+		done
+	done
+	
+	cp $pg_config ${pg_config}.$(date '+%Y%m%d_%H%M%S')
+	new_config=()
 	tune_core_params_done=()
 	
 	for line in "${source_config[@]}"
 	do
-		
 		param_name_tmp=($line)
 		param_name=${param_name_tmp[0]}
 
@@ -90,30 +105,47 @@ run_pg_configure()
 					tune_core_params_done+=("$tune_core_param")
 				fi
 			done
-				
 		else
-			#check commented params
 			new_config+=("$line")
-			comment_pos=$(strindex "$line" "#")
-			if [ $comment_pos == 0 ] ; then
-				for tune_core_param in "${tune_core_params[@]}"
-				do
-					new_param_name=$param_name
-					tune_core_param_name_tmp=($tune_core_param)
-					tune_core_param_name=${tune_core_param_name_tmp[0]}
-					if [ ${#param_name} -ge 2 ]; then
-						new_param_name="${param_name:1}"
-					fi
-					
-					if [[ $new_param_name == "$tune_core_param_name" ]]; then
-						new_config+=("$tune_core_param")
-						tune_core_params_done+=("$tune_core_param")
-					fi
-				done
-			fi
 		fi
 	done
 	
+	for line in "${source_config[@]}"
+	do
+		param_name_tmp=($line)
+		param_name=${param_name_tmp[0]}
+		
+		if [[ $param_name == *"#"* ]] && [ ${#param_name} -ge 2 ]; then
+			#check commented params
+			comment_pos=$(strindex "$param_name" "#")
+			uncommented_param_name="${param_name:1}"
+			
+			if [ $comment_pos == 0 ] ; then
+				found=0
+				for tune_core_param_done in "${tune_core_params_done[@]}"
+				do
+					tune_core_param_name_tmp=($tune_core_param_done)
+					tune_core_param_name=${tune_core_param_name_tmp[0]}
+					if [[ $uncommented_param_name == $tune_core_param_name ]]; then
+						found=1
+						break
+					fi
+				done
+
+				if [[ $found == 0 ]]; then
+					for tune_core_param in "${tune_core_params[@]}"
+					do
+						tune_core_param_name_tmp=($tune_core_param)
+						tune_core_param_name=${tune_core_param_name_tmp[0]}
+						if [[ $uncommented_param_name == $tune_core_param_name ]]; then
+							new_config+=("$tune_core_param")
+							tune_core_params_done+=("$tune_core_param")
+						fi
+					done
+				fi
+			fi
+		fi
+	done
 	
 	for check_param in "${tune_core_params[@]}"
 	do

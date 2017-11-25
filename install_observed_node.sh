@@ -32,6 +32,7 @@ show_help()
 	echo
 	echo "--pg-configure/pg-no-configure						- path to postgresql.conf for configuring"	
 	echo "--psc-install/psc-no-install 						- install pg_stat_console services (all) or not"
+	echo "--psc-run/psc-no-run 						- run pg_stat_console services or not"
 	echo "--pg-stat-monitor-run/pg-stat-monitor-no-run 				- run pg_stat_monitor service or not"
 	echo "--pg-stat-sys-run/pg-stat-sys-no-run 					- run pg_stat_sys service or not"
 	echo "--pg-stat-log-scanner-run/pg-stat-log-scanner-no-run			- run pg_stat_log_scanner service or not"	
@@ -149,6 +150,12 @@ while [ "$1" != "" ]; do
 			;;
 		--psc-no-install)
 			psc_install=0
+			;;
+		--psc-run)
+			psc_run=1
+			;;
+		--psc-no-run)
+			psc_run=0
 			;;
 		--pg-stat-monitor-run)
 			pg_stat_monitor_run=1
@@ -400,11 +407,11 @@ else
 fi
 
 PSC_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-NEW_CONF_STAT_SYS=$PSC_PATH/conf/pg_stat_sys2.conf
+NEW_CONF_STAT_SYS=$PSC_PATH/conf/pg_stat_sys.conf
 cp $PSC_PATH/conf/pg_stat_sys.conf.example $NEW_CONF_STAT_SYS
-NEW_CONF_MONITOR=$PSC_PATH/conf/pg_stat_monitor2.conf
+NEW_CONF_MONITOR=$PSC_PATH/conf/pg_stat_monitor.conf
 cp $PSC_PATH/conf/pg_stat_monitor.conf.example $NEW_CONF_MONITOR
-NEW_CONF_LOG_SCANNER=$PSC_PATH/conf/pg_stat_log_scanner2.conf
+NEW_CONF_LOG_SCANNER=$PSC_PATH/conf/pg_stat_log_scanner.conf
 cp $PSC_PATH/conf/pg_stat_log_scanner.conf.example $NEW_CONF_LOG_SCANNER
 
 write_main_db_params()

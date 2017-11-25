@@ -239,6 +239,7 @@ run_query()
 
 db_exists=$(get_scalar "postgres" "SELECT datname FROM pg_database WHERE datname='${db_name}' limit 1")
 
+
 create_db()
 {
 	if [ -z "$db_exists" ]
