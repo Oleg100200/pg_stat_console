@@ -1659,7 +1659,7 @@ def make_iostat_data():
 
 	cmd_iostat = subprocess.Popen('iostat -d -c -m -x ' + sleep_interval_os_stat,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = cmd_iostat.communicate()
-	if str( err ).find('Cannot find disk data') > -1:
+	if str( err ).find('Cannot find disk data') > -1 or str( err ).find('iostat: command not found') > -1:
 		time.sleep( sleep_interval_os_stat_if_iostat_not_working )
 	else:
 		lines = out.decode('utf8').split('\n')
