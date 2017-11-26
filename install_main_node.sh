@@ -41,6 +41,12 @@ chmod +x install_main_node.sh
 '
 }
 
+if [[ !(-z $(ps -ef | grep pg_stat_console.py | grep -v grep | awk '{print $2}')) ]]; then
+	echo "pg_stat_console already runned"
+	exit
+fi
+
+
 while [ "$1" != "" ]; do
 	PARAM=`echo $1 | awk -F= '{print $1}'`
 	VALUE=`echo $1 | awk -F= '{print $2}'`

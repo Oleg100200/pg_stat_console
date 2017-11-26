@@ -14,6 +14,9 @@ bgbench_db_name="test_db"
 
 PSC_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+#TODO: add detection of PostgreSQL server version
+#TODO: add Ubuntu supporting
+
 echo
 echo -e "This script will install PostgreSQL and environment (python, pgbouncer), "
 echo -e "as well as automatically configure pg_stat_console and run it."
@@ -63,12 +66,12 @@ configure_systemctl()
 
 run_query()
 {
-	su -l postgres -c "psql -A -t -p 5432 -h 127.0.0.1 -U postgres -d $1 -c \"$2\""
+	su -l postgres -c "psql -A -t -p ${db_port} -h 127.0.0.1 -U postgres -d $1 -c \"$2\""
 }
 
 execute_file()
 {
-	su -l postgres -c "psql -A -t -p 5432 -h 127.0.0.1 -U postgres -d $1 -a -f $2"
+	su -l postgres -c "psql -A -t -p ${db_port} -h 127.0.0.1 -U postgres -d $1 -a -f $2"
 }
 
 if [ -d "/var/lib/pgsql" ]; then
@@ -232,12 +235,15 @@ configure_pgbench()
 		echo 'DB ${bgbench_db_name} does not exists, creating...'
 		run_query "postgres" "$query"
 
-		#execute_file "$PSC_PATH/sql/sys_stat.backup"
+		su - postgres -c "/usr/pgsql-10/bin/pgbench -i ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} --foreign-keys"
 	}
 
 	if [ -z "$db_exists" ]
 	then
 		create_db
+		crontab -l > $PSC_PATH/tmp_cron
+		echo "*/3 * * * * su - postgres -c \"/usr/pgsql-10/bin/pgbench ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} -t 3000 --no-vacuum\" >> $PSC_PATH/log/cron_pgbench.log 2>&1" >> $PSC_PATH/tmp_cron
+		crontab $PSC_PATH/tmp_cron
 	else
 		echo 'DB '${bgbench_db_name}' already exists'
 	fi
