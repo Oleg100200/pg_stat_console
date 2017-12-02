@@ -13,21 +13,61 @@ pgbouncer_port=6432
 bgbench_db_name="test_db"
 
 PSC_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $PSC_PATH/pg_conf.sh
 
-#TODO: add detection of PostgreSQL server version
-#TODO: add Ubuntu supporting
+pg_version=0
+pg_service_name=""
+pg_dir_bin=""
 
-echo
-echo -e "This script will install PostgreSQL and environment (python, pgbouncer), "
-echo -e "as well as automatically configure pg_stat_console and run it."
-echo -e "WARNING: don't use this script on production systems. Continue?"
-echo
-select yn in "Yes" "No"; do
-	case $yn in
-		Yes ) break;;
-		No ) exit;;
+show_help()
+{
+	echo
+	echo "---------------------------------------------------"
+	echo "Parameters"
+	echo "---------------------------------------------------"
+	echo "--force 	- do not ask questions"
+	echo "--no-configure-pgbench	- do not configure pgbench"
+	echo
+}
+
+while [ "$1" != "" ]; do
+	PARAM=`echo $1 | awk -F= '{print $1}'`
+	VALUE=`echo $1 | awk -F= '{print $2}'`
+	case $PARAM in
+		-h | --help)
+			show_help
+			exit
+			;;
+		--force)
+			force=1
+			;;
+		--no-configure-pgbench)
+			no_configure_pgbench=1
+			;;
+		*)
+			echo "ERROR: unknown parameter \"$PARAM\""
+			show_help
+			exit 1
+			;;
 	esac
+	shift
 done
+
+if [ ! "$force" ]; then
+	echo
+	echo -e "This script will install PostgreSQL and environment (python, pgbouncer), "
+	echo -e "as well as automatically configure pg_stat_console and run it."
+	echo -e "WARNING: don't use this script on production systems. Continue?"
+	echo
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) break;;
+			No ) exit;;
+		esac
+	done
+fi
+
+echo -e "----------------------------------"
 
 if [[ -z $(yum list installed | grep sysstat) ]]; then
 	yum -y install sysstat
@@ -74,10 +114,63 @@ execute_file()
 	su -l postgres -c "psql -A -t -p ${db_port} -h 127.0.0.1 -U postgres -d $1 -a -f $2"
 }
 
+get_scalar()
+{
+	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -h 127.0.0.1 -U postgres -d $1 -c \"$2\""))
+	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
+	echo ${fld1}
+}
+
 if [ -d "/var/lib/pgsql" ]; then
 	echo
-	echo 'PostgreSQL already installed'
+	#here we suppose that systemctl already configured and initdb executed
+	get_pg_version	#from $PSC_PATH/pg_conf.sh
+	echo $pg_service_name' already installed'
+	
+	role_exists=$(get_scalar "postgres" "select 1 from pg_user where usename = '${db_user}' limit 1")
+	
+	if [ -z "$role_exists" ]
+	then
+		query_create_role="CREATE ROLE ${db_user} LOGIN password '${db_user_passw}' superuser;"
+		run_query "postgres" "$query_create_role"
+	else
+		echo 'ROLE '${db_user}' already exists'
+	fi
+	
+	db_exists=$(get_scalar "postgres" "SELECT datname FROM pg_database WHERE datname='${db_name}' limit 1")
 
+	create_db()
+	{
+		query="
+			CREATE DATABASE ${db_name}
+				WITH OWNER = ${db_user}
+				ENCODING = 'UTF8'
+				template=template0
+				TABLESPACE = pg_default
+				LC_COLLATE = 'en_US.UTF-8'
+				LC_CTYPE = 'en_US.UTF-8'
+				CONNECTION LIMIT = -1;
+		"
+		echo 'DB ${db_name} does not exists, creating...'
+		run_query "postgres" "$query"
+	}
+
+	if [ -z "$db_exists" ]
+	then
+		create_db
+		echo 'DB '${db_name}' is created'
+	else
+		echo 'DB '${db_name}' already exists'
+	fi
+
+	sys_stat_objs_exists=$(get_scalar "${db_name}" "select 1 from pg_class where relname = 'psc_nodes' and relkind = 'r' limit 1")
+	if [ -z "$sys_stat_objs_exists" ]
+	then
+		execute_file "$db_name" "$PSC_PATH/sql/sys_stat.backup"
+	else
+		echo 'DB '${db_name}' already restored'
+	fi
+	
 else
 	yum install -y https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm
 	yum install -y postgresql10-server postgresql10-contrib
@@ -106,26 +199,13 @@ else
 
 	run_query "postgres" "$query"
 	execute_file "$db_name" "$PSC_PATH/sql/sys_stat.backup"
+	get_pg_version
 fi
-
-get_scalar()
-{
-	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -h 127.0.0.1 -U postgres -d $1 -c \"$2\""))
-	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
-	echo ${fld1}
-}
-
-pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")
 
 echo
 
-strindex() {
-  x="${1%%$2*}"
-  [[ "$x" = "$1" ]] && echo -1 || echo "${#x}"
-}
-
-source $PSC_PATH/pg_conf.sh
-run_pg_configure
+pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")		#for $PSC_PATH/pg_conf.sh
+run_pg_configure		#from $PSC_PATH/pg_conf.sh
 
 install_python()
 {
@@ -232,24 +312,26 @@ configure_pgbench()
 				LC_CTYPE = 'en_US.UTF-8'
 				CONNECTION LIMIT = -1;
 		"
-		echo 'DB ${bgbench_db_name} does not exists, creating...'
+		echo 'DB '${bgbench_db_name}' does not exists, creating...'
 		run_query "postgres" "$query"
 
-		su - postgres -c "/usr/pgsql-10/bin/pgbench -i ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} --foreign-keys"
+		su - postgres -c "${pg_dir_bin}/pgbench -i ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} --foreign-keys"
 	}
 
 	if [ -z "$db_exists" ]
 	then
 		create_db
 		crontab -l > $PSC_PATH/tmp_cron
-		echo "*/3 * * * * su - postgres -c \"/usr/pgsql-10/bin/pgbench ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} -t 3000 --no-vacuum\" >> $PSC_PATH/log/cron_pgbench.log 2>&1" >> $PSC_PATH/tmp_cron
+		echo "*/3 * * * * su - postgres -c \"${pg_dir_bin}/pgbench ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} -t 3000 --no-vacuum\" >> $PSC_PATH/log/cron_pgbench.log 2>&1" >> $PSC_PATH/tmp_cron
 		crontab $PSC_PATH/tmp_cron
 	else
 		echo 'DB '${bgbench_db_name}' already exists'
 	fi
 }
 
-configure_pgbench
+if [ ! "$no_configure_pgbench" ]; then
+	configure_pgbench
+fi
 
 ./install_main_node.sh --db-host=127.0.0.1 --db-port=$db_port --db-name=$db_name \
 --db-user=$db_user --db-passw=$db_user_passw --psc-admin-passw=$psc_admin_passw --psc-port=$psc_port \
@@ -264,3 +346,8 @@ configure_pgbench
 --psc-pg-log-dir="/var/log/pg_log" --psc-run --pg-stat-monitor-run --pg-stat-sys-run --pg-stat-log-scanner-run
 
 echo -e "\nDeploy is done"
+echo -e "----------------------------------"
+echo -e "pg_stat_console is ready to use: http://127.0.0.1:${psc_port}"
+echo -e "Login: admin"
+echo -e "Password: ${psc_admin_passw}"
+echo -e "----------------------------------"

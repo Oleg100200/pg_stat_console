@@ -54,9 +54,10 @@ chmod +x install_observed_node.sh
 ./install_observed_node.sh \
 --main-db-host=127.0.0.1 --main-db-port=6432 --main-db-name=sys_stat --main-db-user=app_user --main-db-passw=app_user \
 --db-host=127.0.0.1 --db-port=6432 --db-names=ALL --db-user=app_user --db-passw=app_user \
+--pg-configure \
 --psc-time-zone="Europe/Moscow" --pg-stat-monitor-port=8889 --pg-stat-monitor-allow-hosts="127.0.0.1" \
---psc-node-name="my test node" --psc-node-descr="test node descr" --psc-node-host="127.0.0.1" \
---psc-pg-log-dir="/var/log/pg_log"
+--psc-node-name="my test node" --psc-node-descr="test node descr" --psc-node-host="127.0.0.1" --psc-install \
+--psc-pg-log-dir="/var/log/pg_log" --psc-run --pg-stat-monitor-run --pg-stat-sys-run --pg-stat-log-scanner-run
 
 	OR
 	

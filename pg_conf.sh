@@ -1,3 +1,41 @@
+strindex() {
+  x="${1%%$2*}"
+  [[ "$x" = "$1" ]] && echo -1 || echo "${#x}"
+}
+
+get_scalar()
+{
+	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -h 127.0.0.1 -U postgres -d $1 -c \"$2\""))
+	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
+	echo ${fld1}
+}
+
+get_pg_version()
+{
+	pg_version=$(get_scalar "postgres" "SHOW server_version_num;")
+
+	if [ "$pg_version" -ge "90200" ] && [ "$pg_version" -lt "90300" ]; then
+		pg_service_name="postgresql-9.2"
+		pg_dir_bin="/usr/pgsql-9.2/bin"
+	fi
+	if [ "$pg_version" -ge "90300" ] && [ "$pg_version" -lt "90400" ]; then
+		pg_service_name="postgresql-9.3"
+		pg_dir_bin="/usr/pgsql-9.3/bin"
+	fi
+	if [ "$pg_version" -ge "90400" ] && [ "$pg_version" -lt "90500" ]; then
+		pg_service_name="postgresql-9.4"
+		pg_dir_bin="/usr/pgsql-9.4/bin"
+	fi
+	if [ "$pg_version" -ge "90500" ] && [ "$pg_version" -lt "90600" ]; then
+		pg_service_name="postgresql-9.5"
+		pg_dir_bin="/usr/pgsql-9.5/bin"
+	fi
+	if [ "$pg_version" -ge "100000" ] && [ "$pg_version" -lt "110000" ]; then
+		pg_service_name="postgresql-10"
+		pg_dir_bin="/usr/pgsql-10/bin"
+	fi
+}
+
 run_pg_configure()
 {
 	tune_core_params=()
@@ -92,7 +130,7 @@ run_pg_configure()
 	do
 		param_name_tmp=($line)
 		param_name=${param_name_tmp[0]}
-
+		found=0
 		if [[ !($param_name == *"#"*) ]] && [ ${#param_name} -ge 2 ]; then
 			#check active params
 			for tune_core_param in "${tune_core_params[@]}"
@@ -103,8 +141,12 @@ run_pg_configure()
 					new_config+=("#$line")
 					new_config+=("$tune_core_param")
 					tune_core_params_done+=("$tune_core_param")
+					found=1
 				fi
 			done
+			if [[ $found == 0 ]]; then
+				new_config+=("$line")
+			fi
 		else
 			new_config+=("$line")
 		fi
@@ -169,5 +211,5 @@ run_pg_configure()
 	printf "%s\n" "${new_config[@]}" > ${pg_config}
 	
 	systemctl daemon-reload
-	systemctl restart postgresql-10
+	systemctl restart $pg_service_name
 }
