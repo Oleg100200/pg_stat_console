@@ -1,6 +1,17 @@
-#!/bin/sh
+#!/bin/bash
+current_os=""
+ubuntu_release=""
 
-PYTHON='/usr/local/bin/python3.6' 
+if [ -f /etc/redhat-release ]; then
+	PYTHON='/usr/local/bin/python3.6'
+	UNIT_PATH='/usr/lib/systemd/system'
+fi
+
+if [ -f /etc/lsb-release ]; then
+	PYTHON='/usr/bin/python3.6'
+	UNIT_PATH='/lib/systemd/system'
+fi
+
 PSC_UNIT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PSC_PATH="$(dirname "$PSC_UNIT_PATH")"
 
@@ -17,8 +28,8 @@ for f in "$PSC_UNIT_PATH"/pg_stat_*example; do if [[ -f "$f" ]]; then
 			echo "Processing " $NEW_NAME
 			sed -i "s|PYTHON|$PYTHON|g" $NEW_NAME
 			sed -i "s|PSC_PATH|$PSC_PATH|g" $NEW_NAME
-			cp $NEW_NAME /usr/lib/systemd/system
-			chmod 664 /usr/lib/systemd/system/$(basename "$NEW_NAME")
+			cp $NEW_NAME $UNIT_PATH
+			chmod 664 $UNIT_PATH/$(basename "$NEW_NAME")
 		fi
 	else
 		echo -e "\nWrong input file " $f

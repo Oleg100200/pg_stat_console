@@ -14,25 +14,58 @@ get_pg_version()
 {
 	pg_version=$(get_scalar "postgres" "SHOW server_version_num;")
 
-	if [ "$pg_version" -ge "90200" ] && [ "$pg_version" -lt "90300" ]; then
-		pg_service_name="postgresql-9.2"
-		pg_dir_bin="/usr/pgsql-9.2/bin"
+	if [ $current_os == "RHEL" ]; then
+		if [ "$pg_version" -ge "90200" ] && [ "$pg_version" -lt "90300" ]; then
+			pg_service_name="postgresql-9.2"
+			pg_dir_bin="/usr/pgsql-9.2/bin"
+		fi
+		if [ "$pg_version" -ge "90300" ] && [ "$pg_version" -lt "90400" ]; then
+			pg_service_name="postgresql-9.3"
+			pg_dir_bin="/usr/pgsql-9.3/bin"
+		fi
+		if [ "$pg_version" -ge "90400" ] && [ "$pg_version" -lt "90500" ]; then
+			pg_service_name="postgresql-9.4"
+			pg_dir_bin="/usr/pgsql-9.4/bin"
+		fi
+		if [ "$pg_version" -ge "90500" ] && [ "$pg_version" -lt "90600" ]; then
+			pg_service_name="postgresql-9.5"
+			pg_dir_bin="/usr/pgsql-9.5/bin"
+		fi
+		if [ "$pg_version" -ge "90600" ] && [ "$pg_version" -lt "100000" ]; then
+			pg_service_name="postgresql-9.6"
+			pg_dir_bin="/usr/pgsql-9.6/bin"
+		fi		
+		if [ "$pg_version" -ge "100000" ] && [ "$pg_version" -lt "110000" ]; then
+			pg_service_name="postgresql-10"
+			pg_dir_bin="/usr/pgsql-10/bin"
+		fi
 	fi
-	if [ "$pg_version" -ge "90300" ] && [ "$pg_version" -lt "90400" ]; then
-		pg_service_name="postgresql-9.3"
-		pg_dir_bin="/usr/pgsql-9.3/bin"
-	fi
-	if [ "$pg_version" -ge "90400" ] && [ "$pg_version" -lt "90500" ]; then
-		pg_service_name="postgresql-9.4"
-		pg_dir_bin="/usr/pgsql-9.4/bin"
-	fi
-	if [ "$pg_version" -ge "90500" ] && [ "$pg_version" -lt "90600" ]; then
-		pg_service_name="postgresql-9.5"
-		pg_dir_bin="/usr/pgsql-9.5/bin"
-	fi
-	if [ "$pg_version" -ge "100000" ] && [ "$pg_version" -lt "110000" ]; then
-		pg_service_name="postgresql-10"
-		pg_dir_bin="/usr/pgsql-10/bin"
+
+	if [ $current_os == "Ubuntu" ]; then
+		if [ "$pg_version" -ge "90200" ] && [ "$pg_version" -lt "90300" ]; then
+			pg_service_name="postgresql@9.2-main"
+			pg_dir_bin="/usr/lib/postgresql/9.2/bin"
+		fi
+		if [ "$pg_version" -ge "90300" ] && [ "$pg_version" -lt "90400" ]; then
+			pg_service_name="postgresql@9.3-main"
+			pg_dir_bin="/usr/lib/postgresql/9.3/bin"
+		fi
+		if [ "$pg_version" -ge "90400" ] && [ "$pg_version" -lt "90500" ]; then
+			pg_service_name="postgresql@9.4-main"
+			pg_dir_bin="/usr/lib/postgresql/9.4/bin"
+		fi
+		if [ "$pg_version" -ge "90500" ] && [ "$pg_version" -lt "90600" ]; then
+			pg_service_name="postgresql@9.5-main"
+			pg_dir_bin="/usr/lib/postgresql/9.5/bin"
+		fi
+		if [ "$pg_version" -ge "90600" ] && [ "$pg_version" -lt "100000" ]; then
+			pg_service_name="postgresql@9.6-main"
+			pg_dir_bin="/usr/lib/postgresql/9.6/bin"
+		fi
+		if [ "$pg_version" -ge "100000" ] && [ "$pg_version" -lt "110000" ]; then
+			pg_service_name="postgresql@10-main"
+			pg_dir_bin="/usr/lib/postgresql/10/bin"
+		fi
 	fi
 }
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 psc_port=8888
 psc_monitor_port=8889
@@ -18,6 +18,26 @@ source $PSC_PATH/pg_conf.sh
 pg_version=0
 pg_service_name=""
 pg_dir_bin=""
+current_os=""
+ubuntu_release=""
+
+if [ -f /etc/redhat-release ]; then
+  current_os="RHEL"
+fi
+
+if [ -f /etc/lsb-release ]; then
+	current_os="Ubuntu"
+
+	if [[ $(lsb_release -d | gawk -F"\t" '{print $2}') == *"Ubuntu 17."* ]]; then
+		ubuntu_release="zesty"
+	fi
+	if [[ $(lsb_release -d | gawk -F"\t" '{print $2}') == *"Ubuntu 16."* ]]; then
+		ubuntu_release="xenial"
+	fi
+	if [[ $(lsb_release -d | gawk -F"\t" '{print $2}') == *"Ubuntu 14."* ]]; then
+		ubuntu_release="trusty"
+	fi
+fi
 
 show_help()
 {
@@ -69,16 +89,36 @@ fi
 
 echo -e "----------------------------------"
 
-if [[ -z $(yum list installed | grep sysstat) ]]; then
-	yum -y install sysstat
-else
-	echo "sysstat already installed"
+if [ $current_os == "RHEL" ]; then
+	if [[ -z $(yum list installed | grep sysstat) ]]; then
+		yum -y install sysstat
+	else
+		echo "sysstat already installed"
+	fi
+fi
+	
+if [ $current_os == "Ubuntu" ]; then
+	if [[ -z $(dpkg-query --list | grep sysstat) ]]; then
+		apt-get -y install sysstat
+	else
+		echo "sysstat already installed"
+	fi
 fi
 
-if [[ -z $(yum list installed | grep iotop) ]]; then
-	yum -y install iotop
-else
-	echo "iotop already installed"
+if [ $current_os == "RHEL" ]; then
+	if [[ -z $(yum list installed | grep iotop) ]]; then
+		yum -y install iotop
+	else
+		echo "iotop already installed"
+	fi
+fi
+
+if [ $current_os == "Ubuntu" ]; then
+	if [[ -z $(dpkg-query --list | grep iotop) ]]; then
+		apt-get -y install iotop
+	else
+		echo "iotop already installed"
+	fi
 fi
 
 allow_port()
@@ -97,11 +137,13 @@ allow_port $psc_port
 
 configure_systemctl()
 {
-	systemctl_file="/usr/lib/systemd/system/postgresql-10.service"
-	cp $systemctl_file ${systemctl_file}.$(date '+%Y%m%d_%H%M%S')
-	sed -i "s|Environment=PGDATA=/var/lib/pgsql/10/data/|Environment=PGDATA=$pg_data|g" $systemctl_file
-	systemctl daemon-reload
-	systemctl restart postgresql-10
+	if [ $current_os == "RHEL" ]; then
+		systemctl_file="/usr/lib/systemd/system/postgresql-10.service"
+		cp $systemctl_file ${systemctl_file}.$(date '+%Y%m%d_%H%M%S')
+		sed -i "s|Environment=PGDATA=/var/lib/pgsql/10/data/|Environment=PGDATA=$pg_data|g" $systemctl_file
+		systemctl daemon-reload
+		systemctl restart postgresql-10
+	fi
 }
 
 run_query()
@@ -121,7 +163,7 @@ get_scalar()
 	echo ${fld1}
 }
 
-if [ -d "/var/lib/pgsql" ]; then
+if [ -d "/var/lib/pgsql" ] || [ -d "/var/lib/postgresql" ]; then
 	echo
 	#here we suppose that systemctl already configured and initdb executed
 	get_pg_version	#from $PSC_PATH/pg_conf.sh
@@ -172,12 +214,34 @@ if [ -d "/var/lib/pgsql" ]; then
 	fi
 	
 else
-	yum install -y https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm
-	yum install -y postgresql10-server postgresql10-contrib
+
+	if [ $current_os == "RHEL" ]; then
+		yum install -y https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm
+		yum install -y postgresql10-server postgresql10-contrib
+	fi
+
+	if [ $current_os == "Ubuntu" ]; then
+		cat > /etc/apt/sources.list.d/pgdg.list << EOL
+deb http://apt.postgresql.org/pub/repos/apt/ $ubuntu_release-pgdg main
+EOL
+
+		wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+		  sudo apt-key add -
+		sudo apt-get update
+		apt-get install -y postgresql postgresql-contrib
+	fi
+	
 	systemctl enable postgresql-10
 	mkdir $pg_data
 	chown postgres $pg_data
-	su - postgres -c "/usr/pgsql-10/bin/initdb -D $pg_data -E 'UTF-8'"
+	
+	if [ $current_os == "RHEL" ]; then
+		su - postgres -c "/usr/pgsql-10/bin/initdb -D $pg_data -E 'UTF-8'"
+	fi
+	if [ $current_os == "Ubuntu" ]; then
+		su - postgres -c "/usr/lib/postgresql/10/bin/initdb -D $pg_data -E 'UTF-8'"
+	fi
+	
 	allow_port $db_port
 	configure_systemctl
 	
@@ -206,22 +270,36 @@ echo
 
 pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")		#for $PSC_PATH/pg_conf.sh
 run_pg_configure		#from $PSC_PATH/pg_conf.sh
+if [ $current_os == "Ubuntu" ]; then
+	sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
+fi 
 
 install_python()
 {
-	if [ ! -f /usr/local/bin/python3.6 ]; then
-		yum groupinstall -y 'development tools'
-		yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel
-		wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
-		xz -d Python-3.6.2.tar.xz
-		tar -xvf Python-3.6.2.tar
-		cd Python-3.6.2
-		./configure
-		make && make altinstall
-	else
-		echo "Python already installed"
+	if [ $current_os == "RHEL" ]; then
+		if [ ! -f /usr/local/bin/python3.6 ]; then
+			yum groupinstall -y 'development tools'
+			yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel
+			wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
+			xz -d Python-3.6.2.tar.xz
+			tar -xvf Python-3.6.2.tar
+			cd Python-3.6.2
+			./configure
+			make && make altinstall
+		else
+			echo "Python already installed"
+		fi
 	fi
 	
+	if [ $current_os == "Ubuntu" ]; then
+		if [ ! -f /usr/bin/python3.6 ]; then
+			apt-get install -y python3.6
+			curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
+		else
+			echo "Python already installed"
+		fi
+	fi
+
 	if [[ -z $(pip3.6 list --format columns | grep pytz) ]]; then
 		pip3.6 install pytz
 	fi
@@ -236,12 +314,22 @@ install_python()
 	fi
 }
 
-install_python
+install_python 
 
 install_pgbouncer()
 {
-	if [ ! -f /usr/bin/pgbouncer ]; then
+	if [ -f /usr/bin/pgbouncer ] || [ -f /usr/local/bin/pgbouncer ]; then
+		echo
+		echo "pgbouncer already installed"
+	else
+	if [ $current_os == "RHEL" ]; then
 		yum install -y pgbouncer
+	fi
+	
+	if [ $current_os == "Ubuntu" ]; then
+		apt-get install -y pgbouncer
+	fi
+		
 		cat > /etc/pgbouncer/pgbouncer.ini << EOL
 [databases]
 ${db_name} = host=127.0.0.1 user=${db_user}
@@ -288,9 +376,6 @@ EOL
 		chown pgbouncer:pgbouncer /var/log/pgbouncer.log
 		systemctl restart pgbouncer
 		systemctl enable pgbouncer
-	else
-		echo
-		echo "pgbouncer already installed"
 	fi
 }
 
