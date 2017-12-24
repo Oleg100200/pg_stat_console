@@ -1753,7 +1753,7 @@ def make_iostat_data():
 					io_vals.append( [ columns[0], 'wMB/s', columns[4] ] )
 					io_vals.append( [ columns[0], 'rrqm/s', columns[5] ] )
 					io_vals.append( [ columns[0], 'wrqm/s', columns[6] ] )
-					#io_vals.append( [ columns[0], '', columns[12] ] 	#avgrq-sz
+					io_vals.append( [ columns[0], 'avgrq-sz', float(columns[12]) + float(columns[13]) ] 	#rareq-sz + wareq-sz
 					io_vals.append( [ columns[0], 'avgqu-sz', columns[11] ] )	#aqu-sz
 					io_vals.append( [ columns[0], 'await', float(columns[9]) + float(columns[10]) ] )
 					io_vals.append( [ columns[0], 'svctm', columns[14] ] )
