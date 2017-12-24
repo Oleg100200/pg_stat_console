@@ -247,10 +247,6 @@ EOL
 	configure_systemctl
 	get_pg_version			#from $PSC_PATH/pg_conf.sh
 	run_pg_configure		#from $PSC_PATH/pg_conf.sh
-	
-	if [ $current_os == "Ubuntu" ]; then
-		sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
-	fi
 
 	query_create_role="
 	alter user postgres with password 'postgres';

@@ -242,7 +242,11 @@ run_pg_configure()
 			new_config+=("$check_param")
 		fi
 	done
-	
+
+	if [ $current_os == "Ubuntu" ]; then
+		sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
+	fi
+
 	mkdir /var/log/pg_log
 	chown postgres:postgres /var/log/pg_log
 	printf "%s\n" "${new_config[@]}" > ${pg_config}
