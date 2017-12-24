@@ -488,4 +488,6 @@ echo -e "----------------------------------"
 echo -e "pg_stat_console is ready to use: http://127.0.0.1:${psc_port}"
 echo -e "Login: admin"
 echo -e "Password: ${psc_admin_passw}"
+echo
+echo -e "After 10 minutes, the datapoints will appear on the graphs..."
 echo -e "----------------------------------"

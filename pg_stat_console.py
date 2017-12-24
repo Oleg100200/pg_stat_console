@@ -2491,7 +2491,7 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 				psc_devices.append( [ row['device_name'], row['device_type'], '<input class="conf_param" type="checkbox" param_name="' + row['device_name'] + '" node_name="' + \
 					node['node_name'] + '" param_type="device_in_report" value="a1">Yes</input>' ] )	
 
-			result = self.make_query( 'sys_stat', """SELECT db_name FROM psc_dbs where db_name not in ('postgres', 'template0', 'template1', 'None');""", node['node_name'] )
+			result = self.make_query( 'sys_stat', """SELECT db_name FROM psc_dbs where db_name not in ('postgres', 'template0', 'template1', 'None', '');""", node['node_name'] )
 			for row in result:
 				databases.append( [ row['db_name'],'<input class="conf_param" type="checkbox" param_name="' + row['db_name'] + '" node_name="' +  node['node_name'] + '" param_type="db_in_report" value="a1">Yes</input>' ] )	
 
