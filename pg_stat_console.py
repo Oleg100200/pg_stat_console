@@ -1372,7 +1372,6 @@ class GetAVGRQStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		if self.check_auth() == False:
 			return ""
 
-		avgrq_sz_found = False
 		metrics = self.make_query( 'sys_stat', """SELECT p.param_name, max(dt) as last_dt
 							  FROM psc_os_stat s
 							  inner join psc_params p on p.id = s.param_id
