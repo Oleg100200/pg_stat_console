@@ -923,7 +923,7 @@ class GetLogHandler(BaseAsyncHandlerNoParam):
 						str_res += line
 				except Exception as e:
 					str_res += line
-		logger.log( "End parsing logger.log lines...", "Info" )
+		logger.log( "End parsing log lines...", "Info" )
 		str_res = html.escape( str_res )
 		if str_res.find("""b&#x27;""") == 0:
 			str_res = str_res[len("""b&#x27;"""):]
