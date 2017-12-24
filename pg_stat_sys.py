@@ -1678,9 +1678,9 @@ def make_iostat_data():
 			if len( columns ) > 0:
 				if columns[0] == 'avg-cpu:':
 					count_cpu += 1
-				if columns[0] == 'Device:':
+				if columns[0] == 'Device:' or  columns[0] == 'Device':
 					count_io += 1	
-					
+
 				if len( columns ) == 6 and columns[0] != 'avg-cpu:' and count_cpu >= 2:
 					cpu_vals.append( [ '%user', columns[0] ] )
 					cpu_vals.append( [ '%nice', columns[1] ] )
@@ -1689,7 +1689,7 @@ def make_iostat_data():
 						cpu_vals.append( [ '%iowait', columns[3] ] )
 					cpu_vals.append( [ '%steal', columns[4] ] )
 					cpu_vals.append( [ '%idle', columns[5] ] )
-				
+
 				#if not exists 'r_await', 'w_await' columns and not first measurement
 				if len( columns ) == 12 and columns[0] != 'Device:' and count_io >= 2:
 					io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
@@ -1703,7 +1703,7 @@ def make_iostat_data():
 					io_vals.append( [ columns[0], 'await', columns[9] ] )
 					io_vals.append( [ columns[0], 'svctm', columns[10] ] )
 					io_vals.append( [ columns[0], '%util', columns[11] ] )
-					
+
 				#if exists 'r_await', 'w_await' columns and not first measurement
 				if len( columns ) == 14 and columns[0] != 'Device:' and count_io >= 2:
 					io_vals.append( [ columns[0], 'rrqm/s', columns[1] ] )
@@ -1716,7 +1716,48 @@ def make_iostat_data():
 					io_vals.append( [ columns[0], 'avgqu-sz', columns[8] ] )
 					io_vals.append( [ columns[0], 'await', columns[9] ] )
 					io_vals.append( [ columns[0], 'svctm', columns[12] ] )
-					io_vals.append( [ columns[0], '%util', columns[13] ] )				
+					io_vals.append( [ columns[0], '%util', columns[13] ] )
+
+				#if exists 'r_await', 'w_await' columns and not first measurement
+				if len( columns ) == 16 and columns[0] != 'Device' and count_io >= 2:
+					#sysstat version 11.5.7
+					#Device            r/s     w/s     rMB/s     wMB/s   rrqm/s   wrqm/s  %rrqm  %wrqm r_await w_await aqu-sz rareq-sz wareq-sz  svctm  %util
+					#sda              0.00    4.21      0.00      0.02     0.00     1.20   0.00  22.22    0.00    0.19   0.00     0.00     5.14   0.19   0.08
+					#					1		2		3			4		5		6		7		8		9		10		11		12		13		14		15
+					#r/s - The number (after merges) of read requests completed per second for the device. 
+					#w/s - The number (after merges) of write requests completed per second for the device. 
+					#sec/s (kB/s, MB/s) - The number of sectors (kilobytes, megabytes) read from or written to the device per second.
+					#rsec/s (rkB/s, rMB/s) - The number of sectors (kilobytes, megabytes) read from the device per second. 
+					#wsec/s (wkB/s, wMB/s) - The number of sectors (kilobytes, megabytes) written to the device per second.
+					#rqm/s - The number of I/O requests merged per second that were queued to the device.
+					#rrqm/s - The number of read requests merged per second that were queued to the device. 
+					#wrqm/s - The number of write requests merged per second that were queued to the device.
+					#%rrqm - The percentage of read requests merged together before being sent to the device.
+					#%wrqm - The percentage of write requests merged together before being sent to the device.
+					#areq-sz - The average size (in kilobytes) of the requests that were issued to the device.
+					#	Note: In previous versions, this field was known as avgrq-sz and was expressed in sectors.
+					#rareq-sz - The average size (in kilobytes) of the read requests that were issued to the device.
+					#wareq-sz - The average size (in kilobytes) of the write requests that were issued to the device.
+					
+					#await - The average time (in milliseconds) for I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.
+					#r_await - The average time (in milliseconds) for read requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.
+					#w_await - The average time (in milliseconds) for write requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.
+					
+					#aqu-sz - The average queue length of the requests that were issued to the device.
+					#	Note: In previous versions, this field was known as avgqu-sz.
+					#svctm - The average service time (in milliseconds) for I/O requests that were issued to the device. Warning! Do not trust this field any more. This field will be removed in a future sysstat version.
+
+					io_vals.append( [ columns[0], 'r/s', columns[1] ] )
+					io_vals.append( [ columns[0], 'w/s', columns[2] ] )
+					io_vals.append( [ columns[0], 'rMB/s', columns[3] ] )
+					io_vals.append( [ columns[0], 'wMB/s', columns[4] ] )
+					io_vals.append( [ columns[0], 'rrqm/s', columns[5] ] )
+					io_vals.append( [ columns[0], 'wrqm/s', columns[6] ] )
+					#io_vals.append( [ columns[0], '', columns[12] ] 	#avgrq-sz
+					io_vals.append( [ columns[0], 'avgqu-sz', columns[11] ] )	#aqu-sz
+					io_vals.append( [ columns[0], 'await', float(columns[9]) + float(columns[10]) ] )
+					io_vals.append( [ columns[0], 'svctm', columns[14] ] )
+					io_vals.append( [ columns[0], '%util', columns[15] ] )
 
 	cmd_netstat_t2 = subprocess.Popen('netstat -i',shell=True,stdout=subprocess.PIPE)
 	write_network_vals( cmd_netstat_t2 )	
