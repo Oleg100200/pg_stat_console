@@ -144,21 +144,24 @@ configure_systemctl()
 		systemctl daemon-reload
 		systemctl restart postgresql-10
 	fi
+	if [ $current_os == "Ubuntu" ]; then
+		systemctl restart postgresql
+	fi
 }
 
 run_query()
 {
-	su -l postgres -c "psql -A -t -p ${db_port} -h 127.0.0.1 -U postgres -d $1 -c \"$2\""
+	su -l postgres -c "psql -A -t -p ${db_port} -U postgres -d $1 -c \"$2\""
 }
 
 execute_file()
 {
-	su -l postgres -c "psql -A -t -p ${db_port} -h 127.0.0.1 -U postgres -d $1 -a -f $2"
+	su -l postgres -c "psql -A -t -p ${db_port} -U postgres -d $1 -a -f $2"
 }
 
 get_scalar()
 {
-	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -h 127.0.0.1 -U postgres -d $1 -c \"$2\""))
+	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -U postgres -d $1 -c \"$2\""))
 	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
 	echo ${fld1}
 }
@@ -234,17 +237,17 @@ EOL
 	systemctl enable postgresql-10
 	mkdir $pg_data
 	chown postgres $pg_data
-	
+
 	if [ $current_os == "RHEL" ]; then
 		su - postgres -c "/usr/pgsql-10/bin/initdb -D $pg_data -E 'UTF-8'"
 	fi
 	if [ $current_os == "Ubuntu" ]; then
 		su - postgres -c "/usr/lib/postgresql/10/bin/initdb -D $pg_data -E 'UTF-8'"
 	fi
-	
+
 	allow_port $db_port
 	configure_systemctl
-	
+
 	query_create_role="
 	alter user postgres with password 'postgres';
 	CREATE ROLE ${db_user} LOGIN password '${db_user_passw}' superuser;"
@@ -269,6 +272,8 @@ fi
 echo
 
 pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")		#for $PSC_PATH/pg_conf.sh
+hba_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'hba_file' limit 1")
+
 run_pg_configure		#from $PSC_PATH/pg_conf.sh
 if [ $current_os == "Ubuntu" ]; then
 	sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
@@ -300,6 +305,10 @@ install_python()
 		fi
 	fi
 
+	if [ $current_os == "Ubuntu" ] && [ ! -f /usr/local/bin/pip3.6 ]; then
+		curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
+	fi
+
 	if [[ -z $(pip3.6 list --format columns | grep pytz) ]]; then
 		pip3.6 install pytz
 	fi
@@ -324,12 +333,65 @@ install_pgbouncer()
 	else
 	if [ $current_os == "RHEL" ]; then
 		yum install -y pgbouncer
+		systemctl enable pgbouncer
 	fi
 	
 	if [ $current_os == "Ubuntu" ]; then
-		apt-get install -y pgbouncer
-	fi
+		apt-get install -y build-essential libtool m4 automake
+		apt-get install -y libevent-dev libc-ares2 \
+		libc-ares-dev \
+		libev4 \
+		libev-dev \
+		libevent-dev \
+		libssl1.0.0 \
+		libssl-dev \
+		libtool \
+		pkg-config \
+		python-docutils
+
+		git clone https://github.com/pgbouncer/pgbouncer.git
+		cd pgbouncer
+		git submodule init
+		git submodule update
+		./autogen.sh
+		./configure
+		make
+		make install
+		mkdir /etc/pgbouncer
+		cd ..
+		mv pgbouncer/etc/* /etc/pgbouncer/
 		
+		groupadd -r pgbouncer
+		useradd -rm -d /var/run/pgbouncer -g pgbouncer pgbouncer
+		chown pgbouncer:pgbouncer /etc/pgbouncer/*
+		cat > /etc/systemd/system/pgbouncer.service << EOL
+[Unit]
+Description=A lightweight connection pooler for PostgreSQL
+After=syslog.target
+After=network.target
+
+[Service]
+Type=forking
+
+User=pgbouncer
+Group=pgbouncer
+
+Environment=BOUNCERCONF=/etc/pgbouncer/pgbouncer.ini
+
+PIDFile=/var/run/pgbouncer/pgbouncer.pid
+
+ExecStart=/usr/local/bin/pgbouncer -d -q \${BOUNCERCONF}
+ExecReload=/usr/bin/kill -HUP \$MAINPID
+KillSignal=SIGINT
+
+TimeoutSec=300
+
+[Install]
+WantedBy=multi-user.target
+EOL
+		systemctl daemon-reload
+	fi
+
 		cat > /etc/pgbouncer/pgbouncer.ini << EOL
 [databases]
 ${db_name} = host=127.0.0.1 user=${db_user}
@@ -400,14 +462,14 @@ configure_pgbench()
 		echo 'DB '${bgbench_db_name}' does not exists, creating...'
 		run_query "postgres" "$query"
 
-		su - postgres -c "${pg_dir_bin}/pgbench -i ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} --foreign-keys"
+		su - postgres -c "${pg_dir_bin}/pgbench -i ${bgbench_db_name} -p ${db_port} --foreign-keys"
 	}
 
 	if [ -z "$db_exists" ]
 	then
 		create_db
 		crontab -l > $PSC_PATH/tmp_cron
-		echo "*/3 * * * * su - postgres -c \"${pg_dir_bin}/pgbench ${bgbench_db_name} -h 127.0.0.1 -p ${db_port} -t 3000 --no-vacuum\" >> $PSC_PATH/log/cron_pgbench.log 2>&1" >> $PSC_PATH/tmp_cron
+		echo "*/3 * * * * su - postgres -c \"${pg_dir_bin}/pgbench ${bgbench_db_name} -p ${db_port} -t 3000 --no-vacuum\" >> $PSC_PATH/log/cron_pgbench.log 2>&1" >> $PSC_PATH/tmp_cron
 		crontab $PSC_PATH/tmp_cron
 	else
 		echo 'DB '${bgbench_db_name}' already exists'
