@@ -117,7 +117,7 @@ run_pg_configure()
 	
 	tune_core_params+=("log_destination = 'csvlog'")
 	tune_core_params+=("logging_collector = on")
-	tune_core_params+=("log_directory = 'pg_log'")
+	tune_core_params+=("log_directory = '/var/log/pg_log'")
 	tune_core_params+=("log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'")
 	tune_core_params+=("log_truncate_on_rotation = on")
 	tune_core_params+=("log_rotation_age = 1d")
@@ -241,6 +241,8 @@ run_pg_configure()
 		fi
 	done
 	
+	mkdir /var/log/pg_log
+	chown postgres:postgres /var/log/pg_log
 	printf "%s\n" "${new_config[@]}" > ${pg_config}
 	if [ ! -z "$db_user" ]
 	then

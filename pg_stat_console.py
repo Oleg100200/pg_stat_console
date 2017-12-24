@@ -1372,13 +1372,33 @@ class GetAVGRQStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		if self.check_auth() == False:
 			return ""
 
-		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "avgrq-sz" ] ), data["node_name"] )
+		avgrq_sz_found = False
+		metrics = self.make_query( 'sys_stat', """SELECT p.param_name, max(dt) as last_dt
+							  FROM psc_os_stat s
+							  inner join psc_params p on p.id = s.param_id
+							  inner join psc_devices d on d.id = s.device_id
+							  where p.param_name """ + self.param_generator( ["avgrq-sz", "areq-sz"] ) + 
+							  """ and dt >= '""" + data[ "date_a" ] + """'::timestamp """ + timezone_correct_time_forward +""" and 
+								dt < '""" + data[ "date_b" ] + """'::timestamp """ + timezone_correct_time_forward + """ 
+							group by p.param_name
+							order by last_dt desc
+							limit 1""" )
+
+		metric = "areq-sz"
+		unit = "avg KBytes"
+		for metric_v in metrics:
+			if metric_v[0] == "avgrq-sz":
+				metric = "avgrq-sz"
+				unit = "avg sectors"
+				break
+
+		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ metric ] ), data["node_name"] )
 		for device in psc_devices:
 			if [ data["node_name"], device[0] ] in self.current_user_devices:
-				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "avgrq-sz" ] )
+				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ metric ] )
 				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'avgrq-sz (' + device[0] + ') [ avg sectors ]', 'line' ] )
-				
+					metric + ' (' + device[0] + ') [ ' + unit + ' ]', 'line' ] )
+
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
 class GetAVGQUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
@@ -2467,13 +2487,12 @@ class ShowUserConfigHandler(BaseAsyncHandlerNoParam):
 				continue
 			databases = []
 			psc_devices = []
-			print( '--------------------------->' + str( node['node_name'] ) )
 			result =  self.make_query( 'sys_stat', """SELECT device_name, device_type FROM psc_devices;""", node['node_name'] )
 			for row in result:
 				psc_devices.append( [ row['device_name'], row['device_type'], '<input class="conf_param" type="checkbox" param_name="' + row['device_name'] + '" node_name="' + \
 					node['node_name'] + '" param_type="device_in_report" value="a1">Yes</input>' ] )	
 
-			result = self.make_query( 'sys_stat', """SELECT db_name FROM psc_dbs where db_name not in ('postgres', 'template0', 'template1');""", node['node_name'] )
+			result = self.make_query( 'sys_stat', """SELECT db_name FROM psc_dbs where db_name not in ('postgres', 'template0', 'template1', 'None');""", node['node_name'] )
 			for row in result:
 				databases.append( [ row['db_name'],'<input class="conf_param" type="checkbox" param_name="' + row['db_name'] + '" node_name="' +  node['node_name'] + '" param_type="db_in_report" value="a1">Yes</input>' ] )	
 

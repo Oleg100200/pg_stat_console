@@ -196,7 +196,7 @@ if [ -d "/var/lib/pgsql" ] || [ -d "/var/lib/postgresql" ]; then
 				LC_CTYPE = 'en_US.UTF-8'
 				CONNECTION LIMIT = -1;
 		"
-		echo 'DB ${db_name} does not exists, creating...'
+		echo 'DB "${db_name}" does not exists, creating...'
 		run_query "postgres" "$query"
 	}
 

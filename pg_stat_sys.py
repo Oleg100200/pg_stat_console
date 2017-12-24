@@ -1753,7 +1753,7 @@ def make_iostat_data():
 					io_vals.append( [ columns[0], 'wMB/s', columns[4] ] )
 					io_vals.append( [ columns[0], 'rrqm/s', columns[5] ] )
 					io_vals.append( [ columns[0], 'wrqm/s', columns[6] ] )
-					io_vals.append( [ columns[0], 'avgrq-sz', float(columns[12]) + float(columns[13]) ] 	#rareq-sz + wareq-sz
+					io_vals.append( [ columns[0], 'areq-sz', float(columns[12]) + float(columns[13]) ] ) 	#rareq-sz + wareq-sz, replacing of avgrq-sz. "sectors" -> "KB"
 					io_vals.append( [ columns[0], 'avgqu-sz', columns[11] ] )	#aqu-sz
 					io_vals.append( [ columns[0], 'await', float(columns[9]) + float(columns[10]) ] )
 					io_vals.append( [ columns[0], 'svctm', columns[14] ] )
@@ -1787,7 +1787,7 @@ def make_iostat_data():
 		network_vals_diff.append( diff_param_by_device( device, 'TX-OVR', network_vals ) )		
 		network_vals_diff.append( diff_param_per_sec_by_device( device, 'rx_bytes', network_vals, sleep_interval_os_stat_if_iostat_not_working ) )	#must be equal to iostat delay
 		network_vals_diff.append( diff_param_per_sec_by_device( device, 'tx_bytes', network_vals, sleep_interval_os_stat_if_iostat_not_working ) )
-		
+
 	for device in hdd_devices:
 		io_vals_avg.append( avg_param_by_device( device, 'rrqm/s', io_vals ) )
 		io_vals_avg.append( avg_param_by_device( device, 'wrqm/s', io_vals ) )
@@ -1795,7 +1795,13 @@ def make_iostat_data():
 		io_vals_avg.append( avg_param_by_device( device, 'w/s', io_vals ) )
 		io_vals_avg.append( avg_param_by_device( device, 'rMB/s', io_vals ) )
 		io_vals_avg.append( avg_param_by_device( device, 'wMB/s', io_vals ) )
-		io_vals_avg.append( avg_param_by_device( device, 'avgrq-sz', io_vals ) )
+
+		for v in io_vals:
+			if v[1] == "avgrq-sz":
+				io_vals_avg.append( avg_param_by_device( device, 'avgrq-sz', io_vals ) )
+			if v[1] == "areq-sz":
+				io_vals_avg.append( avg_param_by_device( device, 'areq-sz', io_vals ) )
+
 		io_vals_avg.append( avg_param_by_device( device, 'avgqu-sz', io_vals ) )
 		io_vals_avg.append( avg_param_by_device( device, 'await', io_vals ) )
 		io_vals_avg.append( avg_param_by_device( device, 'svctm', io_vals ) )
