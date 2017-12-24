@@ -227,19 +227,19 @@ sed -i "s|PSC_MONITOR_PORT|$psc_monitor_port|g" $NEW_CONF
 
 get_scalar()
 {
-	results=($(su -l postgres -c "PGPASSWORD='${db_passw}'; psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d $1 -c \"$2\""))
+	results=($(su -l postgres -c "PGPASSWORD='${db_passw}' psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d $1 -c \"$2\""))
 	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
 	echo ${fld1}
 }
 
 execute_file()
 {
-	su -l postgres -c "PGPASSWORD='${db_passw}'; psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d '${db_name}' -a -f $1"
+	su -l postgres -c "PGPASSWORD='${db_passw}' psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d '${db_name}' -a -f $1"
 }
 
 run_query()
 {
-	su -l postgres -c "PGPASSWORD='${db_passw}'; psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d $1 -c \"$2\""
+	su -l postgres -c "PGPASSWORD='${db_passw}' psql -A -t -p '${db_port}' -h '${db_host}' -U '${db_user}' -d $1 -c \"$2\""
 }
 
 db_exists=$(get_scalar "postgres" "SELECT datname FROM pg_database WHERE datname='${db_name}' limit 1")

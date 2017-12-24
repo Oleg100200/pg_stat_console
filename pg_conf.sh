@@ -5,7 +5,7 @@ strindex() {
 
 get_scalar()
 {
-	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -h 127.0.0.1 -U postgres -d $1 -c \"$2\""))
+	results=($(su -l postgres -c "psql -A -t -p '${db_port}' -U postgres -d $1 -c \"$2\""))
 	fld1=`echo ${results[0]} | awk -F'|' '{print $1}'`
 	echo ${fld1}
 }
@@ -67,6 +67,8 @@ get_pg_version()
 			pg_dir_bin="/usr/lib/postgresql/10/bin"
 		fi
 	fi
+	pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")		#for $PSC_PATH/pg_conf.sh
+	hba_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'hba_file' limit 1")
 }
 
 run_pg_configure()
@@ -244,10 +246,6 @@ run_pg_configure()
 	mkdir /var/log/pg_log
 	chown postgres:postgres /var/log/pg_log
 	printf "%s\n" "${new_config[@]}" > ${pg_config}
-	if [ ! -z "$db_user" ]
-	then
-		echo 'host all '${db_user}' 127.0.0.1/32 trust' >> ${hba_config}
-	fi
 	systemctl daemon-reload
 	systemctl restart $pg_service_name
 }

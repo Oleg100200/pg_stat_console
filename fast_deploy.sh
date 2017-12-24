@@ -144,9 +144,6 @@ configure_systemctl()
 		systemctl daemon-reload
 		systemctl restart postgresql-10
 	fi
-	if [ $current_os == "Ubuntu" ]; then
-		systemctl restart postgresql
-	fi
 }
 
 run_query()
@@ -169,7 +166,8 @@ get_scalar()
 if [ -d "/var/lib/pgsql" ] || [ -d "/var/lib/postgresql" ]; then
 	echo
 	#here we suppose that systemctl already configured and initdb executed
-	get_pg_version	#from $PSC_PATH/pg_conf.sh
+	get_pg_version			#from $PSC_PATH/pg_conf.sh
+	run_pg_configure		#from $PSC_PATH/pg_conf.sh
 	echo $pg_service_name' already installed'
 	
 	role_exists=$(get_scalar "postgres" "select 1 from pg_user where usename = '${db_user}' limit 1")
@@ -247,6 +245,12 @@ EOL
 
 	allow_port $db_port
 	configure_systemctl
+	get_pg_version			#from $PSC_PATH/pg_conf.sh
+	run_pg_configure		#from $PSC_PATH/pg_conf.sh
+	
+	if [ $current_os == "Ubuntu" ]; then
+		sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
+	fi
 
 	query_create_role="
 	alter user postgres with password 'postgres';
@@ -266,18 +270,9 @@ EOL
 
 	run_query "postgres" "$query"
 	execute_file "$db_name" "$PSC_PATH/sql/sys_stat.backup"
-	get_pg_version
 fi
 
 echo
-
-pg_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'config_file' limit 1")		#for $PSC_PATH/pg_conf.sh
-hba_config=$(get_scalar "postgres" "select setting from pg_settings where name = 'hba_file' limit 1")
-
-run_pg_configure		#from $PSC_PATH/pg_conf.sh
-if [ $current_os == "Ubuntu" ]; then
-	sed -i "s|/var/lib/postgresql/10/main|$pg_data|g" $pg_config
-fi 
 
 install_python()
 {
