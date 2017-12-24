@@ -246,7 +246,7 @@ run_pg_configure()
 	printf "%s\n" "${new_config[@]}" > ${pg_config}
 	if [ ! -z "$db_user" ]
 	then
-		echo 'host all "${db_user}" 127.0.0.1/32 trust' >> ${hba_config}
+		echo 'host all '${db_user}' 127.0.0.1/32 trust' >> ${hba_config}
 	fi
 	systemctl daemon-reload
 	systemctl restart $pg_service_name
