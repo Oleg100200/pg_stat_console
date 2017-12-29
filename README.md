@@ -39,7 +39,8 @@ Just typing:
 yum -y install git
 cd /home
 git clone https://github.com/masterlee998/pg_stat_console
-cd pg_stat_console && ./fast_deploy.sh
+cd pg_stat_console
+./fast_deploy.sh
 ```
 
 Auto deployment has been tested on RHEL 7 and Ubuntu Xenial.
