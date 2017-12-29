@@ -28,7 +28,26 @@ http://psc.pg-support.com
 * aggregation of old data (compression)
 * monthly reports
 
-## Installation (RHEL 7 example)
+## Fast installation
+
+To install pg_stat_console on a clean OS, you can use <code>fast_deploy.sh</code>
+Before installation, make sure that the time zone specified in <code>fast_deploy.sh</code> is equal to yours and the system time is synchronized.
+
+Just typing:
+
+```
+yum -y git
+cd /home
+git clone https://github.com/masterlee998/pg_stat_console
+cd pg_stat_console
+./fast_deploy.sh
+```
+
+Auto deployment has been tested on RHEL 7 and Ubuntu Xenial.
+
+During the installation, a test database will be created and pgbench is set up to create a test workload. Don't forget to remove the pgbench job from cron.
+
+## Manual installation (RHEL 7 example)
 
 ### OS utils on all nodes
 
