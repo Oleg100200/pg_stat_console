@@ -95,6 +95,11 @@ if [ $current_os == "RHEL" ]; then
 	else
 		echo "sysstat already installed"
 	fi
+	if [[ -z $(yum list installed | grep wget) ]]; then
+		yum -y install wget
+	else
+		echo "wget already installed"
+	fi
 fi
 	
 if [ $current_os == "Ubuntu" ]; then
