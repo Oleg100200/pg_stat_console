@@ -476,6 +476,8 @@ if [ ! "$no_configure_pgbench" ]; then
 	configure_pgbench
 fi
 
+cd $PSC_PATH
+
 ./install_main_node.sh --db-host=127.0.0.1 --db-port=$db_port --db-name=$db_name \
 --db-user=$db_user --db-passw=$db_user_passw --psc-admin-passw=$psc_admin_passw --psc-port=$psc_port \
 --psc-time-zone="Europe/Moscow" --psc-monitor-port=$psc_monitor_port --psc-no-create-db --psc-install --psc-run
