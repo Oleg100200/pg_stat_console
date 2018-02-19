@@ -249,6 +249,7 @@ EOL
 	fi
 
 	allow_port $db_port
+	allow_port $pgbouncer_port
 	configure_systemctl
 	get_pg_version			#from $PSC_PATH/pg_conf.sh
 	run_pg_configure		#from $PSC_PATH/pg_conf.sh

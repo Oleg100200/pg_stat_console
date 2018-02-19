@@ -14,8 +14,8 @@ sys_stat = pq://MAIN_DB_USER:MAIN_DB_PASSW@MAIN_DB_HOST:MAIN_DB_PORT/MAIN_DB_NAM
 [main]
 #This section contains main configuration parameters
 
-collect_pg_sys_stat = 1			#collect statistic of DB
-collect_pg_conn_snapshot = 1	#collect snapshots of connections and locks
+collect_pg_sys_stat = PSC_COLLECT_DB_STAT			#collect statistic of DB
+collect_pg_conn_snapshot = PSC_COLLECT_CONN_STAT	#collect snapshots of connections and locks
 collect_os_stat = 1				#collect statistic of OS
 
 sleep_interval_pg_sys_stat = 300		#sleep interval for make snapshots of DB statistic

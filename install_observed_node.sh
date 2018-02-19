@@ -66,6 +66,8 @@ chmod +x install_observed_node.sh
 '
 }
 
+no_db=0
+
 while [ "$1" != "" ]; do
 	PARAM=`echo $1 | awk -F= '{print $1}'`
 	VALUE=`echo $1 | awk -F= '{print $2}'`
@@ -108,17 +110,17 @@ while [ "$1" != "" ]; do
 			db_passw=$VALUE
 			;;
 		--no-db)
-			no_db=$VALUE
+			no_db=1
 			;;
 		--psc-time-zone)
 			psc_time_zone=$VALUE
 			;;
 		--no-pg-stat-sys)
 			no_pg_stat_sys=1
-			;;		
+			;;
 		--no-pg-stat-monitor)
 			no_pg_stat_monitor=1
-			;;			
+			;;
 		--pg-stat-monitor-port)
 			pg_stat_monitor_port=$VALUE
 			;;
@@ -130,13 +132,13 @@ while [ "$1" != "" ]; do
 			;;
 		--psc-node-descr)
 			psc_node_descr=$VALUE
-			;;			
+			;;
 		--psc-node-host)
 			psc_node_host=$VALUE
 			;;
 		--no-pg-stat-log-scanner)
 			no_pg_stat_log_scanner=1
-			;;	
+			;;
 		--psc-pg-log-dir)
 			psc_pg_log_dir=$VALUE
 			;;
@@ -251,7 +253,7 @@ if [ -z "$no_main_db" ]; then
 	fi
 fi
 
-if [ -z "$no_db" ]; then
+if [ "$no_db" == 0 ]; then
 	if [ -z "$db_host" ]; then
 		echo
 		echo -n "Enter DB host and press [ENTER] (default 127.0.0.1):"
@@ -376,7 +378,7 @@ if [ -z "$psc_node_host" ]; then
 	fi
 fi
 
-if [ -z "$psc_pg_log_dir" ]; then
+if [ "$no_db" == 0 ] && [ -z "$psc_pg_log_dir" ]; then
 	echo
 	echo -n "Enter pg_log directory location and press [ENTER] (default '/var/log/pg_log'):"
 	read psc_pg_log_dir
@@ -440,6 +442,9 @@ write_node_params()
 	sed -i "s|PSC_NODE_DESCR|$psc_node_descr|g" $1
 	sed -i "s|PSC_NODE_HOST|$psc_node_host|g" $1
 	sed -i "s|PSC_TIME_ZONE|$psc_time_zone|g" $1
+	
+	sed -i "s|PSC_COLLECT_DB_STAT|$no_db|g" $1
+	sed -i "s|PSC_COLLECT_CONN_STAT|$no_db|g" $1
 }
 
 write_node_params $NEW_CONF_STAT_SYS
