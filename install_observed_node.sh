@@ -442,9 +442,6 @@ write_node_params()
 	sed -i "s|PSC_NODE_DESCR|$psc_node_descr|g" $1
 	sed -i "s|PSC_NODE_HOST|$psc_node_host|g" $1
 	sed -i "s|PSC_TIME_ZONE|$psc_time_zone|g" $1
-	
-	sed -i "s|PSC_COLLECT_DB_STAT|$no_db|g" $1
-	sed -i "s|PSC_COLLECT_CONN_STAT|$no_db|g" $1
 }
 
 write_node_params $NEW_CONF_STAT_SYS
@@ -458,6 +455,14 @@ sed -i "s|PSC_PG_LOG_DIR|$psc_pg_log_dir|g" $NEW_CONF_MONITOR
 sed -i "s|PSC_PG_LOG_DIR|$psc_pg_log_dir|g" $NEW_CONF_LOG_SCANNER
 
 sed -i "s|PSC_DATABASES_PQ|$psc_databases_pq|g" $NEW_CONF_STAT_SYS
+
+if [ "$no_db" == 1 ]; then
+	sed -i "s|PSC_COLLECT_DB_STAT|0|g" $NEW_CONF_STAT_SYS
+	sed -i "s|PSC_COLLECT_CONN_STAT|0|g" $NEW_CONF_STAT_SYS
+else
+	sed -i "s|PSC_COLLECT_DB_STAT|1|g" $NEW_CONF_STAT_SYS
+	sed -i "s|PSC_COLLECT_CONN_STAT|1|g" $NEW_CONF_STAT_SYS
+fi
 
 is_istalled=0
 
