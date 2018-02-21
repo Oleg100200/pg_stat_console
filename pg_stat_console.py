@@ -2281,7 +2281,7 @@ class StopQueryHandler(BaseAsyncHandlerNoParam):
 
 class GetPgStatConsoleStatusHandler(BaseAsyncHandlerNoParam):
 	def tail(self, file_name, n, offset=0):
-		encoding = locale.getdefaultlocale()[1]
+		encoding = "utf-8" if locale.getdefaultlocale()[1] is None else locale.getdefaultlocale()[1]
 		cmd = subprocess.Popen("tail -n " + str(n) + str(offset) + " " + file_name,shell=True,stdout=subprocess.PIPE)
 		lines = []
 		line_num = 0
@@ -2291,7 +2291,7 @@ class GetPgStatConsoleStatusHandler(BaseAsyncHandlerNoParam):
 		return lines
 		
 	def check_runned_process(self, proc_name):
-		encoding = locale.getdefaultlocale()[1]
+		encoding = "utf-8" if locale.getdefaultlocale()[1] is None else locale.getdefaultlocale()[1]
 		cmd = subprocess.Popen("ps -eaf | grep " + proc_name,shell=True,stdout=subprocess.PIPE)
 		for line in cmd.stdout:  
 			line_str = str( line.decode(encoding) )
