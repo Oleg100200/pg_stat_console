@@ -143,7 +143,7 @@ while [ "$1" != "" ]; do
 			psc_pg_log_dir=$VALUE
 			;;
 		--pg-configure)
-			pg_configure=$VALUE
+			pg_configure=1
 			;;
 		--pg-no-configure)
 			pg_configure=0

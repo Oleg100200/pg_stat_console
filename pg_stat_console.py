@@ -67,7 +67,7 @@ pg_stat_monitor_port = int( read_conf_param_value( config['main']['pg_stat_monit
 db_pools = []
 db_pools.append( [ 'sys_stat', create_engine( read_conf_param_value( config['sys_stat']['sys_stat'] ) + '?application_name=' + \
 	read_conf_param_value( config['main']['application_name'] ), pool_size=pool_size_conf, max_overflow=0, poolclass=QueuePool, \
-	pool_recycle=int(read_conf_param_value( config['main']['db_pool_recycle'] ) )) ] )
+	pool_recycle=int(read_conf_param_value( config['main']['db_pool_recycle'] ) ), paramstyle="named") ] )
 
 session_factorys = []
 for pool in db_pools:
