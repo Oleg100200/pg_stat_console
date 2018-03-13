@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.4
--- Dumped by pg_dump version 9.6.4
+-- Dumped from database version 10.2
+-- Dumped by pg_dump version 10.2
 
--- Started on 2017-08-13 22:54:45 MSK
+-- Started on 2018-03-13 18:41:32 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,7 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 9 (class 2615 OID 220328)
+-- TOC entry 7 (class 2615 OID 16386)
 -- Name: node_template; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -29,7 +29,7 @@ ALTER SCHEMA node_template OWNER TO postgres;
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 272 (class 1255 OID 220329)
+-- TOC entry 464 (class 1255 OID 16387)
 -- Name: psc_get_app_name(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -57,7 +57,7 @@ $$;
 ALTER FUNCTION public.psc_get_app_name(app_name_p text) OWNER TO postgres;
 
 --
--- TOC entry 273 (class 1255 OID 220330)
+-- TOC entry 468 (class 1255 OID 16388)
 -- Name: psc_get_conn_state(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -85,7 +85,7 @@ $$;
 ALTER FUNCTION public.psc_get_conn_state(state_name_p text) OWNER TO postgres;
 
 --
--- TOC entry 274 (class 1255 OID 220331)
+-- TOC entry 467 (class 1255 OID 16389)
 -- Name: psc_get_db(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -113,7 +113,7 @@ $$;
 ALTER FUNCTION public.psc_get_db(db_name_p text) OWNER TO postgres;
 
 --
--- TOC entry 287 (class 1255 OID 220332)
+-- TOC entry 456 (class 1255 OID 16390)
 -- Name: psc_get_db_stat_val(text, text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -150,7 +150,7 @@ $$;
 ALTER FUNCTION public.psc_get_db_stat_val(node_name_p text, db_name_p text, param_name_p text, interval_p text, func_p text) OWNER TO postgres;
 
 --
--- TOC entry 288 (class 1255 OID 220333)
+-- TOC entry 455 (class 1255 OID 16391)
 -- Name: psc_get_db_user(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -178,7 +178,7 @@ $$;
 ALTER FUNCTION public.psc_get_db_user(db_user_p text) OWNER TO postgres;
 
 --
--- TOC entry 289 (class 1255 OID 220334)
+-- TOC entry 475 (class 1255 OID 16392)
 -- Name: psc_get_device(text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -210,7 +210,7 @@ $$;
 ALTER FUNCTION public.psc_get_device(device_name_p text, device_type_p text) OWNER TO postgres;
 
 --
--- TOC entry 290 (class 1255 OID 220335)
+-- TOC entry 454 (class 1255 OID 16393)
 -- Name: psc_get_lock_mode(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -238,7 +238,7 @@ $$;
 ALTER FUNCTION public.psc_get_lock_mode(lock_mode_p text) OWNER TO postgres;
 
 --
--- TOC entry 291 (class 1255 OID 220336)
+-- TOC entry 474 (class 1255 OID 16394)
 -- Name: psc_get_lock_type(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -266,7 +266,7 @@ $$;
 ALTER FUNCTION public.psc_get_lock_type(lock_type_p text) OWNER TO postgres;
 
 --
--- TOC entry 292 (class 1255 OID 220337)
+-- TOC entry 471 (class 1255 OID 16395)
 -- Name: psc_get_node(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -301,7 +301,7 @@ $$;
 ALTER FUNCTION public.psc_get_node(node_name_p text, node_desc_p text, node_host_p text) OWNER TO postgres;
 
 --
--- TOC entry 293 (class 1255 OID 220338)
+-- TOC entry 483 (class 1255 OID 16396)
 -- Name: psc_get_node_info(text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -351,7 +351,7 @@ $$;
 ALTER FUNCTION public.psc_get_node_info(node_name_p text, last_dt_p text) OWNER TO postgres;
 
 --
--- TOC entry 294 (class 1255 OID 220339)
+-- TOC entry 457 (class 1255 OID 16397)
 -- Name: psc_get_os_stat_val(text, text, text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -392,7 +392,7 @@ $$;
 ALTER FUNCTION public.psc_get_os_stat_val(node_name_p text, device_name_p text, device_type_p text, param_name_p text, interval_p text, func_p text) OWNER TO postgres;
 
 --
--- TOC entry 295 (class 1255 OID 220340)
+-- TOC entry 477 (class 1255 OID 16398)
 -- Name: psc_get_param(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -420,7 +420,7 @@ $$;
 ALTER FUNCTION public.psc_get_param(param_name_p text) OWNER TO postgres;
 
 --
--- TOC entry 296 (class 1255 OID 220341)
+-- TOC entry 466 (class 1255 OID 16399)
 -- Name: psc_get_stm_query(bigint, bigint, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -451,7 +451,7 @@ $$;
 ALTER FUNCTION public.psc_get_stm_query(db_id_p bigint, query_id_p bigint, query_p text) OWNER TO postgres;
 
 --
--- TOC entry 297 (class 1255 OID 220342)
+-- TOC entry 473 (class 1255 OID 16400)
 -- Name: psc_get_tbl(bigint, text, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -482,7 +482,7 @@ $$;
 ALTER FUNCTION public.psc_get_tbl(tbl_relid_p bigint, tbl_name_p text, db_id_p bigint) OWNER TO postgres;
 
 --
--- TOC entry 298 (class 1255 OID 220343)
+-- TOC entry 479 (class 1255 OID 16401)
 -- Name: psc_get_user_hash(text, text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -524,7 +524,7 @@ $$;
 ALTER FUNCTION public.psc_get_user_hash(user_hash_p text, user_name_p text, user_ip_p text, user_agent_p text) OWNER TO postgres;
 
 --
--- TOC entry 299 (class 1255 OID 220344)
+-- TOC entry 478 (class 1255 OID 16402)
 -- Name: psc_get_wait_name(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -552,7 +552,7 @@ $$;
 ALTER FUNCTION public.psc_get_wait_name(wait_name_p text) OWNER TO postgres;
 
 --
--- TOC entry 300 (class 1255 OID 220345)
+-- TOC entry 460 (class 1255 OID 16403)
 -- Name: psc_get_wait_type(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -580,7 +580,7 @@ $$;
 ALTER FUNCTION public.psc_get_wait_type(wait_type_p text) OWNER TO postgres;
 
 --
--- TOC entry 301 (class 1255 OID 220346)
+-- TOC entry 458 (class 1255 OID 16404)
 -- Name: psc_init_node(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -657,7 +657,7 @@ $$;
 ALTER FUNCTION public.psc_init_node(node_name_p text, node_descr_p text, node_host_p text) OWNER TO postgres;
 
 --
--- TOC entry 302 (class 1255 OID 220347)
+-- TOC entry 465 (class 1255 OID 16405)
 -- Name: psc_round_minutes(timestamp with time zone, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -675,7 +675,7 @@ ALTER FUNCTION public.psc_round_minutes(timestamp with time zone, integer) OWNER
 SET search_path = node_template, pg_catalog;
 
 --
--- TOC entry 187 (class 1259 OID 220348)
+-- TOC entry 202 (class 1259 OID 16406)
 -- Name: psc_app_names_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -692,7 +692,7 @@ ALTER TABLE psc_app_names_id_seq OWNER TO postgres;
 SET default_with_oids = false;
 
 --
--- TOC entry 188 (class 1259 OID 220350)
+-- TOC entry 203 (class 1259 OID 16408)
 -- Name: psc_app_names; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -705,7 +705,7 @@ CREATE TABLE psc_app_names (
 ALTER TABLE psc_app_names OWNER TO postgres;
 
 --
--- TOC entry 189 (class 1259 OID 220354)
+-- TOC entry 204 (class 1259 OID 16412)
 -- Name: psc_common_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -720,7 +720,7 @@ CREATE SEQUENCE psc_common_stat_id_seq
 ALTER TABLE psc_common_stat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 190 (class 1259 OID 220356)
+-- TOC entry 205 (class 1259 OID 16414)
 -- Name: psc_common_stat; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -735,7 +735,7 @@ CREATE TABLE psc_common_stat (
 ALTER TABLE psc_common_stat OWNER TO postgres;
 
 --
--- TOC entry 191 (class 1259 OID 220365)
+-- TOC entry 206 (class 1259 OID 16423)
 -- Name: psc_conn_states_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -750,7 +750,7 @@ CREATE SEQUENCE psc_conn_states_id_seq
 ALTER TABLE psc_conn_states_id_seq OWNER TO postgres;
 
 --
--- TOC entry 192 (class 1259 OID 220367)
+-- TOC entry 207 (class 1259 OID 16425)
 -- Name: psc_conn_states; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -763,7 +763,7 @@ CREATE TABLE psc_conn_states (
 ALTER TABLE psc_conn_states OWNER TO postgres;
 
 --
--- TOC entry 193 (class 1259 OID 220371)
+-- TOC entry 208 (class 1259 OID 16429)
 -- Name: psc_conns; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -790,7 +790,7 @@ CREATE TABLE psc_conns (
 ALTER TABLE psc_conns OWNER TO postgres;
 
 --
--- TOC entry 194 (class 1259 OID 220377)
+-- TOC entry 209 (class 1259 OID 16435)
 -- Name: psc_dbs_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -805,7 +805,7 @@ CREATE SEQUENCE psc_dbs_id_seq
 ALTER TABLE psc_dbs_id_seq OWNER TO postgres;
 
 --
--- TOC entry 195 (class 1259 OID 220379)
+-- TOC entry 210 (class 1259 OID 16437)
 -- Name: psc_dbs; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -818,7 +818,7 @@ CREATE TABLE psc_dbs (
 ALTER TABLE psc_dbs OWNER TO postgres;
 
 --
--- TOC entry 196 (class 1259 OID 220383)
+-- TOC entry 211 (class 1259 OID 16441)
 -- Name: psc_dbs_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -833,7 +833,7 @@ CREATE SEQUENCE psc_dbs_stat_id_seq
 ALTER TABLE psc_dbs_stat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 197 (class 1259 OID 220385)
+-- TOC entry 212 (class 1259 OID 16443)
 -- Name: psc_dbs_stat; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -849,7 +849,7 @@ CREATE TABLE psc_dbs_stat (
 ALTER TABLE psc_dbs_stat OWNER TO postgres;
 
 --
--- TOC entry 198 (class 1259 OID 220394)
+-- TOC entry 213 (class 1259 OID 16452)
 -- Name: psc_devices_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -864,7 +864,7 @@ CREATE SEQUENCE psc_devices_id_seq
 ALTER TABLE psc_devices_id_seq OWNER TO postgres;
 
 --
--- TOC entry 199 (class 1259 OID 220396)
+-- TOC entry 214 (class 1259 OID 16454)
 -- Name: psc_devices; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -878,7 +878,7 @@ CREATE TABLE psc_devices (
 ALTER TABLE psc_devices OWNER TO postgres;
 
 --
--- TOC entry 200 (class 1259 OID 220400)
+-- TOC entry 215 (class 1259 OID 16458)
 -- Name: psc_lock_modes_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -893,7 +893,7 @@ CREATE SEQUENCE psc_lock_modes_id_seq
 ALTER TABLE psc_lock_modes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 201 (class 1259 OID 220402)
+-- TOC entry 216 (class 1259 OID 16460)
 -- Name: psc_lock_modes; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -906,7 +906,7 @@ CREATE TABLE psc_lock_modes (
 ALTER TABLE psc_lock_modes OWNER TO postgres;
 
 --
--- TOC entry 202 (class 1259 OID 220406)
+-- TOC entry 217 (class 1259 OID 16464)
 -- Name: psc_locktypes_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -921,7 +921,7 @@ CREATE SEQUENCE psc_locktypes_id_seq
 ALTER TABLE psc_locktypes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 203 (class 1259 OID 220408)
+-- TOC entry 218 (class 1259 OID 16466)
 -- Name: psc_lock_types; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -934,7 +934,7 @@ CREATE TABLE psc_lock_types (
 ALTER TABLE psc_lock_types OWNER TO postgres;
 
 --
--- TOC entry 204 (class 1259 OID 220412)
+-- TOC entry 219 (class 1259 OID 16470)
 -- Name: psc_locks; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -959,7 +959,7 @@ CREATE TABLE psc_locks (
 ALTER TABLE psc_locks OWNER TO postgres;
 
 --
--- TOC entry 205 (class 1259 OID 220418)
+-- TOC entry 220 (class 1259 OID 16476)
 -- Name: psc_node_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -974,7 +974,7 @@ CREATE SEQUENCE psc_node_id_seq
 ALTER TABLE psc_node_id_seq OWNER TO postgres;
 
 --
--- TOC entry 206 (class 1259 OID 220420)
+-- TOC entry 221 (class 1259 OID 16478)
 -- Name: psc_os_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -989,7 +989,7 @@ CREATE SEQUENCE psc_os_stat_id_seq
 ALTER TABLE psc_os_stat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 207 (class 1259 OID 220422)
+-- TOC entry 222 (class 1259 OID 16480)
 -- Name: psc_os_stat; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1005,7 +1005,7 @@ CREATE TABLE psc_os_stat (
 ALTER TABLE psc_os_stat OWNER TO postgres;
 
 --
--- TOC entry 208 (class 1259 OID 220431)
+-- TOC entry 223 (class 1259 OID 16489)
 -- Name: psc_params_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1020,7 +1020,7 @@ CREATE SEQUENCE psc_params_id_seq
 ALTER TABLE psc_params_id_seq OWNER TO postgres;
 
 --
--- TOC entry 209 (class 1259 OID 220433)
+-- TOC entry 224 (class 1259 OID 16491)
 -- Name: psc_params; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1033,7 +1033,7 @@ CREATE TABLE psc_params (
 ALTER TABLE psc_params OWNER TO postgres;
 
 --
--- TOC entry 210 (class 1259 OID 220437)
+-- TOC entry 225 (class 1259 OID 16495)
 -- Name: psc_queries_and_plans_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1048,7 +1048,7 @@ CREATE SEQUENCE psc_queries_and_plans_id_seq
 ALTER TABLE psc_queries_and_plans_id_seq OWNER TO postgres;
 
 --
--- TOC entry 211 (class 1259 OID 220439)
+-- TOC entry 226 (class 1259 OID 16497)
 -- Name: psc_queries_and_plans; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1071,7 +1071,7 @@ CREATE TABLE psc_queries_and_plans (
 ALTER TABLE psc_queries_and_plans OWNER TO postgres;
 
 --
--- TOC entry 212 (class 1259 OID 220447)
+-- TOC entry 227 (class 1259 OID 16505)
 -- Name: psc_snapshots_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1086,7 +1086,7 @@ CREATE SEQUENCE psc_snapshots_id_seq
 ALTER TABLE psc_snapshots_id_seq OWNER TO postgres;
 
 --
--- TOC entry 213 (class 1259 OID 220449)
+-- TOC entry 228 (class 1259 OID 16507)
 -- Name: psc_snapshots; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1099,7 +1099,7 @@ CREATE TABLE psc_snapshots (
 ALTER TABLE psc_snapshots OWNER TO postgres;
 
 --
--- TOC entry 214 (class 1259 OID 220454)
+-- TOC entry 229 (class 1259 OID 16512)
 -- Name: psc_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1114,7 +1114,7 @@ CREATE SEQUENCE psc_stat_id_seq
 ALTER TABLE psc_stat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 215 (class 1259 OID 220456)
+-- TOC entry 230 (class 1259 OID 16514)
 -- Name: psc_stm_queries; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1129,7 +1129,7 @@ CREATE TABLE psc_stm_queries (
 ALTER TABLE psc_stm_queries OWNER TO postgres;
 
 --
--- TOC entry 216 (class 1259 OID 220462)
+-- TOC entry 231 (class 1259 OID 16520)
 -- Name: psc_stm_queries_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1144,8 +1144,8 @@ CREATE SEQUENCE psc_stm_queries_id_seq
 ALTER TABLE psc_stm_queries_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3434 (class 0 OID 0)
--- Dependencies: 216
+-- TOC entry 4516 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: psc_stm_queries_id_seq; Type: SEQUENCE OWNED BY; Schema: node_template; Owner: postgres
 --
 
@@ -1153,7 +1153,7 @@ ALTER SEQUENCE psc_stm_queries_id_seq OWNED BY psc_stm_queries.id;
 
 
 --
--- TOC entry 217 (class 1259 OID 220464)
+-- TOC entry 232 (class 1259 OID 16522)
 -- Name: psc_stm_stat; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1170,8 +1170,8 @@ CREATE TABLE psc_stm_stat (
 ALTER TABLE psc_stm_stat OWNER TO postgres;
 
 --
--- TOC entry 3435 (class 0 OID 0)
--- Dependencies: 217
+-- TOC entry 4517 (class 0 OID 0)
+-- Dependencies: 232
 -- Name: TABLE psc_stm_stat; Type: COMMENT; Schema: node_template; Owner: postgres
 --
 
@@ -1190,7 +1190,7 @@ INSERT INTO psc_stm_stat(
 
 
 --
--- TOC entry 218 (class 1259 OID 220472)
+-- TOC entry 233 (class 1259 OID 16530)
 -- Name: psc_stm_stat_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1205,8 +1205,8 @@ CREATE SEQUENCE psc_stm_stat_id_seq
 ALTER TABLE psc_stm_stat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3436 (class 0 OID 0)
--- Dependencies: 218
+-- TOC entry 4518 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: psc_stm_stat_id_seq; Type: SEQUENCE OWNED BY; Schema: node_template; Owner: postgres
 --
 
@@ -1214,7 +1214,7 @@ ALTER SEQUENCE psc_stm_stat_id_seq OWNED BY psc_stm_stat.id;
 
 
 --
--- TOC entry 219 (class 1259 OID 220474)
+-- TOC entry 234 (class 1259 OID 16532)
 -- Name: psc_tbls_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1229,7 +1229,7 @@ CREATE SEQUENCE psc_tbls_id_seq
 ALTER TABLE psc_tbls_id_seq OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1259 OID 220476)
+-- TOC entry 235 (class 1259 OID 16534)
 -- Name: psc_tbls; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1244,7 +1244,7 @@ CREATE TABLE psc_tbls (
 ALTER TABLE psc_tbls OWNER TO postgres;
 
 --
--- TOC entry 221 (class 1259 OID 220480)
+-- TOC entry 236 (class 1259 OID 16538)
 -- Name: psc_tbls_stat; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1261,8 +1261,8 @@ CREATE TABLE psc_tbls_stat (
 ALTER TABLE psc_tbls_stat OWNER TO postgres;
 
 --
--- TOC entry 3437 (class 0 OID 0)
--- Dependencies: 221
+-- TOC entry 4519 (class 0 OID 0)
+-- Dependencies: 236
 -- Name: TABLE psc_tbls_stat; Type: COMMENT; Schema: node_template; Owner: postgres
 --
 
@@ -1281,7 +1281,7 @@ INSERT INTO psc_tbls_stat(
 
 
 --
--- TOC entry 222 (class 1259 OID 220489)
+-- TOC entry 237 (class 1259 OID 16547)
 -- Name: psc_users_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1296,7 +1296,7 @@ CREATE SEQUENCE psc_users_id_seq
 ALTER TABLE psc_users_id_seq OWNER TO postgres;
 
 --
--- TOC entry 223 (class 1259 OID 220491)
+-- TOC entry 238 (class 1259 OID 16549)
 -- Name: psc_users; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1309,7 +1309,7 @@ CREATE TABLE psc_users (
 ALTER TABLE psc_users OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1259 OID 220495)
+-- TOC entry 239 (class 1259 OID 16553)
 -- Name: psc_wait_name_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1324,7 +1324,7 @@ CREATE SEQUENCE psc_wait_name_id_seq
 ALTER TABLE psc_wait_name_id_seq OWNER TO postgres;
 
 --
--- TOC entry 225 (class 1259 OID 220497)
+-- TOC entry 240 (class 1259 OID 16555)
 -- Name: psc_wait_names; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1337,7 +1337,7 @@ CREATE TABLE psc_wait_names (
 ALTER TABLE psc_wait_names OWNER TO postgres;
 
 --
--- TOC entry 226 (class 1259 OID 220501)
+-- TOC entry 241 (class 1259 OID 16559)
 -- Name: psc_wait_type_id_seq; Type: SEQUENCE; Schema: node_template; Owner: postgres
 --
 
@@ -1352,7 +1352,7 @@ CREATE SEQUENCE psc_wait_type_id_seq
 ALTER TABLE psc_wait_type_id_seq OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1259 OID 220503)
+-- TOC entry 242 (class 1259 OID 16561)
 -- Name: psc_wait_types; Type: TABLE; Schema: node_template; Owner: postgres
 --
 
@@ -1367,7 +1367,47 @@ ALTER TABLE psc_wait_types OWNER TO postgres;
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 228 (class 1259 OID 220507)
+-- TOC entry 452 (class 1259 OID 33555)
+-- Name: psc_inheritance; Type: TABLE; Schema: public; Owner: app_user
+--
+
+CREATE TABLE psc_inheritance (
+    id integer NOT NULL,
+    node_source character varying(255),
+    node_dest character varying(255),
+    metrics character varying(90)[]
+);
+
+
+ALTER TABLE psc_inheritance OWNER TO app_user;
+
+--
+-- TOC entry 451 (class 1259 OID 33553)
+-- Name: psc_inheritance_id_seq; Type: SEQUENCE; Schema: public; Owner: app_user
+--
+
+CREATE SEQUENCE psc_inheritance_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE psc_inheritance_id_seq OWNER TO app_user;
+
+--
+-- TOC entry 4520 (class 0 OID 0)
+-- Dependencies: 451
+-- Name: psc_inheritance_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: app_user
+--
+
+ALTER SEQUENCE psc_inheritance_id_seq OWNED BY psc_inheritance.id;
+
+
+--
+-- TOC entry 243 (class 1259 OID 16565)
 -- Name: psc_node_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1382,7 +1422,7 @@ CREATE SEQUENCE psc_node_id_seq
 ALTER TABLE psc_node_id_seq OWNER TO postgres;
 
 --
--- TOC entry 229 (class 1259 OID 220509)
+-- TOC entry 244 (class 1259 OID 16567)
 -- Name: psc_nodes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1397,7 +1437,7 @@ CREATE TABLE psc_nodes (
 ALTER TABLE psc_nodes OWNER TO postgres;
 
 --
--- TOC entry 230 (class 1259 OID 220516)
+-- TOC entry 245 (class 1259 OID 16574)
 -- Name: psc_user_hashes; Type: TABLE; Schema: public; Owner: app_user
 --
 
@@ -1415,7 +1455,7 @@ ALTER TABLE psc_user_hashes OWNER TO app_user;
 SET search_path = node_template, pg_catalog;
 
 --
--- TOC entry 3211 (class 2604 OID 220520)
+-- TOC entry 4287 (class 2604 OID 16578)
 -- Name: psc_stm_queries id; Type: DEFAULT; Schema: node_template; Owner: postgres
 --
 
@@ -1423,15 +1463,27 @@ ALTER TABLE ONLY psc_stm_queries ALTER COLUMN id SET DEFAULT nextval('psc_stm_qu
 
 
 --
--- TOC entry 3214 (class 2604 OID 220521)
+-- TOC entry 4290 (class 2604 OID 16579)
 -- Name: psc_stm_stat id; Type: DEFAULT; Schema: node_template; Owner: postgres
 --
 
 ALTER TABLE ONLY psc_stm_stat ALTER COLUMN id SET DEFAULT nextval('psc_stm_stat_id_seq'::regclass);
 
 
+SET search_path = public, pg_catalog;
+
 --
--- TOC entry 3225 (class 2606 OID 220523)
+-- TOC entry 4300 (class 2604 OID 33558)
+-- Name: psc_inheritance id; Type: DEFAULT; Schema: public; Owner: app_user
+--
+
+ALTER TABLE ONLY psc_inheritance ALTER COLUMN id SET DEFAULT nextval('psc_inheritance_id_seq'::regclass);
+
+
+SET search_path = node_template, pg_catalog;
+
+--
+-- TOC entry 4302 (class 2606 OID 16581)
 -- Name: psc_app_names psc_app_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1440,7 +1492,7 @@ ALTER TABLE ONLY psc_app_names
 
 
 --
--- TOC entry 3229 (class 2606 OID 220525)
+-- TOC entry 4306 (class 2606 OID 16583)
 -- Name: psc_conn_states psc_conn_state_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1449,7 +1501,7 @@ ALTER TABLE ONLY psc_conn_states
 
 
 --
--- TOC entry 3236 (class 2606 OID 220527)
+-- TOC entry 4313 (class 2606 OID 16585)
 -- Name: psc_dbs psc_db_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1458,7 +1510,7 @@ ALTER TABLE ONLY psc_dbs
 
 
 --
--- TOC entry 3240 (class 2606 OID 220529)
+-- TOC entry 4317 (class 2606 OID 16587)
 -- Name: psc_devices psc_device_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1467,7 +1519,7 @@ ALTER TABLE ONLY psc_devices
 
 
 --
--- TOC entry 3242 (class 2606 OID 220531)
+-- TOC entry 4319 (class 2606 OID 16589)
 -- Name: psc_lock_modes psc_lock_mode_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1476,7 +1528,7 @@ ALTER TABLE ONLY psc_lock_modes
 
 
 --
--- TOC entry 3244 (class 2606 OID 220533)
+-- TOC entry 4321 (class 2606 OID 16591)
 -- Name: psc_lock_types psc_ocktype_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1485,7 +1537,7 @@ ALTER TABLE ONLY psc_lock_types
 
 
 --
--- TOC entry 3249 (class 2606 OID 220535)
+-- TOC entry 4326 (class 2606 OID 16593)
 -- Name: psc_os_stat psc_os_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1494,7 +1546,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3251 (class 2606 OID 220537)
+-- TOC entry 4328 (class 2606 OID 16595)
 -- Name: psc_params psc_param_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1503,7 +1555,7 @@ ALTER TABLE ONLY psc_params
 
 
 --
--- TOC entry 3255 (class 2606 OID 220539)
+-- TOC entry 4332 (class 2606 OID 16597)
 -- Name: psc_snapshots psc_snapshot_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1512,7 +1564,7 @@ ALTER TABLE ONLY psc_snapshots
 
 
 --
--- TOC entry 3270 (class 2606 OID 220541)
+-- TOC entry 4347 (class 2606 OID 16599)
 -- Name: psc_tbls_stat psc_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1521,7 +1573,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3259 (class 2606 OID 220543)
+-- TOC entry 4336 (class 2606 OID 16601)
 -- Name: psc_stm_queries psc_stm_queries_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1530,7 +1582,7 @@ ALTER TABLE ONLY psc_stm_queries
 
 
 --
--- TOC entry 3263 (class 2606 OID 220545)
+-- TOC entry 4340 (class 2606 OID 16603)
 -- Name: psc_stm_stat psc_stm_stat_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1539,7 +1591,7 @@ ALTER TABLE ONLY psc_stm_stat
 
 
 --
--- TOC entry 3267 (class 2606 OID 220547)
+-- TOC entry 4344 (class 2606 OID 16605)
 -- Name: psc_tbls psc_tbl_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1548,7 +1600,7 @@ ALTER TABLE ONLY psc_tbls
 
 
 --
--- TOC entry 3274 (class 2606 OID 220549)
+-- TOC entry 4351 (class 2606 OID 16607)
 -- Name: psc_users psc_user_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1557,7 +1609,7 @@ ALTER TABLE ONLY psc_users
 
 
 --
--- TOC entry 3276 (class 2606 OID 220551)
+-- TOC entry 4353 (class 2606 OID 16609)
 -- Name: psc_wait_names psc_wait_name_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1566,7 +1618,7 @@ ALTER TABLE ONLY psc_wait_names
 
 
 --
--- TOC entry 3278 (class 2606 OID 220553)
+-- TOC entry 4355 (class 2606 OID 16611)
 -- Name: psc_wait_types psc_wait_type_id_unique; Type: CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1577,7 +1629,7 @@ ALTER TABLE ONLY psc_wait_types
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 3280 (class 2606 OID 220555)
+-- TOC entry 4357 (class 2606 OID 16613)
 -- Name: psc_nodes psc_node_id_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1586,7 +1638,7 @@ ALTER TABLE ONLY psc_nodes
 
 
 --
--- TOC entry 3282 (class 2606 OID 220557)
+-- TOC entry 4359 (class 2606 OID 16615)
 -- Name: psc_nodes psc_node_name_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1595,7 +1647,7 @@ ALTER TABLE ONLY psc_nodes
 
 
 --
--- TOC entry 3284 (class 2606 OID 220559)
+-- TOC entry 4361 (class 2606 OID 16617)
 -- Name: psc_user_hashes psc_user_hash_unique; Type: CONSTRAINT; Schema: public; Owner: app_user
 --
 
@@ -1606,7 +1658,7 @@ ALTER TABLE ONLY psc_user_hashes
 SET search_path = node_template, pg_catalog;
 
 --
--- TOC entry 3226 (class 1259 OID 220560)
+-- TOC entry 4303 (class 1259 OID 16618)
 -- Name: psc_common_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1614,7 +1666,7 @@ CREATE INDEX psc_common_stat_dt_idx ON psc_common_stat USING btree (dt);
 
 
 --
--- TOC entry 3227 (class 1259 OID 221913)
+-- TOC entry 4304 (class 1259 OID 16619)
 -- Name: psc_common_stat_param_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1622,7 +1674,7 @@ CREATE INDEX psc_common_stat_param_id_idx ON psc_common_stat USING btree (param_
 
 
 --
--- TOC entry 3230 (class 1259 OID 220561)
+-- TOC entry 4307 (class 1259 OID 16620)
 -- Name: psc_conns_backend_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1630,7 +1682,7 @@ CREATE INDEX psc_conns_backend_start_idx ON psc_conns USING btree (backend_start
 
 
 --
--- TOC entry 3231 (class 1259 OID 220562)
+-- TOC entry 4308 (class 1259 OID 16621)
 -- Name: psc_conns_pid_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1638,7 +1690,7 @@ CREATE INDEX psc_conns_pid_idx ON psc_conns USING btree (pid);
 
 
 --
--- TOC entry 3232 (class 1259 OID 220563)
+-- TOC entry 4309 (class 1259 OID 16622)
 -- Name: psc_conns_query_start_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1646,7 +1698,7 @@ CREATE INDEX psc_conns_query_start_idx ON psc_conns USING btree (query_start);
 
 
 --
--- TOC entry 3233 (class 1259 OID 220564)
+-- TOC entry 4310 (class 1259 OID 16623)
 -- Name: psc_conns_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1654,7 +1706,7 @@ CREATE INDEX psc_conns_sn_id_idx ON psc_conns USING btree (sn_id);
 
 
 --
--- TOC entry 3234 (class 1259 OID 221914)
+-- TOC entry 4311 (class 1259 OID 16624)
 -- Name: psc_conns_sn_id_idx1; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1662,7 +1714,7 @@ CREATE INDEX psc_conns_sn_id_idx1 ON psc_conns USING btree (sn_id);
 
 
 --
--- TOC entry 3237 (class 1259 OID 220565)
+-- TOC entry 4314 (class 1259 OID 16625)
 -- Name: psc_dbs_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1670,7 +1722,7 @@ CREATE INDEX psc_dbs_stat_dt_idx ON psc_dbs_stat USING btree (dt);
 
 
 --
--- TOC entry 3238 (class 1259 OID 221915)
+-- TOC entry 4315 (class 1259 OID 16626)
 -- Name: psc_dbs_stat_param_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1678,7 +1730,7 @@ CREATE INDEX psc_dbs_stat_param_id_idx ON psc_dbs_stat USING btree (param_id);
 
 
 --
--- TOC entry 3245 (class 1259 OID 220566)
+-- TOC entry 4322 (class 1259 OID 16627)
 -- Name: psc_locks_sn_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1686,7 +1738,7 @@ CREATE INDEX psc_locks_sn_id_idx ON psc_locks USING btree (sn_id);
 
 
 --
--- TOC entry 3246 (class 1259 OID 221916)
+-- TOC entry 4323 (class 1259 OID 16628)
 -- Name: psc_locks_sn_id_idx1; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1694,7 +1746,7 @@ CREATE INDEX psc_locks_sn_id_idx1 ON psc_locks USING btree (sn_id);
 
 
 --
--- TOC entry 3247 (class 1259 OID 220567)
+-- TOC entry 4324 (class 1259 OID 16629)
 -- Name: psc_os_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1702,7 +1754,7 @@ CREATE INDEX psc_os_stat_dt_idx ON psc_os_stat USING btree (dt);
 
 
 --
--- TOC entry 3252 (class 1259 OID 220568)
+-- TOC entry 4329 (class 1259 OID 16630)
 -- Name: psc_queries_and_plans_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1710,7 +1762,7 @@ CREATE INDEX psc_queries_and_plans_dt_idx ON psc_queries_and_plans USING btree (
 
 
 --
--- TOC entry 3253 (class 1259 OID 220569)
+-- TOC entry 4330 (class 1259 OID 16631)
 -- Name: psc_queries_and_plans_duration_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1718,7 +1770,7 @@ CREATE INDEX psc_queries_and_plans_duration_idx ON psc_queries_and_plans USING b
 
 
 --
--- TOC entry 3256 (class 1259 OID 220570)
+-- TOC entry 4333 (class 1259 OID 16632)
 -- Name: psc_snapshots_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1726,7 +1778,7 @@ CREATE INDEX psc_snapshots_dt_idx ON psc_snapshots USING btree (dt);
 
 
 --
--- TOC entry 3257 (class 1259 OID 220571)
+-- TOC entry 4334 (class 1259 OID 16633)
 -- Name: psc_stm_queries_db_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1734,7 +1786,7 @@ CREATE INDEX psc_stm_queries_db_id_idx ON psc_stm_queries USING btree (db_id);
 
 
 --
--- TOC entry 3260 (class 1259 OID 220572)
+-- TOC entry 4337 (class 1259 OID 16634)
 -- Name: psc_stm_queries_query_hash_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1742,7 +1794,7 @@ CREATE INDEX psc_stm_queries_query_hash_id_idx ON psc_stm_queries USING btree (q
 
 
 --
--- TOC entry 3261 (class 1259 OID 220573)
+-- TOC entry 4338 (class 1259 OID 16635)
 -- Name: psc_stm_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1750,7 +1802,7 @@ CREATE INDEX psc_stm_stat_dt_idx ON psc_stm_stat USING btree (dt);
 
 
 --
--- TOC entry 3264 (class 1259 OID 220574)
+-- TOC entry 4341 (class 1259 OID 16636)
 -- Name: psc_stm_stat_param_id_db_id_query_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1758,7 +1810,7 @@ CREATE INDEX psc_stm_stat_param_id_db_id_query_id_idx ON psc_stm_stat USING btre
 
 
 --
--- TOC entry 3265 (class 1259 OID 221917)
+-- TOC entry 4342 (class 1259 OID 16637)
 -- Name: psc_stm_stat_query_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1766,7 +1818,7 @@ CREATE INDEX psc_stm_stat_query_id_idx ON psc_stm_stat USING btree (query_id);
 
 
 --
--- TOC entry 3271 (class 1259 OID 220575)
+-- TOC entry 4348 (class 1259 OID 16638)
 -- Name: psc_tbls_stat_dt_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1774,7 +1826,7 @@ CREATE INDEX psc_tbls_stat_dt_idx ON psc_tbls_stat USING btree (dt);
 
 
 --
--- TOC entry 3272 (class 1259 OID 221918)
+-- TOC entry 4349 (class 1259 OID 16639)
 -- Name: psc_tbls_stat_param_id_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
@@ -1782,15 +1834,27 @@ CREATE INDEX psc_tbls_stat_param_id_idx ON psc_tbls_stat USING btree (param_id);
 
 
 --
--- TOC entry 3268 (class 1259 OID 220576)
+-- TOC entry 4345 (class 1259 OID 16640)
 -- Name: psc_tbls_tbl_relid_idx; Type: INDEX; Schema: node_template; Owner: postgres
 --
 
 CREATE INDEX psc_tbls_tbl_relid_idx ON psc_tbls USING btree (tbl_relid);
 
 
+SET search_path = public, pg_catalog;
+
 --
--- TOC entry 3286 (class 2606 OID 220577)
+-- TOC entry 4362 (class 1259 OID 33562)
+-- Name: psc_inheritance_node_source_node_dest_idx; Type: INDEX; Schema: public; Owner: app_user
+--
+
+CREATE UNIQUE INDEX psc_inheritance_node_source_node_dest_idx ON psc_inheritance USING btree (node_source, node_dest);
+
+
+SET search_path = node_template, pg_catalog;
+
+--
+-- TOC entry 4370 (class 2606 OID 16641)
 -- Name: psc_conns psc_app_name_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1799,7 +1863,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3287 (class 2606 OID 220582)
+-- TOC entry 4369 (class 2606 OID 16646)
 -- Name: psc_conns psc_conn_state_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1808,7 +1872,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3288 (class 2606 OID 220587)
+-- TOC entry 4368 (class 2606 OID 16651)
 -- Name: psc_conns psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1817,7 +1881,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3293 (class 2606 OID 220592)
+-- TOC entry 4372 (class 2606 OID 16656)
 -- Name: psc_dbs_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1826,7 +1890,7 @@ ALTER TABLE ONLY psc_dbs_stat
 
 
 --
--- TOC entry 3304 (class 2606 OID 220597)
+-- TOC entry 4382 (class 2606 OID 16661)
 -- Name: psc_queries_and_plans psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1835,7 +1899,7 @@ ALTER TABLE ONLY psc_queries_and_plans
 
 
 --
--- TOC entry 3309 (class 2606 OID 220602)
+-- TOC entry 4389 (class 2606 OID 16666)
 -- Name: psc_tbls_stat psc_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1844,7 +1908,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3302 (class 2606 OID 220607)
+-- TOC entry 4381 (class 2606 OID 16671)
 -- Name: psc_os_stat psc_device_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1853,7 +1917,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3295 (class 2606 OID 220612)
+-- TOC entry 4379 (class 2606 OID 16676)
 -- Name: psc_locks psc_other_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1862,7 +1926,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3296 (class 2606 OID 220617)
+-- TOC entry 4378 (class 2606 OID 16681)
 -- Name: psc_locks psc_other_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1871,7 +1935,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3297 (class 2606 OID 220622)
+-- TOC entry 4377 (class 2606 OID 16686)
 -- Name: psc_locks psc_other_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1880,7 +1944,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3285 (class 2606 OID 220627)
+-- TOC entry 4363 (class 2606 OID 16691)
 -- Name: psc_common_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1889,7 +1953,7 @@ ALTER TABLE ONLY psc_common_stat
 
 
 --
--- TOC entry 3294 (class 2606 OID 220632)
+-- TOC entry 4371 (class 2606 OID 16696)
 -- Name: psc_dbs_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1898,7 +1962,7 @@ ALTER TABLE ONLY psc_dbs_stat
 
 
 --
--- TOC entry 3303 (class 2606 OID 220637)
+-- TOC entry 4380 (class 2606 OID 16701)
 -- Name: psc_os_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1907,7 +1971,7 @@ ALTER TABLE ONLY psc_os_stat
 
 
 --
--- TOC entry 3310 (class 2606 OID 220642)
+-- TOC entry 4388 (class 2606 OID 16706)
 -- Name: psc_tbls_stat psc_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1916,7 +1980,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3289 (class 2606 OID 220647)
+-- TOC entry 4367 (class 2606 OID 16711)
 -- Name: psc_conns psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1925,7 +1989,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3298 (class 2606 OID 220652)
+-- TOC entry 4376 (class 2606 OID 16716)
 -- Name: psc_locks psc_sn_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1934,7 +1998,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3305 (class 2606 OID 220657)
+-- TOC entry 4383 (class 2606 OID 16721)
 -- Name: psc_stm_queries psc_stm_queries_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1943,7 +2007,7 @@ ALTER TABLE ONLY psc_stm_queries
 
 
 --
--- TOC entry 3306 (class 2606 OID 220662)
+-- TOC entry 4386 (class 2606 OID 16726)
 -- Name: psc_stm_stat psc_stm_stat_db_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1952,7 +2016,7 @@ ALTER TABLE ONLY psc_stm_stat
 
 
 --
--- TOC entry 3307 (class 2606 OID 220667)
+-- TOC entry 4385 (class 2606 OID 16731)
 -- Name: psc_stm_stat psc_stm_stat_param_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1961,7 +2025,7 @@ ALTER TABLE ONLY psc_stm_stat
 
 
 --
--- TOC entry 3308 (class 2606 OID 220672)
+-- TOC entry 4384 (class 2606 OID 16736)
 -- Name: psc_stm_stat psc_stm_stat_query_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1970,7 +2034,7 @@ ALTER TABLE ONLY psc_stm_stat
 
 
 --
--- TOC entry 3311 (class 2606 OID 220677)
+-- TOC entry 4387 (class 2606 OID 16741)
 -- Name: psc_tbls_stat psc_tbl_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1979,7 +2043,7 @@ ALTER TABLE ONLY psc_tbls_stat
 
 
 --
--- TOC entry 3290 (class 2606 OID 220682)
+-- TOC entry 4366 (class 2606 OID 16746)
 -- Name: psc_conns psc_user_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1988,7 +2052,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3291 (class 2606 OID 220687)
+-- TOC entry 4365 (class 2606 OID 16751)
 -- Name: psc_conns psc_wait_event_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -1997,7 +2061,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3292 (class 2606 OID 220692)
+-- TOC entry 4364 (class 2606 OID 16756)
 -- Name: psc_conns psc_wait_event_type_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -2006,7 +2070,7 @@ ALTER TABLE ONLY psc_conns
 
 
 --
--- TOC entry 3299 (class 2606 OID 220697)
+-- TOC entry 4375 (class 2606 OID 16761)
 -- Name: psc_locks psc_waiting_locktype_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -2015,7 +2079,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3300 (class 2606 OID 220702)
+-- TOC entry 4374 (class 2606 OID 16766)
 -- Name: psc_locks psc_waiting_mode_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -2024,7 +2088,7 @@ ALTER TABLE ONLY psc_locks
 
 
 --
--- TOC entry 3301 (class 2606 OID 220707)
+-- TOC entry 4373 (class 2606 OID 16771)
 -- Name: psc_locks psc_waiting_table_id_fk; Type: FK CONSTRAINT; Schema: node_template; Owner: postgres
 --
 
@@ -2032,7 +2096,7 @@ ALTER TABLE ONLY psc_locks
     ADD CONSTRAINT psc_waiting_table_id_fk FOREIGN KEY (waiting_table_id) REFERENCES psc_tbls(id);
 
 
--- Completed on 2017-08-13 22:54:45 MSK
+-- Completed on 2018-03-13 18:41:32 MSK
 
 --
 -- PostgreSQL database dump complete

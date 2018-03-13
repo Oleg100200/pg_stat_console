@@ -67,7 +67,7 @@ pg_stat_monitor_port = int( read_conf_param_value( config['main']['pg_stat_monit
 db_pools = []
 db_pools.append( [ 'sys_stat', create_engine( read_conf_param_value( config['sys_stat']['sys_stat'] ) + '?application_name=' + \
 	read_conf_param_value( config['main']['application_name'] ), pool_size=pool_size_conf, max_overflow=0, poolclass=QueuePool, \
-	pool_recycle=int(read_conf_param_value( config['main']['db_pool_recycle'] ) ), paramstyle="named") ] )
+	pool_recycle=int(read_conf_param_value( config['main']['db_pool_recycle'] )) , paramstyle="named") ] )
 
 session_factorys = []
 for pool in db_pools:
@@ -227,6 +227,10 @@ class CoreHandler():
 		self.current_user = []
 		self.current_user_dbs = []
 		self.current_user_devices = []
+		self.current_user_config = []
+		self.current_user_inherited_dbs = []
+		self.current_user_inherited_devices = []
+		self.inherit_node_name = None
 	
 	@contextmanager
 	def closing(self, session):
@@ -313,6 +317,7 @@ class CoreHandler():
 			logger.log( "Invalid User " + str( user_hash ), "Error" )
 			return False
 
+		self.current_user_config = tornado.escape.json_decode(params[ "user_config" ])
 		if 'user_config' in params and params[ "user_config" ] is not None:
 			user_config = tornado.escape.json_decode(params[ "user_config" ])
 			for v in user_config:
@@ -323,7 +328,7 @@ class CoreHandler():
 
 		return True
 
-	def make_query( self, db_name, query_text, node_name = None, need_auth = True ):
+	def make_query( self, db_name, query_text, node_name = None, need_auth = True, metrics = None ):
 		global scoped_sessions
 		list = []
 		
@@ -341,16 +346,36 @@ class CoreHandler():
 			return []
 		
 		self.session = next(scoped_session[1] for scoped_session in scoped_sessions if scoped_session[0]==db_name)
-		
+		inherit_node_id = None
+		self.inherit_node_name = None
 		with self.closing( self.session ) as session:
 			session.execute( """set application_name = '""" + application_name + """'""" )
 			session.execute( """SET timezone = '""" + time_zone + """';""" )
+			
 			if db_name == 'sys_stat' and node_name is not None:
 				result_node = session.execute( """SELECT id FROM public.psc_nodes where node_name = '""" + node_name + """'""" )
 				schema_id = None
 				for row in result_node:
 					schema_id = row['id']
-				session.execute( """set search_path = 'n""" + str( schema_id ) + """', 'public';""" )
+					
+				if metrics is not None:
+					inherit_node = session.execute( """SELECT id, node_name FROM public.psc_nodes where node_name = (
+						select node_source
+						from psc_inheritance
+						where '""" + node_name + """' ilike node_dest
+							and array""" + str(metrics) + """::character varying[] <@ metrics
+						limit 1
+					)""" )
+					for row in inherit_node:
+						inherit_node_id = row['id']
+						self.inherit_node_name = row['node_name']
+
+					if inherit_node_id is not None:
+						session.execute( """set search_path = 'n""" + str( inherit_node_id ) + """', 'public';""" )
+					else:
+						session.execute( """set search_path = 'n""" + str( schema_id ) + """', 'public';""" )
+				else:
+					session.execute( """set search_path = 'n""" + str( schema_id ) + """', 'public';""" )
 
 			backend_pid = session.execute( """select pg_backend_pid() as pid""" )
 			for row in backend_pid:
@@ -361,8 +386,22 @@ class CoreHandler():
 				( str( self.current_user[0][0] )[:8] if need_auth else "no hash" ) + "), db_pid = " + str( self.db_pid ), "Info" )
 			
 			list = session.execute( query_text )
+			print(query_text)
 			session.commit()
-		return list
+			
+		if inherit_node_id is None:
+			return list
+		else:
+			#[{"param_name":"eth0","node_name":"s2.perf.int.zone","param_type":"device_in_report"}, ... ]
+			for v in self.current_user_config:
+				
+				if v["node_name"] == self.inherit_node_name and v["param_type"] == "device_in_report":
+					self.current_user_inherited_devices.append(v["param_name"])
+				if v["node_name"] == self.inherit_node_name and v["param_type"] == "db_in_report":
+					self.current_user_inherited_dbs.append(v["param_name"])
+				#print( str(self.current_user_inherited_devices) )
+				#print( str(self.current_user_inherited_dbs) )
+			return list
 
 	def on_connection_close(self):
 		if self.db_pid is not None:
@@ -1256,8 +1295,12 @@ class GetCPUStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat):
 		if self.check_auth() == False:
 			return ""
 
-		queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], None, [ "%user", "%nice", "%system", "%iowait", "%steal", "%idle" ] )
-		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), 'CPU load [ % ]', 'stackedArea' ] )
+		node_name = data["node_name"] if self.inherit_node_name is None else self.inherit_node_name
+		_metrics = [ "%user", "%nice", "%system", "%iowait", "%steal", "%idle" ]
+
+		queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], None, _metrics )
+		data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"], metrics=_metrics ), \
+			self.make_query( 'sys_stat', queries[1], data["node_name"], metrics=_metrics ), 'CPU load [ % ]' + ( ' *' if self.inherit_node_name is not None else ''), 'stackedArea' ] )
 
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1287,12 +1330,16 @@ class GetDiskUtilStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		if self.check_auth() == False:
 			return ""
 
-		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "%util" ] ), data["node_name"] )
+		node_name = data["node_name"] if self.inherit_node_name is None else self.inherit_node_name
+		_metrics = [ "%util" ]
+		
+		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], _metrics ), data["node_name"], metrics=_metrics )
 		for device in psc_devices:
-			if [ data["node_name"], device[0] ] in self.current_user_devices:
-				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "%util" ] )
-				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'Disk utilization (' + device[0] + ') [ % ]', 'line' ] )
+			if [ node_name, device[0] ] in self.current_user_devices or \
+				( self.inherit_node_name is not None and device[0] in self.current_user_inherited_devices ):
+				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], _metrics )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], node_name, metrics=_metrics ), self.make_query( 'sys_stat', queries[1], node_name, metrics=_metrics ), \
+					'Disk utilization (' + device[0] + ') [ % ]' + ( ' *' if self.inherit_node_name is not None else ''), 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
@@ -1321,12 +1368,16 @@ class GetWRQMRRQMStatHandler(BaseAsyncHandlerNoParam,Chart,QueryMakerSimpleStat)
 		if self.check_auth() == False:
 			return ""
 
-		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ], [ "rrqm/s", "wrqm/s" ] ), data["node_name"] )
+		node_name = data["node_name"] if self.inherit_node_name is None else self.inherit_node_name
+		_metrics = [ "rrqm/s", "wrqm/s" ]
+			
+		psc_devices = self.make_query( 'sys_stat', self.get_os_devices( data[ "date_a" ], data[ "date_b" ],_metrics ), data["node_name"], metrics=_metrics )
 		for device in psc_devices:
-			if [ data["node_name"], device[0] ] in self.current_user_devices:
-				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0], [ "rrqm/s", "wrqm/s" ] )
-				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"] ), self.make_query( 'sys_stat', queries[1], data["node_name"] ), \
-					'rrqm/s wrqm/s (' + device[0] + ') [ requests per second ]', 'line' ] )
+			if [ node_name, device[0] ] in self.current_user_devices or \
+				( self.inherit_node_name is not None and device[0] in self.current_user_inherited_devices ):
+				queries = self.generate_query_os_stat( data[ "date_a" ], data[ "date_b" ], device[0],_metrics )
+				data_graph.append( [ self.make_query( 'sys_stat', queries[0], data["node_name"], metrics=_metrics ), self.make_query( 'sys_stat', queries[1], data["node_name"], metrics=_metrics ), \
+					'rrqm/s wrqm/s (' + device[0] + ') [ requests per second ]'+ ( ' *' if self.inherit_node_name is not None else ''), 'line' ] )
 				
 		return self.make_line_report( data_graph, [data[ "date_a" ], data[ "date_b" ]] )
 
